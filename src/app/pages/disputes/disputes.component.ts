@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../app.service';
 import { Dispute, DisputeStatus, UserRole } from '../../types';
 import { LucideAngularModule } from 'lucide-angular';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
     selector: 'app-disputes',
@@ -305,6 +306,8 @@ export class DisputesComponent implements OnInit {
         this.newMessage = '';
     }
 
+    private toastService = inject(ToastService);
+
     onEvidenceSelected(event: any) {
         const files = event.target.files;
         if (files && files.length > 0) {
@@ -315,8 +318,6 @@ export class DisputesComponent implements OnInit {
             this.newDisputeForm.evidence = fileList;
         }
     }
-
-    private toastService = inject(ToastService);
 
     createDispute() {
         if (!this.newDisputeForm.taskId || !this.newDisputeForm.issueType || !this.newDisputeForm.reason) {

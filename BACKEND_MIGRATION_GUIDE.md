@@ -1,9 +1,25 @@
 # TaskFlow Backend Migration Guide
 ## From localStorage to .NET Core + MySQL + JWT Authentication
 
-**Document Version:** 1.0  
+**Document Version:** 1.1  
 **Last Updated:** February 4, 2026  
 **Target Framework:** .NET 8.0 / .NET 7.0
+
+### 📝 Changelog
+**v1.1 (Feb 4, 2026):**
+- Added comprehensive Error Handling & Validation section
+- Added Performance Optimization strategies (caching, indexing, pagination)
+- Added Security Best Practices (rate limiting, encryption, HTTPS headers)
+- Added Logging & Monitoring with Serilog and Health Checks
+- Added Testing Strategy with unit and integration test examples
+- Enhanced with real-world production scenarios
+
+**v1.0 (Feb 4, 2026):**
+- Initial release with complete migration guide
+- Database schema design
+- Backend architecture
+- Authentication & Authorization
+- API endpoints documentation
 
 ---
 
@@ -15,6 +31,12 @@
 5. [API Endpoints Documentation](#5-api-endpoints-documentation)
 6. [Implementation Steps](#6-implementation-steps)
 7. [Testing & Deployment](#7-testing--deployment)
+8. [Error Handling & Validation](#8-error-handling--validation)
+9. [Performance Optimization](#9-performance-optimization)
+10. [Security Best Practices](#10-security-best-practices)
+11. [Logging & Monitoring](#11-logging--monitoring)
+12. [Testing Strategy](#12-testing-strategy)
+13. [Next Steps](#13-next-steps)
 
 ---
 
@@ -2134,7 +2156,683 @@ export class ApiService {
 
 ---
 
-## 8. Next Steps
+## 8. Error Handling & Validation
+
+### 8.1 Global Exception Handling
+
+**Middleware/ExceptionHandlingMiddleware.cs**
+```csharp
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Net;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace TaskFlowAPI.Middleware
+{
+    public class ExceptionHandlingMiddleware
+    {
+        private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+
+        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+        {
+            _next = next;
+            _logger = logger;
+        }
+
+        public async Task InvokeAsync(HttpContext context)
+        {
+            try
+            {
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unhandled exception occurred");
+                await HandleExceptionAsync(context, ex);
+            }
+        }
+
+        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        {
+            var code = HttpStatusCode.InternalServerError;
+            var message = "An error occurred while processing your request.";
+
+            switch (exception)
+            {
+                case UnauthorizedAccessException:
+                    code = HttpStatusCode.Unauthorized;
+                    message = "Unauthorized access";
+                    break;
+                case ArgumentException:
+                case ArgumentNullException:
+                    code = HttpStatusCode.BadRequest;
+                    message = exception.Message;
+                    break;
+                case KeyNotFoundException:
+                    code = HttpStatusCode.NotFound;
+                    message = exception.Message;
+                    break;
+                case InvalidOperationException:
+                    code = HttpStatusCode.BadRequest;
+                    message = exception.Message;
+                    break;
+            }
+
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)code;
+
+            var result = JsonSerializer.Serialize(new
+            {
+                error = message,
+                statusCode = (int)code,
+                timestamp = DateTime.UtcNow
+            });
+
+            return context.Response.WriteAsync(result);
+        }
+    }
+}
+```
+
+### 8.2 Input Validation with FluentValidation
+
+**Install Package:**
+```bash
+dotnet add package FluentValidation.AspNetCore
+```
+
+**Validators/CreateTaskValidator.cs**
+```csharp
+using FluentValidation;
+using TaskFlowAPI.DTOs.Task;
+
+namespace TaskFlowAPI.Validators
+{
+    public class CreateTaskValidator : AbstractValidator<CreateTaskDto>
+    {
+        public CreateTaskValidator()
+        {
+            RuleFor(x => x.Title)
+                .NotEmpty().WithMessage("Title is required")
+                .MaximumLength(200).WithMessage("Title cannot exceed 200 characters");
+
+            RuleFor(x => x.Description)
+                .NotEmpty().WithMessage("Description is required")
+                .MinimumLength(20).WithMessage("Description must be at least 20 characters")
+                .MaximumLength(2000).WithMessage("Description cannot exceed 2000 characters");
+
+            RuleFor(x => x.Category)
+                .NotEmpty().WithMessage("Category is required");
+
+            RuleFor(x => x.BudgetMin)
+                .GreaterThan(0).WithMessage("Minimum budget must be greater than 0");
+
+            RuleFor(x => x.BudgetMax)
+                .GreaterThan(x => x.BudgetMin).WithMessage("Maximum budget must be greater than minimum budget");
+
+            RuleFor(x => x.PreferredDate)
+                .GreaterThanOrEqualTo(DateTime.Today).WithMessage("Preferred date cannot be in the past");
+
+            RuleFor(x => x.Location)
+                .NotNull().WithMessage("Location is required");
+
+            RuleFor(x => x.Location.State)
+                .NotEmpty().When(x => x.Location != null).WithMessage("State is required");
+
+            RuleFor(x => x.Location.City)
+                .NotEmpty().When(x => x.Location != null).WithMessage("City is required");
+
+            RuleFor(x => x.Location.FullAddress)
+                .NotEmpty().When(x => x.Location != null).WithMessage("Full address is required");
+        }
+    }
+}
+```
+
+**Program.cs Configuration:**
+```csharp
+using FluentValidation;
+using FluentValidation.AspNetCore;
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateTaskValidator>();
+```
+
+### 8.3 Custom API Response Wrapper
+
+**DTOs/Common/ApiResponse.cs**
+```csharp
+namespace TaskFlowAPI.DTOs.Common
+{
+    public class ApiResponse<T>
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public T? Data { get; set; }
+        public List<string>? Errors { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+        public static ApiResponse<T> SuccessResponse(T data, string message = "Success")
+        {
+            return new ApiResponse<T>
+            {
+                Success = true,
+                Message = message,
+                Data = data
+            };
+        }
+
+        public static ApiResponse<T> ErrorResponse(string message, List<string>? errors = null)
+        {
+            return new ApiResponse<T>
+            {
+                Success = false,
+                Message = message,
+                Errors = errors ?? new List<string>()
+            };
+        }
+    }
+
+    public class PaginatedResponse<T> : ApiResponse<T>
+    {
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public int TotalCount { get; set; }
+        public int TotalPages { get; set; }
+
+        public static PaginatedResponse<List<TItem>> CreatePaginatedResponse<TItem>(
+            List<TItem> items, 
+            int page, 
+            int pageSize, 
+            int totalCount)
+        {
+            return new PaginatedResponse<List<TItem>>
+            {
+                Success = true,
+                Data = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+        }
+    }
+}
+```
+
+### 8.4 Model Validation Middleware
+
+**Helpers/ValidationBehavior.cs**
+```csharp
+using FluentValidation;
+using MediatR;
+
+namespace TaskFlowAPI.Helpers
+{
+    public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IRequest<TResponse>
+    {
+        private readonly IEnumerable<IValidator<TRequest>> _validators;
+
+        public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
+        {
+            _validators = validators;
+        }
+
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            if (_validators.Any())
+            {
+                var context = new ValidationContext<TRequest>(request);
+                var validationResults = await Task.WhenAll(_validators.Select(v => v.ValidateAsync(context, cancellationToken)));
+                var failures = validationResults.SelectMany(r => r.Errors).Where(f => f != null).ToList();
+
+                if (failures.Count != 0)
+                {
+                    throw new ValidationException(failures);
+                }
+            }
+
+            return await next();
+        }
+    }
+}
+```
+
+---
+
+## 9. Performance Optimization
+
+### 9.1 Database Indexing Strategy
+
+The schema already includes essential indexes, but here are query-specific optimizations:
+
+```sql
+-- Composite indexes for common queries
+CREATE INDEX idx_tasks_customer_status ON Tasks(CustomerId, Status);
+CREATE INDEX idx_tasks_worker_status ON Tasks(WorkerId, Status);
+CREATE INDEX idx_bids_task_status ON Bids(TaskId, Status);
+CREATE INDEX idx_reviews_reviewee ON Reviews(RevieweeId, Rating);
+
+-- Full-text search indexes (for MySQL 5.7+)
+ALTER TABLE Tasks ADD FULLTEXT INDEX idx_tasks_search (Title, Description);
+ALTER TABLE Users ADD FULLTEXT INDEX idx_users_search (Name, Email);
+
+-- Optimize for date range queries
+CREATE INDEX idx_tasks_date_range ON Tasks(PreferredDate, Status);
+CREATE INDEX idx_disputes_date_status ON Disputes(CreatedDate, Status);
+```
+
+### 9.2 Caching with IMemoryCache
+
+**Services/Implementations/CachedUserService.cs**
+```csharp
+using Microsoft.Extensions.Caching.Memory;
+
+namespace TaskFlowAPI.Services.Implementations
+{
+    public class CachedUserService : IUserService
+    {
+        private readonly IUserService _userService;
+        private readonly IMemoryCache _cache;
+        private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(15);
+
+        public CachedUserService(IUserService userService, IMemoryCache cache)
+        {
+            _userService = userService;
+            _cache = cache;
+        }
+
+        public async Task<UserDto?> GetUserByIdAsync(Guid userId)
+        {
+            var cacheKey = $"user_{userId}";
+            
+            if (_cache.TryGetValue(cacheKey, out UserDto? cachedUser))
+            {
+                return cachedUser;
+            }
+
+            var user = await _userService.GetUserByIdAsync(userId);
+            
+            if (user != null)
+            {
+                _cache.Set(cacheKey, user, _cacheDuration);
+            }
+
+            return user;
+        }
+
+        // Implement other methods with cache invalidation
+    }
+}
+```
+
+**Program.cs:**
+```csharp
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.Decorate<IUserService, CachedUserService>();
+```
+
+### 9.3 Database Query Optimization
+
+**Use AsNoTracking for Read-Only Queries:**
+```csharp
+public async Task<List<TaskDto>> GetAllTasksAsync()
+{
+    return await _context.Tasks
+        .AsNoTracking()  // Improves performance for read-only queries
+        .Include(t => t.Location)
+        .Include(t => t.Bids)
+        .Select(t => _mapper.Map<TaskDto>(t))
+        .ToListAsync();
+}
+```
+
+**Implement Pagination Efficiently:**
+```csharp
+public async Task<PaginatedResponse<List<TaskDto>>> GetTasksPaginatedAsync(int page, int pageSize)
+{
+    var totalCount = await _context.Tasks.CountAsync();
+    
+    var tasks = await _context.Tasks
+        .AsNoTracking()
+        .OrderByDescending(t => t.CreatedDate)
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .Select(t => _mapper.Map<TaskDto>(t))
+        .ToListAsync();
+
+    return PaginatedResponse<List<TaskDto>>.CreatePaginatedResponse(tasks, page, pageSize, totalCount);
+}
+```
+
+---
+
+## 10. Security Best Practices
+
+### 10.1 Rate Limiting
+
+**Install Package:**
+```bash
+dotnet add package AspNetCoreRateLimit
+```
+
+**appsettings.json:**
+```json
+{
+  "IpRateLimiting": {
+    "EnableEndpointRateLimiting": true,
+    "StackBlockedRequests": false,
+    "RealIpHeader": "X-Real-IP",
+    "ClientIdHeader": "X-ClientId",
+    "HttpStatusCode": 429,
+    "GeneralRules": [
+      {
+        "Endpoint": "*",
+        "Period": "1m",
+        "Limit": 60
+      },
+      {
+        "Endpoint": "*/api/auth/login",
+        "Period": "15m",
+        "Limit": 5
+      },
+      {
+        "Endpoint": "*/api/auth/register",
+        "Period": "1h",
+        "Limit": 3
+      }
+    ]
+  }
+}
+```
+
+**Program.cs:**
+```csharp
+builder.Services.AddMemoryCache();
+builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
+app.UseIpRateLimiting();
+```
+
+### 10.2 Data Protection & Encryption
+
+**Encrypt Sensitive Data:**
+```csharp
+using System.Security.Cryptography;
+using System.Text;
+
+public class EncryptionService
+{
+    private readonly byte[] _key;
+    private readonly byte[] _iv;
+
+    public EncryptionService(IConfiguration configuration)
+    {
+        var encryptionKey = configuration["Encryption:Key"];
+        _key = Encoding.UTF8.GetBytes(encryptionKey);
+        _iv = Encoding.UTF8.GetBytes(encryptionKey.Substring(0, 16));
+    }
+
+    public string Encrypt(string plainText)
+    {
+        using var aes = Aes.Create();
+        aes.Key = _key;
+        aes.IV = _iv;
+
+        var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+        using var ms = new MemoryStream();
+        using var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
+        using (var sw = new StreamWriter(cs))
+        {
+            sw.Write(plainText);
+        }
+
+        return Convert.ToBase64String(ms.ToArray());
+    }
+
+    public string Decrypt(string cipherText)
+    {
+        using var aes = Aes.Create();
+        aes.Key = _key;
+        aes.IV = _iv;
+
+        var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+        using var ms = new MemoryStream(Convert.FromBase64String(cipherText));
+        using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
+        using var sr = new StreamReader(cs);
+
+        return sr.ReadToEnd();
+    }
+}
+```
+
+### 10.3 SQL Injection Prevention
+
+✅ **Always use parameterized queries** (EF Core does this automatically)  
+✅ **Never concatenate user input** into SQL strings  
+✅ **Use stored procedures** for complex operations  
+✅ **Validate all input** before database operations
+
+### 10.4 HTTPS & Security Headers
+
+**Program.cs:**
+```csharp
+app.UseHttpsRedirection();
+app.UseHsts();
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Add("X-Frame-Options", "DENY");
+    context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Add("Referrer-Policy", "no-referrer");
+    context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'");
+    await next();
+});
+```
+
+---
+
+## 11. Logging & Monitoring
+
+### 11.1 Structured Logging with Serilog
+
+**Install Packages:**
+```bash
+dotnet add package Serilog.AspNetCore
+dotnet add package Serilog.Sinks.File
+dotnet add package Serilog.Sinks.Console
+```
+
+**Program.cs:**
+```csharp
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithMachineName()
+    .WriteTo.Console()
+    .WriteTo.File("logs/taskflow-.log", 
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+// Log important events
+app.Use(async (context, next) =>
+{
+    var stopwatch = Stopwatch.StartNew();
+    await next();
+    stopwatch.Stop();
+
+    Log.Information(
+        "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMilliseconds}ms",
+        context.Request.Method,
+        context.Request.Path,
+        context.Response.StatusCode,
+        stopwatch.ElapsedMilliseconds
+    );
+});
+```
+
+### 11.2 Health Checks
+
+**Program.cs:**
+```csharp
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ApplicationDbContext>()
+    .AddMySql(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false
+});
+```
+
+---
+
+## 12. Testing Strategy
+
+### 12.1 Unit Tests Example
+
+**TaskServiceTests.cs:**
+```csharp
+using Xunit;
+using Moq;
+using TaskFlowAPI.Services.Implementations;
+using TaskFlowAPI.Repositories.Interfaces;
+
+namespace TaskFlowAPI.Tests.Services
+{
+    public class TaskServiceTests
+    {
+        private readonly Mock<ITaskRepository> _taskRepositoryMock;
+        private readonly TaskService _taskService;
+
+        public TaskServiceTests()
+        {
+            _taskRepositoryMock = new Mock<ITaskRepository>();
+            _taskService = new TaskService(_taskRepositoryMock.Object);
+        }
+
+        [Fact]
+        public async Task CreateTask_ValidInput_ReturnsTask()
+        {
+            // Arrange
+            var createTaskDto = new CreateTaskDto
+            {
+                Title = "Fix Leaky Pipe",
+                Description = "Kitchen sink is leaking",
+                Category = "plumber",
+                BudgetMin = 500,
+                BudgetMax = 2000
+            };
+
+            _taskRepositoryMock
+                .Setup(repo => repo.CreateAsync(It.IsAny<Task>()))
+                .ReturnsAsync(new Task { Id = Guid.NewGuid() });
+
+            // Act
+            var result = await _taskService.CreateTaskAsync(createTaskDto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(createTaskDto.Title, result.Title);
+            _taskRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<Task>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetTaskById_NonExistentId_ReturnsNull()
+        {
+            // Arrange
+            var taskId = Guid.NewGuid();
+            _taskRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(taskId))
+                .ReturnsAsync((Task?)null);
+
+            // Act
+            var result = await _taskService.GetTaskByIdAsync(taskId);
+
+            // Assert
+            Assert.Null(result);
+        }
+    }
+}
+```
+
+### 12.2 Integration Tests
+
+**TasksControllerIntegrationTests.cs:**
+```csharp
+using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net.Http.Json;
+using Xunit;
+
+namespace TaskFlowAPI.Tests.Integration
+{
+    public class TasksControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+    {
+        private readonly HttpClient _client;
+
+        public TasksControllerIntegrationTests(WebApplicationFactory<Program> factory)
+        {
+            _client = factory.CreateClient();
+        }
+
+        [Fact]
+        public async Task GetTasks_ReturnsSuccessStatusCode()
+        {
+            // Act
+            var response = await _client.GetAsync("/api/tasks");
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+        }
+
+        [Fact]
+        public async Task CreateTask_ValidData_ReturnsCreatedTask()
+        {
+            // Arrange
+            var newTask = new CreateTaskDto
+            {
+                Title = "Test Task",
+                Description = "This is a test task description",
+                Category = "plumber",
+                BudgetMin = 500,
+                BudgetMax = 1000
+            };
+
+            // Act
+            var response = await _client.PostAsJsonAsync("/api/tasks", newTask);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            var createdTask = await response.Content.ReadFromJsonAsync<TaskDto>();
+            Assert.NotNull(createdTask);
+            Assert.Equal(newTask.Title, createdTask.Title);
+        }
+    }
+}
+```
+
+---
+
+## 13. Next Steps
 
 After completing the basic implementation:
 

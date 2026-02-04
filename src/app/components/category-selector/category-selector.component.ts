@@ -62,6 +62,8 @@ import {
     styles: []
 })
 export class CategorySelectorComponent {
+    private toastService = inject(ToastService);
+
     @Input() selectedCategories: string[] = [];
     @Input() maxSelections: number | null = null;
     @Input() label: string = 'Select Categories';

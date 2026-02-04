@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../app.service';
 import { Review, Task, UserRole } from '../../types';
 import { LucideAngularModule } from 'lucide-angular';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
     selector: 'app-reviews',
@@ -205,13 +207,13 @@ export class ReviewsComponent implements OnInit {
         return user ? user.avatar : 'https://picsum.photos/seed/user/200';
     }
 
+    private confirmService = inject(ConfirmDialogService);
+    private toastService = inject(ToastService);
+
     canDelete(review: Review): boolean {
         const currentUser = this.appService.currentUser;
         return currentUser?.id === review.reviewerId || currentUser?.role === 'ADMIN';
     }
-
-    private confirmService = inject(ConfirmDialogService);
-    private toastService = inject(ToastService);
 
     async deleteReview(review: Review) {
         const confirmed = await this.confirmService.show(
