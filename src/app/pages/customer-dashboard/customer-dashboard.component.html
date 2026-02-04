@@ -1,0 +1,366 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+        <div>
+            <h1 class="text-4xl font-black text-slate-900 tracking-tight">Project Dashboard</h1>
+            <p class="text-slate-500 mt-2 font-medium">Hello, {{currentUser?.name}}. You have {{(customerTasks$ |
+                async)?.length || 0}} active service requests.</p>
+        </div>
+        <button (click)="isPostingTask = true"
+            class="flex items-center justify-center bg-indigo-600 text-white font-black py-4 px-8 rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95 group">
+            <lucide-icon [img]="Plus" class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform"></lucide-icon>
+            Create New Request
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <ng-container *ngIf="customerTasks$ | async as customerTasks; else loading">
+            <div *ngIf="customerTasks.length === 0"
+                class="col-span-full py-32 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                <div class="bg-white w-20 h-20 rounded-3xl shadow-sm flex items-center justify-center mx-auto mb-6">
+                    <lucide-icon [img]="Search" class="text-indigo-500 w-10 h-10"></lucide-icon>
+                </div>
+                <h3 class="text-2xl font-black text-slate-900">No requests found</h3>
+                <p class="text-slate-500 max-w-sm mx-auto mt-3 font-medium">Post your first task to connect with
+                    Indian's top service experts.</p>
+                <button (click)="isPostingTask = true"
+                    class="mt-8 text-indigo-600 font-bold flex items-center mx-auto hover:underline">
+                    Start now <lucide-icon [img]="ChevronRight" class="ml-1 w-4 h-4"></lucide-icon>
+                </button>
+            </div>
+
+            <app-task-card *ngFor="let task of customerTasks" [task]="task" [role]="UserRole.CUSTOMER"
+                (select)="setSelectedTask(task)"></app-task-card>
+        </ng-container>
+        <ng-template #loading>
+            <p>Loading tasks...</p>
+        </ng-template>
+    </div>
+
+    <!-- Previous Bookings Section -->
+    <div class="mt-16">
+        <button (click)="togglePreviousBookings()" 
+            class="flex items-center gap-3 mb-8 px-6 py-3 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors border border-indigo-200">
+            <span class="text-sm font-black text-indigo-600 uppercase tracking-widest">{{ showCompletedTasks ? 'Hide' : 'View' }} Previous Bookings</span>
+            <lucide-icon [img]="ChevronRight" class="w-4 h-4 text-indigo-600" [ngClass]="{'rotate-90': showCompletedTasks}"></lucide-icon>
+        </button>
+
+        <div *ngIf="showCompletedTasks" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in">
+            <div *ngIf="completedTasks.length === 0" class="col-span-full text-center py-12 bg-slate-50 rounded-2xl">
+                <p class="text-slate-500 font-medium">No completed bookings yet.</p>
+            </div>
+
+            <div *ngFor="let task of completedTasks" 
+                class="bg-white border border-slate-100 rounded-2xl p-6 hover:shadow-lg transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="font-black text-slate-900 mb-1">{{task.title}}</h3>
+                        <p class="text-xs text-slate-500 font-medium">{{task.location.city}}, {{task.location.state}}</p>
+                    </div>
+                </div>
+
+                <!-- Rating Stars -->
+                <div class="mb-4 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="flex gap-1">
+                            <lucide-icon *ngFor="let i of getStarArray(getAverageRating(task))" 
+                                [img]="Star" 
+                                class="w-4 h-4 fill-amber-400 text-amber-400"></lucide-icon>
+                            <lucide-icon *ngFor="let i of getStarArray(5 - getAverageRating(task))" 
+                                [img]="Star" 
+                                class="w-4 h-4 text-slate-200"></lucide-icon>
+                        </div>
+                        <span class="text-sm font-bold text-slate-900">{{getAverageRating(task)}}</span>
+                    </div>
+                    <p *ngIf="task.reviews && task.reviews.length > 0" class="text-xs text-slate-500">
+                        {{task.reviews.length}} review<span *ngIf="task.reviews.length !== 1">s</span>
+                    </p>
+                </div>
+
+                <!-- Task Details -->
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-600">Budget:</span>
+                        <span class="font-bold text-slate-900">{{CURRENCY}}{{task.budgetMax}}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-600">Worker:</span>
+                        <span class="font-bold text-slate-900">{{task.workerName}}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-600">Category:</span>
+                        <span class="font-bold text-slate-900">{{task.category}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Activity Widget -->
+    <div class="mt-16">
+        <app-platform-activity></app-platform-activity>
+    </div>
+
+    <div *ngIf="isPostingTask"
+        class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div
+            class="bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900">Post a Request</h2>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Get custom bids from
+                        experts</p>
+                </div>
+                <button (click)="isPostingTask = false"
+                    class="bg-slate-50 p-2 rounded-xl text-slate-400 hover:text-slate-600">
+                    <lucide-icon [img]="X"></lucide-icon>
+                </button>
+            </div>
+            <form (submit)="handleSubmitTask($event)" class="p-8 overflow-y-auto max-h-[80vh]">
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Short
+                            Title</label>
+                        <input name="title" required placeholder="e.g. AC Installation in living room"
+                            class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none font-medium" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label
+                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Category</label>
+                            <select name="category"
+                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium">
+                                <option *ngFor="let c of CATEGORIES" [value]="c.id">{{c.name}}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Service
+                                Date</label>
+                            <input type="date" name="date" required
+                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Job
+                            Description</label>
+                        <textarea name="description" rows="3" required placeholder="Detailed requirements..."
+                            class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label
+                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">State</label>
+                            <select [(ngModel)]="selectedState" (change)="onStateChange()" name="state"
+                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium">
+                                <option value="">Select State</option>
+                                <option *ngFor="let state of STATES" [value]="state">{{ state }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">City</label>
+                            <select [(ngModel)]="selectedCity" (change)="onCityChange()" name="city" [disabled]="!selectedState"
+                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium disabled:bg-slate-100 disabled:cursor-not-allowed">
+                                <option value="">Select City</option>
+                                <option *ngFor="let city of availableCities" [value]="city">{{ city }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label
+                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Area</label>
+                            <select [(ngModel)]="selectedArea" name="area" [disabled]="!selectedCity"
+                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium disabled:bg-slate-100 disabled:cursor-not-allowed">
+                                <option value="">Select Area</option>
+                                <option *ngFor="let area of availableAreas" [value]="area">{{ area }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Full Address</label>
+                            <input [(ngModel)]="fullAddress" name="fullAddress" required placeholder="Complete address with street, zip code"
+                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none font-medium" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label
+                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Min
+                                Budget ({{CURRENCY}})</label>
+                            <input type="number" name="budgetMin" required
+                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium" />
+                        </div>
+                        <div>
+                            <label
+                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Max
+                                Budget ({{CURRENCY}})</label>
+                            <input type="number" name="budgetMax" required
+                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium" />
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl hover:bg-black transition-all mt-4 shadow-xl">
+                        Launch Project
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Details Modal -->
+    <div *ngIf="selectedTask"
+        class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div
+                class="px-10 py-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                <h2 class="text-2xl font-black text-slate-900">{{selectedTask.title}}</h2>
+                <button (click)="setSelectedTask(null)"
+                    class="p-2 bg-slate-50 rounded-xl text-slate-400 hover:text-slate-600 transition-colors">
+                    <lucide-icon [img]="X"></lucide-icon>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-10">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    <div class="lg:col-span-1 space-y-8">
+                        <div>
+                            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Requirement
+                                Brief</h3>
+                            <p class="text-slate-600 leading-relaxed font-medium">{{selectedTask.description}}</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                                <span
+                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Estimated
+                                    Budget</span>
+                                <span class="text-xl font-black text-slate-900">{{CURRENCY}}{{selectedTask.budgetMin}} -
+                                    {{CURRENCY}}{{selectedTask.budgetMax}}</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                                <span
+                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Project
+                                    Status</span>
+                                <span
+                                    class="text-sm font-black text-indigo-600 uppercase tracking-wider">{{selectedTask.status}}</span>
+                            </div>
+                        </div>
+
+                        <div *ngIf="selectedTask.status === TaskStatus.COMPLETED"
+                            class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
+                            <div class="flex items-center text-emerald-700 mb-4">
+                                <lucide-icon [img]="CheckCircle" class="w-5 h-5 mr-2"></lucide-icon>
+                                <span class="font-black text-sm uppercase tracking-wider">Payment Released</span>
+                            </div>
+                            <p class="text-xs font-medium text-emerald-600 leading-relaxed mb-4">Service completed
+                                successfully and funds transferred to expert.</p>
+                            <button *ngIf="!selectedTask.reviews || selectedTask.reviews.length === 0" 
+                                (click)="openReviewModal(selectedTask.id, selectedTask.workerId)"
+                                class="w-full bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors">
+                                Leave a Review
+                            </button>
+                            <div *ngIf="selectedTask.reviews && selectedTask.reviews.length > 0" class="text-sm text-emerald-700 font-semibold">
+                                ✓ Review submitted
+                            </div>
+                        </div>
+
+                        <div *ngIf="selectedTask.status === TaskStatus.IN_PROGRESS"
+                            class="bg-indigo-600 p-6 rounded-3xl text-white shadow-xl shadow-indigo-100">
+                            <p class="text-xs font-black uppercase tracking-widest opacity-80 mb-4">Milestone Active</p>
+                            <p class="text-lg font-bold mb-6">Partner on-site since {{selectedTask.checkInTime}}</p>
+                            <button (click)="approveTask(selectedTask.id)"
+                                class="w-full bg-white text-indigo-600 font-black py-4 rounded-xl hover:bg-slate-50 transition-all shadow-lg">
+                                Release {{CURRENCY}}{{selectedTask.budgetMax}}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2">
+                        <!-- Task Status Timeline -->
+                        <div class="mb-8">
+                            <app-task-status-timeline [task]="selectedTask"></app-task-status-timeline>
+                        </div>
+
+                        <div class="flex items-center justify-between mb-8">
+                            <h3 class="text-xl font-black text-slate-900 flex items-center">
+                                Expert Proposals <span
+                                    class="ml-3 px-3 py-1 bg-slate-100 rounded-lg text-xs text-slate-500">{{selectedTask.bids.length}}</span>
+                            </h3>
+                            <div *ngIf="selectedTask.bids.length > 0" class="flex items-center gap-2">
+                                <span class="text-sm text-slate-500 font-medium">Sort by Price:</span>
+                                <button (click)="toggleBidSort()" 
+                                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-semibold text-slate-700 transition-colors">
+                                    {{ bidSortOrder === 'asc' ? '₹ Low to High' : '₹ High to Low' }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div *ngIf="selectedTask.bids.length === 0"
+                            class="bg-slate-50 rounded-3xl p-12 text-center border-2 border-dashed border-slate-200">
+                            <p class="text-slate-400 font-bold">Proposals will appear here as experts respond to your
+                                request.</p>
+                        </div>
+                        <div *ngIf="selectedTask.bids.length > 0" class="space-y-6">
+                            <div *ngFor="let bid of sortedBids"
+                                class="group relative bg-white border rounded-[2rem] p-8 transition-all"
+                                [ngClass]="{'ring-2 ring-indigo-500 bg-indigo-50/10': bid.status === 'ACCEPTED', 'border-slate-100 hover:shadow-xl hover:shadow-slate-100': bid.status !== 'ACCEPTED'}">
+                                <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
+                                    <div class="flex items-center space-x-4">
+                                        <img [src]="bid.workerAvatar"
+                                            class="w-16 h-16 rounded-2xl object-cover shadow-sm" />
+                                        <div>
+                                            <h4 class="font-black text-slate-900 text-lg">{{bid.workerName}}</h4>
+                                            <div class="flex items-center text-sm font-bold mt-1">
+                                                <lucide-icon [img]="Star"
+                                                    class="w-4 h-4 fill-amber-500 text-amber-500 mr-1.5"></lucide-icon>
+                                                <span class="text-slate-700">{{bid.workerRating}}</span>
+                                                <span class="mx-2 text-slate-300">•</span>
+                                                <span
+                                                    class="text-indigo-600 uppercase tracking-widest text-[10px]">Verified
+                                                    Pro</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">
+                                            Proposed Quote</p>
+                                        <span
+                                            class="text-3xl font-black text-slate-900">{{CURRENCY}}{{bid.amount.toLocaleString('en-IN')}}</span>
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-6 p-5 bg-slate-50 rounded-2xl text-slate-600 text-sm font-medium leading-relaxed italic">
+                                    "{{bid.message}}"
+                                </div>
+
+                                <div class="mt-6 flex items-center justify-between">
+                                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Est.
+                                        {{bid.estimatedDays}} Days Completion</span>
+                                    <button *ngIf="selectedTask.status === TaskStatus.BIDDING"
+                                        (click)="selectWorker(selectedTask.id, bid.id)"
+                                        class="bg-slate-900 text-white text-sm font-black px-8 py-3 rounded-xl hover:bg-black transition-all shadow-lg shadow-slate-200">
+                                        Accept & Hire
+                                    </button>
+                                    <div *ngIf="bid.status === 'ACCEPTED'"
+                                        class="flex items-center text-indigo-600 font-black text-sm uppercase tracking-widest">
+                                        <lucide-icon [img]="CheckCircle" class="w-4 h-4 mr-2"></lucide-icon> Hired
+                                        Partner
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <app-review-modal [showModal]="showReviewModal" 
+        [workerId]="reviewingWorkerId" 
+        [taskId]="reviewingTaskId"
+        [customerId]="currentUser?.id || ''"
+        (close)="showReviewModal = false"
+        (submitted)="handleReviewSubmit($event)">
+    </app-review-modal>
+</div>

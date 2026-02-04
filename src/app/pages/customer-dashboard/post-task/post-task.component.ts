@@ -1,0 +1,363 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AppService } from '../../../app.service';
+import { ToastService } from '../../../services/toast.service';
+import { SERVICE_CATEGORIES } from '../../../service-categories';
+import {
+    LucideAngularModule,
+    MapPin,
+    Calendar,
+    DollarSign,
+    FileText,
+    ArrowRight,
+    ArrowLeft,
+    CheckCircle2,
+    Circle,
+    Upload,
+    X
+} from 'lucide-angular';
+
+@Component({
+    selector: 'app-post-task',
+    standalone: true,
+    imports: [CommonModule, FormsModule, LucideAngularModule],
+    template: `
+        <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 py-12 px-4">
+            <div class="max-w-4xl mx-auto">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight">Post a New Task</h1>
+                    <p class="text-slate-300 text-lg font-medium">Find the perfect professional for your needs</p>
+                </div>
+
+                <!-- Stepper -->
+                <div class="mb-12">
+                    <div class="flex items-center justify-between mb-8">
+                        <div *ngFor="let step of [1, 2, 3]; let i = index"
+                            class="flex items-center flex-1"
+                            [class.mb-0]="i === 2">
+                            <!-- Step Circle -->
+                            <div [class.bg-indigo-600]="currentStep >= step"
+                                [class.bg-slate-300]="currentStep < step"
+                                [class.text-white]="currentStep >= step"
+                                [class.text-slate-600]="currentStep < step"
+                                class="w-12 h-12 rounded-full flex items-center justify-center font-black text-lg transition-all shadow-lg">
+                                <span *ngIf="currentStep > step" class="flex items-center">
+                                    <lucide-icon [img]="CheckCircle2" class="w-6 h-6"></lucide-icon>
+                                </span>
+                                <span *ngIf="currentStep <= step">{{ step }}</span>
+                            </div>
+
+                            <!-- Step Label -->
+                            <div class="ml-4">
+                                <p class="font-bold text-white text-sm uppercase tracking-widest">
+                                    {{ getStepTitle(step) }}
+                                </p>
+                                <p class="text-slate-400 text-xs font-medium">
+                                    {{ getStepDescription(step) }}
+                                </p>
+                            </div>
+
+                            <!-- Connector Line -->
+                            <div *ngIf="i < 2" class="flex-1 h-1 bg-slate-300 mx-4"
+                                [class.bg-indigo-600]="currentStep > step"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Container -->
+                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+                    <!-- Step 1: Basic Details -->
+                    <div *ngIf="currentStep === 1" class="p-8 md:p-12">
+                        <h2 class="text-2xl font-black text-slate-900 mb-8">Task Details</h2>
+                        
+                        <form class="space-y-6">
+                            <!-- Category Selection -->
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-3">Service Category *</label>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                                    <div *ngFor="let category of SERVICE_CATEGORIES"
+                                        (click)="selectCategory(category.id)"
+                                        [class.ring-2]="formData.category === category.id"
+                                        [class.ring-indigo-500]="formData.category === category.id"
+                                        [class.bg-indigo-50]="formData.category === category.id"
+                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center">
+                                        <div [class]="category.color" class="w-10 h-10 rounded-lg flex items-center justify-center mb-2 mx-auto">
+                                            <lucide-icon [img]="getCategoryIcon(category.id)" class="w-5 h-5"></lucide-icon>
+                                        </div>
+                                        <p class="font-bold text-slate-900 text-sm">{{ category.name }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Task Title -->
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Task Title *</label>
+                                <input [(ngModel)]="formData.title" name="title" placeholder="e.g., Fix leaky bathroom tap"
+                                    class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                    required>
+                            </div>
+
+                            <!-- Description -->
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Description *</label>
+                                <textarea [(ngModel)]="formData.description" name="description" 
+                                    placeholder="Provide detailed information about your task..."
+                                    rows="4"
+                                    class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium resize-none"
+                                    required></textarea>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: Location & Date -->
+                    <div *ngIf="currentStep === 2" class="p-8 md:p-12">
+                        <h2 class="text-2xl font-black text-slate-900 mb-8">When & Where</h2>
+                        
+                        <form class="space-y-6">
+                            <!-- Location -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">State *</label>
+                                    <input [(ngModel)]="formData.location.state" name="state" placeholder="e.g., Delhi"
+                                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                        required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">City *</label>
+                                    <input [(ngModel)]="formData.location.city" name="city" placeholder="e.g., New Delhi"
+                                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Area/Locality *</label>
+                                    <input [(ngModel)]="formData.location.area" name="area" placeholder="e.g., Connaught Place"
+                                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                        required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Preferred Date *</label>
+                                    <input [(ngModel)]="formData.preferredDate" name="date" type="date"
+                                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                        required>
+                                </div>
+                            </div>
+
+                            <!-- Full Address -->
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Full Address</label>
+                                <textarea [(ngModel)]="formData.location.fullAddress" name="fullAddress"
+                                    placeholder="Apartment/Building, Street, Landmark (optional)"
+                                    rows="3"
+                                    class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium resize-none"></textarea>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Step 3: Budget & Photos -->
+                    <div *ngIf="currentStep === 3" class="p-8 md:p-12">
+                        <h2 class="text-2xl font-black text-slate-900 mb-8">Budget & Details</h2>
+                        
+                        <form class="space-y-6">
+                            <!-- Budget -->
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-4">Budget Range (₹) *</label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <input [(ngModel)]="formData.budgetMin" name="budgetMin" type="number" placeholder="Minimum budget"
+                                            class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                            required>
+                                    </div>
+                                    <div>
+                                        <input [(ngModel)]="formData.budgetMax" name="budgetMax" type="number" placeholder="Maximum budget"
+                                            class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                            required>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2 font-medium">
+                                    Budget range: ₹{{ formData.budgetMin | number:'1.0-0' }} - ₹{{ formData.budgetMax | number:'1.0-0' }}
+                                </p>
+                            </div>
+
+                            <!-- Photos -->
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-3">Add Photos (Optional)</label>
+                                <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-indigo-400 transition-colors cursor-pointer">
+                                    <lucide-icon [img]="Upload" class="w-10 h-10 text-slate-400 mx-auto mb-3"></lucide-icon>
+                                    <p class="text-sm font-bold text-slate-700">Drag photos here or click to browse</p>
+                                    <p class="text-xs text-slate-500 mt-1">PNG, JPG up to 5MB each</p>
+                                    <input type="file" multiple accept="image/*" class="hidden" #fileInput>
+                                </div>
+                                <div *ngIf="formData.photos.length > 0" class="mt-4 grid grid-cols-3 gap-3">
+                                    <div *ngFor="let photo of formData.photos" class="relative group">
+                                        <img [src]="photo" alt="Task photo" class="w-full h-24 object-cover rounded-lg border border-slate-200">
+                                        <button (click)="removePhoto(photo)" type="button"
+                                            class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <lucide-icon [img]="X" class="w-4 h-4"></lucide-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Summary -->
+                            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 mt-8">
+                                <h3 class="font-black text-indigo-900 mb-4">Summary</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-indigo-700 font-semibold">Category:</span>
+                                        <span class="text-indigo-900 font-bold">{{ getCategoryName(formData.category) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-indigo-700 font-semibold">Location:</span>
+                                        <span class="text-indigo-900 font-bold">{{ formData.location.city }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-indigo-700 font-semibold">Budget:</span>
+                                        <span class="text-indigo-900 font-bold">₹{{ formData.budgetMin }} - ₹{{ formData.budgetMax }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="bg-slate-50 px-8 md:px-12 py-6 border-t border-slate-100 flex items-center justify-between">
+                        <button *ngIf="currentStep > 1" (click)="previousStep()"
+                            class="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-bold transition-colors">
+                            <lucide-icon [img]="ArrowLeft" class="w-5 h-5"></lucide-icon>
+                            Back
+                        </button>
+                        <div *ngIf="currentStep === 1"></div>
+
+                        <button *ngIf="currentStep < 3" (click)="nextStep()"
+                            class="flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-xl hover:bg-indigo-700 font-bold transition-colors shadow-lg">
+                            Next
+                            <lucide-icon [img]="ArrowRight" class="w-5 h-5"></lucide-icon>
+                        </button>
+
+                        <button *ngIf="currentStep === 3" (click)="submitTask()"
+                            class="bg-emerald-600 text-white px-8 py-3 rounded-xl hover:bg-emerald-700 font-bold transition-colors shadow-lg">
+                            Post Task
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `,
+    styles: []
+})
+export class PostTaskComponent implements OnInit {
+    currentStep = 1;
+    formData = {
+        category: '',
+        title: '',
+        description: '',
+        location: { state: '', city: '', area: '', fullAddress: '' },
+        preferredDate: '',
+        budgetMin: 500,
+        budgetMax: 2000,
+        photos: [] as string[]
+    };
+
+    SERVICE_CATEGORIES = SERVICE_CATEGORIES;
+
+    readonly ArrowRight = ArrowRight;
+    readonly ArrowLeft = ArrowLeft;
+    readonly CheckCircle2 = CheckCircle2;
+    readonly Circle = Circle;
+    readonly Upload = Upload;
+    readonly X = X;
+
+    constructor(private appService: AppService, private router: Router) {}
+
+    ngOnInit() {}
+
+    selectCategory(categoryId: string) {
+        this.formData.category = categoryId;
+    }
+
+    getCategoryIcon(categoryId: string): any {
+        const category = SERVICE_CATEGORIES.find((c: any) => c.id === categoryId);
+        if (!category) return null;
+        // Map icon names to lucide icons
+        const iconMap: any = {
+            'Droplet': 'Droplet',
+            'Zap': 'Zap',
+            'Hammer': 'Hammer',
+            'Paintbrush': 'Paintbrush',
+            'Trash2': 'Trash2',
+            'Wind': 'Wind',
+            'Bug': 'Bug',
+            'Leaf': 'Leaf',
+            'Lock': 'Lock',
+            'Wrench': 'Wrench'
+        };
+        return iconMap[category.icon];
+    }
+
+    getCategoryName(categoryId: string): string {
+        const category = SERVICE_CATEGORIES.find((c: any) => c.id === categoryId);
+        return category ? category.name : 'Not selected';
+    }
+
+    getStepTitle(step: number): string {
+        const titles = ['Task Details', 'When & Where', 'Budget & Photos'];
+        return titles[step - 1] || '';
+    }
+
+    getStepDescription(step: number): string {
+        const descriptions = ['Tell us what you need', 'Choose date & location', 'Set budget & add photos'];
+        return descriptions[step - 1] || '';
+    }
+
+    nextStep() {
+        if (this.validateStep(this.currentStep)) {
+            this.currentStep++;
+        }
+    }
+
+    previousStep() {
+        this.currentStep--;
+    }
+
+    validateStep(step: number): boolean {
+        switch (step) {
+            case 1:
+                return !!this.formData.category && !!this.formData.title && !!this.formData.description;
+            case 2:
+                return !!this.formData.location.state && !!this.formData.location.city && 
+                       !!this.formData.location.area && !!this.formData.preferredDate;
+            case 3:
+                return this.formData.budgetMin > 0 && this.formData.budgetMax >= this.formData.budgetMin;
+            default:
+                return true;
+        }
+    }
+
+    removePhoto(photo: string) {
+        this.formData.photos = this.formData.photos.filter(p => p !== photo);
+    }
+
+    private toastService = inject(ToastService);
+
+    submitTask() {
+        if (!this.validateStep(3)) {
+            this.toastService.error('Please complete all required fields');
+            return;
+        }
+
+        const taskData = {
+            ...this.formData,
+            customerId: this.appService.currentUser?.id || 'u1'
+        };
+
+        this.appService.postTask(taskData);
+        this.toastService.success('Task posted successfully!');
+        this.router.navigate(['/customer']);
+    }
+}

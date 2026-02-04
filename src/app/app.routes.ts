@@ -1,3 +1,29 @@
 import { Routes } from '@angular/router';
+import { LandingPageComponent } from './pages/landing-page/landing-page.component';
+import { CustomerDashboardComponent } from './pages/customer-dashboard/customer-dashboard.component';
+import { WorkerDashboardComponent } from './pages/worker-dashboard/worker-dashboard.component';
+import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
+import { DisputesComponent } from './pages/disputes/disputes.component';
+import { ReviewsComponent } from './pages/reviews/reviews.component';
+import { UserManagementComponent } from './pages/admin-dashboard/user-management.component';
+import { TaskReviewComponent } from './pages/admin-dashboard/task-review.component';
+import { AdminDisputesComponent } from './pages/admin-dashboard/disputes.component';
+import { WorkerEarningsComponent } from './pages/worker-earnings/worker-earnings.component';
+import { PostTaskComponent } from './pages/customer-dashboard/post-task/post-task.component';
+import { MyBookingsComponent } from './pages/customer-dashboard/my-bookings/my-bookings.component';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+    { path: '', component: LandingPageComponent },
+    { path: 'customer', component: CustomerDashboardComponent },
+    { path: 'customer/post-task', component: PostTaskComponent },
+    { path: 'customer/bookings', component: MyBookingsComponent },
+    { path: 'worker', component: WorkerDashboardComponent },
+    { path: 'worker/earnings', component: WorkerEarningsComponent },
+    { path: 'admin', component: AdminDashboardComponent },
+    { path: 'admin/users', component: UserManagementComponent },
+    { path: 'admin/reviews', component: TaskReviewComponent },
+    { path: 'admin/disputes', component: AdminDisputesComponent },
+    { path: 'reviews', component: ReviewsComponent },
+    { path: 'disputes', component: DisputesComponent },
+    { path: '**', redirectTo: '' }
+];

@@ -1,0 +1,60 @@
+<div
+    class="bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-2xl hover:shadow-slate-200 transition-all group flex flex-col h-full">
+    <div class="p-6 flex-grow">
+        <div class="flex justify-between items-start mb-4">
+            <span
+                class="text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider border {{STATUS_COLORS[task.status]}}">
+                {{formatStatus(task.status)}}
+            </span>
+            <span class="text-[10px] text-slate-400 font-bold tracking-widest uppercase">ID:
+                {{task.id.toUpperCase()}}</span>
+        </div>
+
+        <h3
+            class="text-xl font-extrabold text-slate-900 mb-3 leading-tight group-hover:text-indigo-600 transition-colors">
+            {{task.title}}
+        </h3>
+        <p class="text-slate-500 text-sm line-clamp-2 mb-6 font-medium">
+            {{task.description}}
+        </p>
+
+        <div class="grid grid-cols-1 gap-3 mb-6">
+            <div class="flex items-center text-slate-600 text-xs font-semibold">
+                <div class="w-6 h-6 rounded-md bg-slate-50 flex items-center justify-center mr-3">
+                    <lucide-icon [img]="MapPin" class="w-3.5 h-3.5 text-slate-400"></lucide-icon>
+                </div>
+                {{task.location}}
+            </div>
+            <div class="flex items-center text-slate-600 text-xs font-semibold">
+                <div class="w-6 h-6 rounded-md bg-slate-50 flex items-center justify-center mr-3">
+                    <lucide-icon [img]="Calendar" class="w-3.5 h-3.5 text-slate-400"></lucide-icon>
+                </div>
+                {{formatDate(task.preferredDate)}}
+            </div>
+            <div class="flex items-center text-slate-600 text-xs font-semibold">
+                <div class="w-6 h-6 rounded-md bg-slate-50 flex items-center justify-center mr-3">
+                    <lucide-icon [img]="CreditCard" class="w-3.5 h-3.5 text-slate-400"></lucide-icon>
+                </div>
+                Budget: {{CURRENCY}}{{task.budgetMin.toLocaleString('en-IN')}} -
+                {{CURRENCY}}{{task.budgetMax.toLocaleString('en-IN')}}
+            </div>
+        </div>
+    </div>
+
+    <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between mt-auto">
+        <div class="flex items-center text-indigo-600 font-black text-xs uppercase tracking-widest">
+            <lucide-icon [img]="MessageSquare" class="w-4 h-4 mr-2"></lucide-icon>
+            {{task.bids.length}} Proposals
+        </div>
+
+        <button *ngIf="role === UserRole.CUSTOMER" (click)="onSelectClick()"
+            class="flex items-center text-sm font-black text-slate-900 hover:text-indigo-600 transition-colors">
+            Review <lucide-icon [img]="ArrowRight" class="ml-1 w-4 h-4"></lucide-icon>
+        </button>
+
+        <button *ngIf="role === UserRole.WORKER && task.status === TaskStatus.POSTED" (click)="onBidClick()"
+            class="text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-100 active:scale-95">
+            Send Bid
+        </button>
+    </div>
+</div>
