@@ -1,0 +1,3 @@
+## 2026-02-05 - Form Accessibility and Usability Patterns
+**Learning:** Found that the application's forms (specifically the Login/Register form) lacked explicit label-to-input associations using `for`/`id` attributes, which is a critical accessibility issue for screen readers. Additionally, common usability features like password visibility toggles and proper `autocomplete` attributes were missing, hindering the user experience.
+**Action:** Always check for missing `for`/`id` associations and `autocomplete` attributes in forms. Implement password visibility toggles for all authentication forms to improve usability and reduce user errors.
