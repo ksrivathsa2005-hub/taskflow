@@ -175,7 +175,7 @@ export class TaskStatusTimelineComponent {
         [TaskStatus.DISPUTED]: 'Under Dispute'
     };
 
-    private readonly STATUS_DESCRIPTIONS: Record<TaskStatus, string> = {
+    private readonly STATUS_DESCRIPTIONS: Record<string, string> = {
         [TaskStatus.POSTED]: 'Your task has been posted to the platform',
         [TaskStatus.BIDDING]: 'Workers are submitting their bids',
         [TaskStatus.ASSIGNED]: 'You have selected a worker',
@@ -193,7 +193,7 @@ export class TaskStatusTimelineComponent {
 
     getTimelineSteps(): TimelineStep[] {
         const steps: TimelineStep[] = [];
-        const currentIndex = this.WORKFLOW_SEQUENCE.indexOf(this.task.status);
+        const currentIndex = this.WORKFLOW_SEQUENCE.indexOf(this.task.status as TaskStatus);
 
         // Only show main workflow steps, exclude disputed/cancelled if in main flow
         const visibleSteps = this.WORKFLOW_SEQUENCE.slice(0, -2); // Exclude CANCELLED and DISPUTED
@@ -289,7 +289,7 @@ export class TaskStatusTimelineComponent {
         return descriptions[status] || '';
     }
 
-    getStatusDescription(status: TaskStatus): string {
+    getStatusDescription(status: TaskStatus | string): string {
         return this.STATUS_DESCRIPTIONS[status] || 'Unknown status';
     }
 
@@ -308,7 +308,7 @@ export class TaskStatusTimelineComponent {
     }
 
     getCurrentProgress(): number {
-        const currentIndex = this.WORKFLOW_SEQUENCE.indexOf(this.task.status);
+        const currentIndex = this.WORKFLOW_SEQUENCE.indexOf(this.task.status as TaskStatus);
         if (currentIndex === -1) return 0;
         const progress = Math.round(((currentIndex + 1) / this.WORKFLOW_SEQUENCE.length) * 100);
         return Math.min(progress, 100);

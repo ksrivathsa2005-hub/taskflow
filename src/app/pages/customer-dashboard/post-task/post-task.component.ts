@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AppService } from '../../../app.service';
+import { ApiService } from '../../../services/api.service';
+import { AuthService } from '../../../services/auth.service';
 import { ToastService } from '../../../services/toast.service';
 import { SERVICE_CATEGORIES } from '../../../service-categories';
 import {
@@ -273,6 +275,10 @@ export class PostTaskComponent implements OnInit {
     readonly Upload = Upload;
     readonly X = X;
 
+    private toastService = inject(ToastService);
+    private apiService = inject(ApiService);
+    private authService = inject(AuthService);
+
     constructor(private appService: AppService, private router: Router) {}
 
     ngOnInit() {}
@@ -343,21 +349,44 @@ export class PostTaskComponent implements OnInit {
         this.formData.photos = this.formData.photos.filter(p => p !== photo);
     }
 
-    private toastService = inject(ToastService);
-
     submitTask() {
         if (!this.validateStep(3)) {
             this.toastService.error('Please complete all required fields');
             return;
         }
 
-        const taskData = {
-            ...this.formData,
-            customerId: this.appService.currentUser?.id || 'u1'
+        const currentUser = this.authService.currentUser;
+        if (!currentUser) {
+            this.toastService.error('You must be logged in to post a task');
+            return;
+        }
+
+        // Format request according to API spec
+        const taskRequest = {
+            title: this.formData.title,
+            description: this.formData.description,
+            category: this.formData.category,
+            budgetMin: this.formData.budgetMin,
+            budgetMax: this.formData.budgetMax,
+            preferredDate: this.formData.preferredDate,
+            location: {
+                state: this.formData.location.state,
+                city: this.formData.location.city,
+                area: this.formData.location.area,
+                fullAddress: this.formData.location.fullAddress
+            },
+            photos: this.formData.photos
         };
 
-        this.appService.postTask(taskData);
-        this.toastService.success('Task posted successfully!');
-        this.router.navigate(['/customer']);
+        this.apiService.createTask(taskRequest).subscribe({
+            next: (response) => {
+                this.toastService.success('Task posted successfully!');
+                this.router.navigate(['/customer']);
+            },
+            error: (error) => {
+                console.error('Error creating task:', error);
+                this.toastService.error(error.message || 'Failed to post task. Please try again.');
+            }
+        });
     }
 }

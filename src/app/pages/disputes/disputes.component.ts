@@ -269,7 +269,7 @@ export class DisputesComponent implements OnInit {
         this.appService.currentUser$.subscribe(user => {
             if (user) {
                 this.currentUserId = user.id;
-                this.currentUserRole = user.role;
+                this.currentUserRole = user.role as UserRole;
                 this.loadAvailableTasks();
             }
         });

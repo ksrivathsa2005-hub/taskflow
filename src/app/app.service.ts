@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { User, UserRole, Task, TaskStatus, Bid, AppState, Dispute, UserStatus, ProgressUpdate } from './types';
 import { MockApiService } from './services/mock-api.service';
 import { ToastService } from './services/toast.service';
+import { SERVICE_CATEGORIES } from './service-categories';
+import { AuthService } from './services/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -21,8 +23,14 @@ export class AppService {
     disputes$ = this.disputesSubject.asObservable();
 
     private toastService = inject(ToastService);
+    private authService = inject(AuthService);
 
     constructor(private mockApi: MockApiService, private router: Router) {
+        // Subscribe to auth service for current user
+        this.authService.currentUser$.subscribe(user => {
+            this.currentUserSubject.next(user);
+        });
+        
         this.loadFromLocalStorage();
     }
 
@@ -83,11 +91,13 @@ export class AppService {
         this.saveToLocalStorage();
     }
 
+    // For backward compatibility - redirects to auth service
     loginAs(role: UserRole) {
+        // This is now handled by AuthService
+        // Keep for backward compatibility with existing UI
         const user = this.users.find(u => u.role === role);
         if (user) {
             this.setCurrentUser(user);
-            // Navigate to appropriate dashboard
             const roleMap: { [key in UserRole]: string } = {
                 [UserRole.CUSTOMER]: '/customer',
                 [UserRole.WORKER]: '/worker',
@@ -97,10 +107,35 @@ export class AppService {
         }
     }
 
+    // Delegate to AuthService for real authentication
+    login(email: string, password: string) {
+        return this.authService.login({ email, password });
+    }
+
+    register(name: string, email: string, password: string, role: 'CUSTOMER' | 'WORKER' | 'ADMIN', phone?: string) {
+        return this.authService.register({ name, email, password, role, phone });
+    }
+
+    logout() {
+        return this.authService.logout();
+    }
+
     postTask(taskData: any) {
         const newTask = this.mockApi.createTask(taskData);
         this.tasksSubject.next([newTask, ...this.tasks]);
         this.saveToLocalStorage();
+    }
+
+    createTask(taskData: any) {
+        return this.postTask(taskData);
+    }
+
+    getServiceCategories() {
+        return SERVICE_CATEGORIES;
+    }
+
+    acceptBid(taskId: string, bidId: string) {
+        return this.selectWorker(taskId, bidId);
     }
 
     placeBid(bidData: any) {
@@ -283,10 +318,5 @@ export class AppService {
 
     getUnresolvedDisputeCount(): number {
         return this.mockApi.getUnresolvedDisputeCount();
-    }
-
-    logout() {
-        this.setCurrentUser(null);
-        localStorage.removeItem('taskflow_appstate');
     }
 }

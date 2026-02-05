@@ -36,8 +36,16 @@ export class TaskCardComponent {
     readonly MessageSquare = MessageSquare;
     readonly ArrowRight = ArrowRight;
 
-    formatStatus(status: string) {
-        return status.replace(/_/g, ' ');
+    formatStatus(status: unknown) {
+        const value = typeof status === 'string' ? status : String(status ?? '');
+        return value.replace(/_/g, ' ');
+    }
+
+    formatLocation(location: Task['location']): string {
+        if (!location) return '';
+        if (typeof location === 'string') return location;
+        const parts = [location.area, location.city, location.state].filter(Boolean);
+        return parts.join(', ');
     }
 
     formatDate(date: string) {

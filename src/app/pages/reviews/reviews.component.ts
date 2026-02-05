@@ -204,7 +204,7 @@ export class ReviewsComponent implements OnInit {
 
     getReviewerAvatar(review: Review): string {
         const user = this.appService.users.find(u => u.id === review.reviewerId);
-        return user ? user.avatar : 'https://picsum.photos/seed/user/200';
+        return user ? (user.avatar || 'https://picsum.photos/seed/user/200') : 'https://picsum.photos/seed/user/200';
     }
 
     private confirmService = inject(ConfirmDialogService);

@@ -219,7 +219,7 @@ export class MyBookingsComponent implements OnInit {
             case 'Active':
                 tasks = tasks.filter(t => 
                     [TaskStatus.BIDDING, TaskStatus.ASSIGNED, TaskStatus.CONFIRMED, 
-                     TaskStatus.TRAVELING, TaskStatus.ARRIVED, TaskStatus.IN_PROGRESS].includes(t.status)
+                     TaskStatus.TRAVELING, TaskStatus.ARRIVED, TaskStatus.IN_PROGRESS].includes(t.status as TaskStatus)
                 );
                 break;
             case 'Pending':

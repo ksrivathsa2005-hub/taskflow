@@ -136,7 +136,7 @@
                             <label
                                 class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Service
                                 Date</label>
-                            <input type="date" name="date" required
+                            <input type="date" name="preferredDate" required
                                 class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium" />
                         </div>
                     </div>
@@ -150,19 +150,19 @@
                         <div>
                             <label
                                 class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">State</label>
-                            <select [(ngModel)]="selectedState" (change)="onStateChange()" name="state"
+                            <select [(ngModel)]="selectedStateId" (change)="onStateChange()" name="state"
                                 class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium">
                                 <option value="">Select State</option>
-                                <option *ngFor="let state of STATES" [value]="state">{{ state }}</option>
+                                <option *ngFor="let state of availableStates" [value]="state.id">{{ state.name }}</option>
                             </select>
                         </div>
                         <div>
                             <label
                                 class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">City</label>
-                            <select [(ngModel)]="selectedCity" (change)="onCityChange()" name="city" [disabled]="!selectedState"
+                            <select [(ngModel)]="selectedCityId" (change)="onCityChange()" name="city" [disabled]="!selectedStateId"
                                 class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium disabled:bg-slate-100 disabled:cursor-not-allowed">
                                 <option value="">Select City</option>
-                                <option *ngFor="let city of availableCities" [value]="city">{{ city }}</option>
+                                <option *ngFor="let city of availableCities" [value]="city.id">{{ city.name }}</option>
                             </select>
                         </div>
                     </div>
@@ -170,10 +170,10 @@
                         <div>
                             <label
                                 class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Area</label>
-                            <select [(ngModel)]="selectedArea" name="area" [disabled]="!selectedCity"
+                            <select [(ngModel)]="selectedAreaId" (change)="onAreaChange()" name="area" [disabled]="!selectedCityId"
                                 class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium disabled:bg-slate-100 disabled:cursor-not-allowed">
                                 <option value="">Select Area</option>
-                                <option *ngFor="let area of availableAreas" [value]="area">{{ area }}</option>
+                                <option *ngFor="let area of availableAreas" [value]="area.id">{{ area.name }} - {{ area.pincode }}</option>
                             </select>
                         </div>
                         <div>

@@ -35,31 +35,6 @@
                   <lucide-icon [img]="AlertCircle" class="w-4 h-4 text-red-600"></lucide-icon>
                   Disputes
                 </button>
-
-                <!-- Worker Earnings -->
-                <div *ngIf="currentUser.role === UserRole.WORKER" class="border-t border-slate-100 mt-2 pt-2">
-                  <button (click)="navigateToEarnings()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-green-50 flex items-center gap-2 transition-colors">
-                    <lucide-icon [img]="TrendingUp" class="w-4 h-4 text-green-600"></lucide-icon>
-                    My Earnings
-                  </button>
-                </div>
-
-                <!-- Admin Section -->
-                <div *ngIf="currentUser.role === UserRole.ADMIN" class="border-t border-slate-100 mt-2 pt-2">
-                  <p class="px-4 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider">Admin Panel</p>
-                  <button (click)="navigateToAdminUsers()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
-                    <lucide-icon [img]="Users" class="w-4 h-4 text-purple-600"></lucide-icon>
-                    User Management
-                  </button>
-                  <button (click)="navigateToAdminReviews()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
-                    <lucide-icon [img]="FileText" class="w-4 h-4 text-purple-600"></lucide-icon>
-                    Task Reviews
-                  </button>
-                  <button (click)="navigateToAdminDisputes()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
-                    <lucide-icon [img]="AlertCircle" class="w-4 h-4 text-purple-600"></lucide-icon>
-                    Manage Disputes
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -94,7 +69,7 @@
 
         <ng-template #guest>
           <div class="flex items-center space-x-4">
-            <button routerLink="/"
+            <button routerLink="/login"
               class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">
               Login
             </button>

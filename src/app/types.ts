@@ -49,18 +49,20 @@ export interface User {
     name: string;
     email: string;
     password?: string;
-    role: UserRole;
-    avatar: string;
+    role: UserRole | string;
+    avatar?: string;
     phone?: string;
     address?: Address;
+    addresses?: any[];
     isBusy?: boolean;
     rating: number;
     completedJobs: number;
     skills?: string[];
     categories?: string[];
     experience?: number;
-    status: UserStatus;
+    status: UserStatus | string;
     createdDate?: string;
+    updatedDate?: string;
 }
 
 export interface Bid {
@@ -88,22 +90,34 @@ export interface Task {
     title: string;
     description: string;
     category: string;
-    location: Address;
+    location: Address | {
+        id?: string;
+        taskId?: string;
+        state: string;
+        city: string;
+        area: string;
+        fullAddress: string;
+        latitude?: number;
+        longitude?: number;
+    };
     customerId: string;
-    workerId?: string;
-    workerName?: string;
-    status: TaskStatus;
+    customerName?: string;
+    workerId?: string | null;
+    workerName?: string | null;
+    status: TaskStatus | string;
     budgetMin: number;
     budgetMax: number;
     preferredDate: string;
-    photos: string[];
+    photos: string[] | Array<{id?: string; taskId?: string; photoUrl: string; uploadedDate?: string}>;
     bids: Bid[];
-    checkInTime?: string;
+    checkInTime?: string | null;
     progressUpdates: ProgressUpdate[];
     reviews: Review[];
-    adminReviewNotes?: string;
+    disputes?: any[];
+    adminReviewNotes?: string | null;
     createdDate?: string;
-    completionDate?: string;
+    completionDate?: string | null;
+    updatedDate?: string;
 }
 
 export interface Review {

@@ -1,9 +1,10 @@
 
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AppService } from '../../app.service';
+import { AuthService } from '../../services/auth.service';
 import { UserRole } from '../../types';
 import {
     LucideAngularModule,
@@ -40,6 +41,8 @@ export class NavbarComponent {
     unreadDisputes = 0;
     showDropdown = false;
 
+    private authService = inject(AuthService);
+
     constructor(public appService: AppService, private router: Router) {
         this.appService.disputes$.subscribe(disputes => {
             this.unreadDisputes = disputes.filter(d => d.status !== 'RESOLVED').length;
@@ -47,15 +50,15 @@ export class NavbarComponent {
     }
 
     logout() {
-        // Clear localStorage
-        localStorage.removeItem('taskflow_appstate');
-        localStorage.removeItem('currentUser');
-        
-        // Clear app state
-        this.appService.setCurrentUser(null);
-        
-        // Navigate to login
-        this.router.navigate(['/']);
+        // Use AuthService for logout
+        this.authService.logout().subscribe({
+            next: () => {
+                // Toast is shown by AuthService
+            },
+            error: (error) => {
+                console.error('Logout error:', error);
+            }
+        });
     }
 
     navigateToDisputes() {
@@ -68,29 +71,7 @@ export class NavbarComponent {
         this.showDropdown = false;
     }
 
-    navigateToEarnings() {
-        this.router.navigate(['/worker/earnings']);
-        this.showDropdown = false;
-    }
-
-    navigateToAdminUsers() {
-        this.router.navigate(['/admin/users']);
-        this.showDropdown = false;
-    }
-
-    navigateToAdminReviews() {
-        this.router.navigate(['/admin/reviews']);
-        this.showDropdown = false;
-    }
-
-    navigateToAdminDisputes() {
-        this.router.navigate(['/admin/disputes']);
-        this.showDropdown = false;
-    }
-
     toggleDropdown() {
         this.showDropdown = !this.showDropdown;
     }
 }
-
-
