@@ -106,13 +106,13 @@ import {
 
                         <!-- Resolve Button -->
                         <div class="px-8 py-4 border-t border-slate-100 flex gap-3">
-                            <button *ngIf="selectedDispute.status !== 'RESOLVED'"
+                            <button *ngIf="selectedDispute.status !== DisputeStatus.RESOLVED"
                                 (click)="showResolveModal = true"
                                 class="flex-1 px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
                                 <lucide-icon [img]="CheckCircle" class="w-4 h-4"></lucide-icon>
                                 Resolve Dispute
                             </button>
-                            <div *ngIf="selectedDispute.status === 'RESOLVED'" class="flex-1 px-6 py-3 bg-emerald-50 text-emerald-700 font-bold rounded-xl text-center">
+                            <div *ngIf="selectedDispute.status === DisputeStatus.RESOLVED" class="flex-1 px-6 py-3 bg-emerald-50 text-emerald-700 font-bold rounded-xl text-center">
                                 ✓ Dispute Resolved
                             </div>
                         </div>
@@ -161,8 +161,10 @@ export class AdminDisputesComponent implements OnInit {
     newAdminMessage: string = '';
     resolutionNotes: string = '';
     showResolveModal = false;
+    currentUser: any = null;
 
     readonly CURRENCY = CURRENCY;
+    readonly DisputeStatus = DisputeStatus;
     readonly MessageCircle = MessageCircle;
     readonly UserIcon = UserIcon;
     readonly Clock = Clock;
@@ -183,7 +185,20 @@ export class AdminDisputesComponent implements OnInit {
     constructor(public appService: AppService) {}
 
     ngOnInit() {
+        // Get current user (admin)
+        this.appService.currentUser$.subscribe(user => {
+            this.currentUser = user;
+            console.log('Admin user:', user);
+        });
+
+        // Load disputes if not already loaded
+        if (this.appService.disputes.length === 0) {
+            console.log('Loading disputes for admin...');
+            this.appService.loadDisputesFromApi();
+        }
+
         this.appService.disputes$.subscribe(disputes => {
+            console.log('Admin received disputes:', disputes);
             this.disputes = disputes;
         });
     }
@@ -212,11 +227,11 @@ export class AdminDisputesComponent implements OnInit {
     }
 
     sendAdminMessage() {
-        if (this.selectedDispute && this.newAdminMessage.trim()) {
+        if (this.selectedDispute && this.newAdminMessage.trim() && this.currentUser) {
             this.appService.addMessageToDispute(this.selectedDispute.id, {
                 message: this.newAdminMessage,
-                senderId: 'admin',
-                senderName: 'Admin Support',
+                senderId: this.currentUser.id,
+                senderName: this.currentUser.name || 'Admin Support',
                 timestamp: new Date().toISOString()
             });
             this.newAdminMessage = '';
@@ -225,6 +240,7 @@ export class AdminDisputesComponent implements OnInit {
 
     confirmResolve() {
         if (this.selectedDispute) {
+            console.log('Resolving dispute:', this.selectedDispute.id, 'Notes:', this.resolutionNotes);
             this.appService.resolveDispute(this.selectedDispute.id, this.resolutionNotes);
             this.showResolveModal = false;
             this.resolutionNotes = '';

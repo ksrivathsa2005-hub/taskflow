@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { LandingPageComponent } from './pages/landing-page/landing-page.component';
+import { LoginComponent } from './pages/login/login.component';
+import { AdminLoginComponent } from './pages/admin-login/admin-login.component';
 import { CustomerDashboardComponent } from './pages/customer-dashboard/customer-dashboard.component';
 import { WorkerDashboardComponent } from './pages/worker-dashboard/worker-dashboard.component';
 import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
@@ -11,18 +13,21 @@ import { AdminDisputesComponent } from './pages/admin-dashboard/disputes.compone
 import { WorkerEarningsComponent } from './pages/worker-earnings/worker-earnings.component';
 import { PostTaskComponent } from './pages/customer-dashboard/post-task/post-task.component';
 import { MyBookingsComponent } from './pages/customer-dashboard/my-bookings/my-bookings.component';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
     { path: '', component: LandingPageComponent },
+    { path: 'login', component: LoginComponent },
+    { path: 'admin-login', component: AdminLoginComponent },
     { path: 'customer', component: CustomerDashboardComponent },
     { path: 'customer/post-task', component: PostTaskComponent },
     { path: 'customer/bookings', component: MyBookingsComponent },
     { path: 'worker', component: WorkerDashboardComponent },
     { path: 'worker/earnings', component: WorkerEarningsComponent },
-    { path: 'admin', component: AdminDashboardComponent },
-    { path: 'admin/users', component: UserManagementComponent },
-    { path: 'admin/reviews', component: TaskReviewComponent },
-    { path: 'admin/disputes', component: AdminDisputesComponent },
+    { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
+    { path: 'admin/users', component: UserManagementComponent, canActivate: [adminGuard] },
+    { path: 'admin/reviews', component: TaskReviewComponent, canActivate: [adminGuard] },
+    { path: 'admin/disputes', component: AdminDisputesComponent, canActivate: [adminGuard] },
     { path: 'reviews', component: ReviewsComponent },
     { path: 'disputes', component: DisputesComponent },
     { path: '**', redirectTo: '' }

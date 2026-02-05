@@ -9,6 +9,7 @@ import { ReviewModalComponent } from '../../components/review-modal/review-modal
 import { PlatformActivityComponent } from '../../components/platform-activity/platform-activity.component';
 import { Task, TaskStatus, UserRole, Bid } from '../../types';
 import { STATUS_COLORS, CURRENCY } from '../../constants';
+import { SERVICE_CATEGORIES } from '../../service-categories';
 import {
     LucideAngularModule,
     Plus,
@@ -50,6 +51,9 @@ export class CustomerDashboardComponent implements OnInit {
     reviewingWorkerId = '';
     reviewingTaskId = '';
     bidSortOrder: 'asc' | 'desc' = 'asc';
+    showDisputeModal = false;
+    disputeTaskId = '';
+    disputeReason = '';
 
     readonly TaskStatus = TaskStatus;
     readonly STATUS_COLORS = STATUS_COLORS;
@@ -73,11 +77,18 @@ export class CustomerDashboardComponent implements OnInit {
     ngOnInit() {
         this.appService.currentUser$.subscribe(user => {
             this.currentUser = user;
+            console.log('Customer Dashboard - Current User:', user);
         });
 
         this.appService.tasks$.subscribe(tasks => {
+            console.log('Customer Dashboard - All tasks:', tasks);
+            console.log('Customer Dashboard - Current user ID:', this.appService.currentUser?.id);
             this.myTasks = tasks.filter(t => t.customerId === this.appService.currentUser?.id);
+            console.log('Customer Dashboard - Filtered tasks:', this.myTasks);
         });
+
+        // Force load tasks from API when component initializes
+        this.appService.loadTasksFromApi();
     }
 
     getPendingActions(): Observable<Task[]> {
@@ -172,7 +183,11 @@ export class CustomerDashboardComponent implements OnInit {
                         filtered = filtered.filter(t => t.status === TaskStatus.POSTED);
                         break;
                     case 'Completed':
-                        filtered = filtered.filter(t => t.status === TaskStatus.COMPLETED);
+                        filtered = filtered.filter(t => 
+                            t.status === TaskStatus.VERIFIED || 
+                            t.status === TaskStatus.PAID || 
+                            t.status === TaskStatus.COMPLETED
+                        );
                         break;
                     case 'Cancelled':
                         filtered = filtered.filter(t => t.status === TaskStatus.CANCELLED);
@@ -194,16 +209,29 @@ export class CustomerDashboardComponent implements OnInit {
 
     get customerTasks$(): Observable<Task[]> {
         return this.appService.tasks$.pipe(
-            map(tasks => tasks.filter(t => t.customerId === this.appService.currentUser?.id))
+            map(tasks => {
+                console.log('customerTasks$ - All tasks from service:', tasks);
+                console.log('customerTasks$ - Current user ID:', this.appService.currentUser?.id);
+                const filtered = tasks.filter(t => {
+                    console.log('Task customerId:', t.customerId, 'User ID:', this.appService.currentUser?.id, 'Match:', t.customerId === this.appService.currentUser?.id);
+                    return t.customerId === this.appService.currentUser?.id;
+                });
+                console.log('customerTasks$ - Filtered tasks:', filtered);
+                return filtered;
+            })
         );
     }
 
     get completedTasks(): Task[] {
-        return this.myTasks.filter(t => t.status === TaskStatus.COMPLETED);
+        return this.myTasks.filter(t => 
+            t.status === TaskStatus.VERIFIED || 
+            t.status === TaskStatus.PAID || 
+            t.status === TaskStatus.COMPLETED
+        );
     }
 
     get CATEGORIES() {
-        return this.appService.getServiceCategories();
+        return SERVICE_CATEGORIES;
     }
 
     get STATES() {
@@ -262,13 +290,17 @@ export class CustomerDashboardComponent implements OnInit {
         const form = event.target as HTMLFormElement;
         const formData = new FormData(form);
         
+        // Convert date from YYYY-MM-DD to ISO DateTime format
+        const dateStr = formData.get('preferredDate') as string;
+        const preferredDate = dateStr ? new Date(dateStr).toISOString() : new Date().toISOString();
+        
         const taskData = {
             title: formData.get('title') as string,
             description: formData.get('description') as string,
             category: formData.get('category') as string,
             budgetMin: Number(formData.get('budgetMin')),
             budgetMax: Number(formData.get('budgetMax')),
-            preferredDate: formData.get('preferredDate') as string,
+            preferredDate: preferredDate,
             location: {
                 state: this.selectedState,
                 city: this.selectedCity,
@@ -277,7 +309,7 @@ export class CustomerDashboardComponent implements OnInit {
             }
         };
 
-        this.appService.createTask(taskData);
+        this.appService.postTask(taskData);
         this.isPostingTask = false;
         form.reset();
         this.selectedState = '';
@@ -298,7 +330,7 @@ export class CustomerDashboardComponent implements OnInit {
     }
 
     selectWorker(taskId: string, bidId: string) {
-        this.appService.acceptBid(taskId, bidId);
+        this.appService.selectWorker(taskId, bidId);
     }
 
     approveTask(taskId: string) {
@@ -316,5 +348,35 @@ export class CustomerDashboardComponent implements OnInit {
     handleReviewSubmit(event: any) {
         console.log('Review submitted:', event);
         this.showReviewModal = false;
+    }
+
+    openDisputeModal(taskId: string) {
+        this.disputeTaskId = taskId;
+        this.showDisputeModal = true;
+        this.disputeReason = '';
+    }
+
+    submitDispute() {
+        if (this.disputeReason.trim() && this.currentUser) {
+            const task = this.myTasks.find(t => t.id === this.disputeTaskId);
+            if (!task) {
+                console.error('Task not found for dispute');
+                return;
+            }
+            
+            // Respondent is the worker if task has one, otherwise it will be handled by backend
+            const respondentId = task.workerId || task.customerId;
+            
+            this.appService.createDispute({
+                taskId: this.disputeTaskId,
+                initiatorId: this.currentUser.id,
+                initiatorRole: UserRole.CUSTOMER,
+                respondentId: respondentId,
+                reason: this.disputeReason
+            });
+            this.showDisputeModal = false;
+            this.disputeReason = '';
+            this.router.navigate(['/disputes']);
+        }
     }
 }

@@ -273,6 +273,27 @@
                                 Release {{CURRENCY}}{{selectedTask.budgetMax}}
                             </button>
                         </div>
+
+                        <div *ngIf="selectedTask.status === TaskStatus.WORK_COMPLETED"
+                            class="bg-amber-50 p-6 rounded-3xl border-2 border-amber-200 shadow-xl">
+                            <div class="flex items-center text-amber-700 mb-4">
+                                <lucide-icon [img]="AlertCircle" class="w-6 h-6 mr-3"></lucide-icon>
+                                <p class="text-xs font-black uppercase tracking-widest">Action Required</p>
+                            </div>
+                            <p class="text-lg font-bold text-slate-900 mb-2">Worker has completed the task</p>
+                            <p class="text-sm text-slate-600 font-medium mb-6">Please verify the work and approve to release payment</p>
+                            <div class="flex gap-3">
+                                <button (click)="approveTask(selectedTask.id)"
+                                    class="flex-1 bg-emerald-600 text-white font-black py-4 rounded-xl hover:bg-emerald-700 transition-all shadow-lg flex items-center justify-center gap-2">
+                                    <lucide-icon [img]="CheckCircle" class="w-5 h-5"></lucide-icon>
+                                    Verify & Release {{CURRENCY}}{{selectedTask.budgetMax}}
+                                </button>
+                                <button (click)="openDisputeModal(selectedTask.id)"
+                                    class="px-6 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all">
+                                    Raise Issue
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="lg:col-span-2">
@@ -363,4 +384,51 @@
         (close)="showReviewModal = false"
         (submitted)="handleReviewSubmit($event)">
     </app-review-modal>
+
+    <!-- Dispute Modal -->
+    <div *ngIf="showDisputeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 relative animate-in fade-in zoom-in duration-300">
+            <button (click)="showDisputeModal = false" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors">
+                <lucide-icon [img]="X" class="w-6 h-6"></lucide-icon>
+            </button>
+            
+            <div class="flex items-center text-amber-600 mb-6">
+                <lucide-icon [img]="AlertCircle" class="w-8 h-8 mr-3"></lucide-icon>
+                <h2 class="text-2xl font-black text-slate-900">Raise an Issue</h2>
+            </div>
+            
+            <p class="text-slate-600 font-medium mb-6">
+                Please describe the issue with the completed work. Our team will review and assist in resolving the matter.
+            </p>
+            
+            <form (submit)="submitDispute(); $event.preventDefault()">
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Issue Description</label>
+                    <textarea 
+                        [(ngModel)]="disputeReason"
+                        name="reason"
+                        rows="4"
+                        required
+                        placeholder="Describe what went wrong..."
+                        class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-medium resize-none">
+                    </textarea>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button 
+                        type="button"
+                        (click)="showDisputeModal = false"
+                        class="flex-1 px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all">
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit"
+                        [disabled]="!disputeReason.trim()"
+                        class="flex-1 px-6 py-3 bg-amber-600 text-white font-bold rounded-xl hover:bg-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        Submit Issue
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>

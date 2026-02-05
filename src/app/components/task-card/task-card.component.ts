@@ -36,8 +36,9 @@ export class TaskCardComponent {
     readonly MessageSquare = MessageSquare;
     readonly ArrowRight = ArrowRight;
 
-    formatStatus(status: string) {
-        return status.replace(/_/g, ' ');
+    formatStatus(status: string | TaskStatus) {
+        const statusStr = String(status);
+        return statusStr.replace(/_/g, ' ');
     }
 
     formatDate(date: string) {

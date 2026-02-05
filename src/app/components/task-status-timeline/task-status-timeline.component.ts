@@ -293,8 +293,9 @@ export class TaskStatusTimelineComponent {
         return this.STATUS_DESCRIPTIONS[status] || 'Unknown status';
     }
 
-    formatStatus(status: string): string {
-        return status.replace(/_/g, ' ');
+    formatStatus(status: string | TaskStatus | number): string {
+        const statusStr = String(status);
+        return statusStr.replace(/_/g, ' ');
     }
 
     formatDate(date?: string): string {

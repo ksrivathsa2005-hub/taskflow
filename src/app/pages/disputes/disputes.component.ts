@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../app.service';
-import { Dispute, DisputeStatus, UserRole } from '../../types';
+import { Dispute, DisputeStatus, UserRole, TaskStatus } from '../../types';
 import { LucideAngularModule } from 'lucide-angular';
 import { ToastService } from '../../services/toast.service';
 
@@ -266,20 +266,35 @@ export class DisputesComponent implements OnInit {
     constructor(private appService: AppService) {}
 
     ngOnInit() {
+        console.log('Disputes component initializing...');
+        
         this.appService.currentUser$.subscribe(user => {
             if (user) {
+                console.log('Current user for disputes:', user);
                 this.currentUserId = user.id;
                 this.currentUserRole = user.role;
                 this.loadAvailableTasks();
             }
         });
 
+        // Load disputes from API if needed
+        console.log('Current disputes count:', this.appService.disputes.length);
+        if (this.appService.disputes.length === 0) {
+            console.log('No disputes loaded, calling loadDisputesFromApi()');
+            this.appService.loadDisputesFromApi();
+        }
+
         this.appService.disputes$.subscribe(disputes => {
-            this.disputes = disputes.filter(d => 
-                d.initiatorId === this.currentUserId || 
-                d.respondentId === this.currentUserId ||
-                this.currentUserRole === UserRole.ADMIN
-            );
+            console.log('Disputes updated:', disputes);
+            this.disputes = disputes.filter(d => {
+                const isInitiator = d.initiatorId === this.currentUserId;
+                const isRespondent = d.respondentId === this.currentUserId;
+                const isAdmin = this.currentUserRole === UserRole.ADMIN;
+                console.log(`Dispute ${d.id}: initiator=${isInitiator}, respondent=${isRespondent}, admin=${isAdmin}`);
+                return isInitiator || isRespondent || isAdmin;
+            });
+            console.log('Filtered disputes for user:', this.disputes);
+            
             if (this.disputes.length > 0 && !this.selectedDispute) {
                 this.selectDispute(this.disputes[0]);
             }
@@ -287,16 +302,24 @@ export class DisputesComponent implements OnInit {
     }
 
     loadAvailableTasks() {
-        // Get tasks based on user role
+        // Get tasks based on user role - only show tasks that can have disputes
         if (this.currentUserRole === UserRole.CUSTOMER) {
-            // Customers can see their posted tasks
+            // Customers can dispute tasks that are in progress, work completed, verified or completed
             this.availableTasks = this.appService.tasks.filter(t => 
-                t.customerId === this.currentUserId && (t.status === 'IN_PROGRESS' || t.status === 'COMPLETED')
+                t.customerId === this.currentUserId && 
+                (t.status === TaskStatus.IN_PROGRESS || 
+                 t.status === TaskStatus.WORK_COMPLETED ||
+                 t.status === TaskStatus.VERIFIED ||
+                 t.status === TaskStatus.COMPLETED)
             );
         } else if (this.currentUserRole === UserRole.WORKER) {
-            // Workers can see their assigned tasks
+            // Workers can dispute tasks they're assigned to
             this.availableTasks = this.appService.tasks.filter(t => 
-                t.workerId === this.currentUserId && (t.status === 'IN_PROGRESS' || t.status === 'COMPLETED')
+                t.workerId === this.currentUserId && 
+                (t.status === TaskStatus.IN_PROGRESS ||
+                 t.status === TaskStatus.WORK_COMPLETED ||
+                 t.status === TaskStatus.VERIFIED ||
+                 t.status === TaskStatus.COMPLETED)
             );
         }
     }
@@ -331,10 +354,21 @@ export class DisputesComponent implements OnInit {
             return;
         }
 
+        // Determine respondent: if customer is initiator, respondent is worker (if assigned)
+        // If worker is initiator, respondent is customer
+        let respondentId: string;
+        if (task.customerId === this.currentUserId) {
+            // Customer is initiator, worker is respondent (if task has worker)
+            respondentId = task.workerId || task.customerId; // Fallback to customer if no worker
+        } else {
+            // Worker is initiator, customer is respondent
+            respondentId = task.customerId;
+        }
+
         const disputeData = {
             taskId: this.newDisputeForm.taskId,
             initiatorId: this.currentUserId,
-            respondentId: task.customerId === this.currentUserId ? task.workerId : task.customerId,
+            respondentId: respondentId,
             reason: this.newDisputeForm.reason,
             issueType: this.newDisputeForm.issueType,
             evidence: this.newDisputeForm.evidence

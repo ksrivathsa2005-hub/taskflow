@@ -7,6 +7,7 @@ import { AppService } from '../../app.service';
 import { TaskCardComponent } from '../../components/task-card/task-card.component';
 import { PlatformActivityComponent } from '../../components/platform-activity/platform-activity.component';
 import { ToastService } from '../../services/toast.service';
+import { LocationApiService, City, Area } from '../../services/location-api.service';
 import { Task, TaskStatus, UserRole, User } from '../../types';
 import { CURRENCY } from '../../constants';
 import {
@@ -20,7 +21,9 @@ import {
     TrendingUp,
     DollarSign,
     X,
-    AlertCircle
+    AlertCircle,
+    MapPin,
+    Filter
 } from 'lucide-angular';
 import { Observable, map } from 'rxjs';
 
@@ -43,6 +46,15 @@ export class WorkerDashboardComponent implements OnInit {
     disputeReason: string = '';
     showEarningsTab = false;
 
+    // Location filter properties
+    showLocationFilter = false;
+    isLoadingLocation = false;
+    locationError = '';
+    selectedCityFilter = '';
+    selectedAreaFilter: string | null = null;
+    allCities: City[] = [];
+    filteredAreas: Area[] = [];
+
     readonly CURRENCY = CURRENCY;
     readonly TaskStatus = TaskStatus;
     readonly UserRole = UserRole;
@@ -57,8 +69,11 @@ export class WorkerDashboardComponent implements OnInit {
     readonly DollarSign = DollarSign;
     readonly X = X;
     readonly AlertCircle = AlertCircle;
+    readonly MapPin = MapPin;
+    readonly Filter = Filter;
 
     private toastService = inject(ToastService);
+    private locationApi = inject(LocationApiService);
 
     constructor(public appService: AppService, private router: Router) {
         this.availableTasks$ = this.appService.tasks$.pipe(
@@ -85,10 +100,23 @@ export class WorkerDashboardComponent implements OnInit {
             })
         );
         this.myActiveTask$ = this.appService.tasks$.pipe(
-            map(tasks => tasks.find(t => t.workerId === this.appService.currentUser?.id && (t.status === TaskStatus.ASSIGNED || t.status === TaskStatus.IN_PROGRESS)))
+            map(tasks => tasks.find(t => 
+                t.workerId === this.appService.currentUser?.id && 
+                (t.status === TaskStatus.ASSIGNED || 
+                 t.status === TaskStatus.CONFIRMED ||
+                 t.status === TaskStatus.TRAVELING ||
+                 t.status === TaskStatus.ARRIVED ||
+                 t.status === TaskStatus.IN_PROGRESS ||
+                 t.status === TaskStatus.WORK_COMPLETED)
+            ))
         );
         this.myCompletedTasks$ = this.appService.tasks$.pipe(
-            map(tasks => tasks.filter(t => t.workerId === this.appService.currentUser?.id && t.status === TaskStatus.COMPLETED))
+            map(tasks => tasks.filter(t => 
+                t.workerId === this.appService.currentUser?.id && 
+                (t.status === TaskStatus.VERIFIED || 
+                 t.status === TaskStatus.PAID || 
+                 t.status === TaskStatus.COMPLETED)
+            ))
         );
     }
 
@@ -194,4 +222,67 @@ export class WorkerDashboardComponent implements OnInit {
 
     getAverageRating(): number {
         return this.currentUser?.rating || 0;
-    }}
+    }
+
+    // Location filter methods
+    loadLocationFilter() {
+        this.showLocationFilter = true;
+        this.isLoadingLocation = true;
+        this.locationError = '';
+
+        this.locationApi.getPopularCities().subscribe({
+            next: (response) => {
+                this.allCities = response.data;
+                this.isLoadingLocation = false;
+            },
+            error: (error) => {
+                this.locationError = 'Failed to load cities';
+                this.isLoadingLocation = false;
+            }
+        });
+    }
+
+    onCitySelect(cityId: string) {
+        if (!cityId) {
+            this.filteredAreas = [];
+            this.selectedAreaFilter = null;
+            return;
+        }
+
+        this.isLoadingLocation = true;
+        this.locationApi.getAreas(cityId).subscribe({
+            next: (response) => {
+                this.filteredAreas = response.data;
+                this.isLoadingLocation = false;
+                this.selectedAreaFilter = null;
+            },
+            error: (error) => {
+                this.locationError = 'Failed to load areas';
+                this.isLoadingLocation = false;
+            }
+        });
+    }
+
+    filterByArea(areaName: string) {
+        this.selectedAreaFilter = areaName;
+    }
+
+    clearLocationFilter() {
+        this.showLocationFilter = false;
+        this.selectedCityFilter = '';
+        this.selectedAreaFilter = null;
+        this.filteredAreas = [];
+        this.locationError = '';
+    }
+
+    getFilteredTasks(tasks: Task[]): Task[] {
+        if (!this.selectedAreaFilter) {
+            return tasks;
+        }
+
+        return tasks.filter(task => {
+            const taskArea = task.location?.area?.toLowerCase();
+            return taskArea === this.selectedAreaFilter?.toLowerCase();
+        });
+    }
+}

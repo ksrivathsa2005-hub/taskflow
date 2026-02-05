@@ -1,8 +1,6 @@
-
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AppService } from '../../app.service';
-import { UserRole } from '../../types';
+import { Router } from '@angular/router';
 import { FEATURES, CATEGORIES } from '../../constants';
 import {
     LucideAngularModule,
@@ -30,7 +28,6 @@ import {
 export class LandingPageComponent {
     readonly FEATURES = FEATURES;
     readonly CATEGORIES = CATEGORIES;
-    readonly UserRole = UserRole;
 
     readonly ArrowRight = ArrowRight;
     readonly CheckCircle = CheckCircle;
@@ -57,15 +54,11 @@ export class LandingPageComponent {
         { label: 'Cities Covered', value: '12+' },
     ];
 
-    demoAccounts = [
-        { name: 'Rahul Kumar', role: UserRole.CUSTOMER, email: 'rahul@taskflow.com', badge: 'Customer' },
-        { name: 'Priya Singh', role: UserRole.WORKER, email: 'priya@taskflow.com', badge: 'Expert' },
-        { name: 'Admin User', role: UserRole.ADMIN, email: 'admin@taskflow.com', badge: 'Administrator' }
-    ];
+    constructor(
+        private router: Router
+    ) { }
 
-    constructor(private appService: AppService) { }
-
-    loginAsDemo(role: UserRole) {
-        this.appService.loginAs(role);
+    goToLogin() {
+        this.router.navigate(['/login']);
     }
 }
