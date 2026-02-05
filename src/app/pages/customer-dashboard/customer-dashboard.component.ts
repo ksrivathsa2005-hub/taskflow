@@ -10,6 +10,7 @@ import { PlatformActivityComponent } from '../../components/platform-activity/pl
 import { Task, TaskStatus, UserRole, Bid } from '../../types';
 import { STATUS_COLORS, CURRENCY } from '../../constants';
 import { SERVICE_CATEGORIES } from '../../service-categories';
+import { LocationApiService, City, Area } from '../../services/location-api.service';
 import {
     LucideAngularModule,
     Plus,
@@ -45,8 +46,18 @@ export class CustomerDashboardComponent implements OnInit {
     selectedCity = '';
     selectedArea = '';
     fullAddress = '';
-    availableCities: string[] = [];
-    availableAreas: string[] = [];
+    availableCities: City[] = [];
+    availableAreas: Area[] = [];
+    
+    private readonly STATES_LIST = [
+        { id: 'MH', name: 'Maharashtra' },
+        { id: 'DL', name: 'Delhi' },
+        { id: 'KA', name: 'Karnataka' },
+        { id: 'TN', name: 'Tamil Nadu' },
+        { id: 'TG', name: 'Telangana' },
+        { id: 'WB', name: 'West Bengal' },
+        { id: 'GJ', name: 'Gujarat' }
+    ];
     showReviewModal = false;
     reviewingWorkerId = '';
     reviewingTaskId = '';
@@ -72,19 +83,19 @@ export class CustomerDashboardComponent implements OnInit {
     readonly X = X;
     readonly Star = Star;
 
-    constructor(public appService: AppService, public router: Router) {}
+    constructor(
+        public appService: AppService, 
+        public router: Router,
+        private locationService: LocationApiService
+    ) {}
 
     ngOnInit() {
         this.appService.currentUser$.subscribe(user => {
             this.currentUser = user;
-            console.log('Customer Dashboard - Current User:', user);
         });
 
         this.appService.tasks$.subscribe(tasks => {
-            console.log('Customer Dashboard - All tasks:', tasks);
-            console.log('Customer Dashboard - Current user ID:', this.appService.currentUser?.id);
             this.myTasks = tasks.filter(t => t.customerId === this.appService.currentUser?.id);
-            console.log('Customer Dashboard - Filtered tasks:', this.myTasks);
         });
 
         // Force load tasks from API when component initializes
@@ -209,16 +220,7 @@ export class CustomerDashboardComponent implements OnInit {
 
     get customerTasks$(): Observable<Task[]> {
         return this.appService.tasks$.pipe(
-            map(tasks => {
-                console.log('customerTasks$ - All tasks from service:', tasks);
-                console.log('customerTasks$ - Current user ID:', this.appService.currentUser?.id);
-                const filtered = tasks.filter(t => {
-                    console.log('Task customerId:', t.customerId, 'User ID:', this.appService.currentUser?.id, 'Match:', t.customerId === this.appService.currentUser?.id);
-                    return t.customerId === this.appService.currentUser?.id;
-                });
-                console.log('customerTasks$ - Filtered tasks:', filtered);
-                return filtered;
-            })
+            map(tasks => tasks.filter(t => t.customerId === this.appService.currentUser?.id))
         );
     }
 
@@ -235,7 +237,7 @@ export class CustomerDashboardComponent implements OnInit {
     }
 
     get STATES() {
-        return ['Delhi', 'Maharashtra', 'Karnataka', 'Tamil Nadu', 'West Bengal'];
+        return this.STATES_LIST;
     }
 
     setSelectedTask(task: Task | null) {
@@ -260,16 +262,17 @@ export class CustomerDashboardComponent implements OnInit {
     onStateChange() {
         this.selectedCity = '';
         this.selectedArea = '';
+        this.availableAreas = [];
+        
         if (this.selectedState) {
-            // Mock cities for each state
-            const citiesMap: any = {
-                'Delhi': ['North Delhi', 'South Delhi', 'East Delhi', 'West Delhi'],
-                'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane'],
-                'Karnataka': ['Bangalore', 'Mysore', 'Mangalore', 'Hubli'],
-                'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli'],
-                'West Bengal': ['Kolkata', 'Howrah', 'Durgapur', 'Siliguri']
-            };
-            this.availableCities = citiesMap[this.selectedState] || [];
+            // Get all cities and filter by selected state
+            this.locationService.getPopularCities().subscribe(response => {
+                this.availableCities = response.data.filter(city => {
+                    const selectedStateObj = this.STATES_LIST.find(s => s.name === this.selectedState);
+                    return city.state === this.selectedState || 
+                           (selectedStateObj && city.state === selectedStateObj.name);
+                });
+            });
         } else {
             this.availableCities = [];
         }
@@ -278,8 +281,13 @@ export class CustomerDashboardComponent implements OnInit {
     onCityChange() {
         this.selectedArea = '';
         if (this.selectedCity) {
-            // Mock areas
-            this.availableAreas = ['Area 1', 'Area 2', 'Area 3', 'Area 4'];
+            // Find the city ID and get its areas
+            const selectedCityObj = this.availableCities.find(c => c.name === this.selectedCity);
+            if (selectedCityObj) {
+                this.locationService.getAreas(selectedCityObj.id).subscribe(response => {
+                    this.availableAreas = response.data;
+                });
+            }
         } else {
             this.availableAreas = [];
         }
@@ -294,6 +302,18 @@ export class CustomerDashboardComponent implements OnInit {
         const dateStr = formData.get('preferredDate') as string;
         const preferredDate = dateStr ? new Date(dateStr).toISOString() : new Date().toISOString();
         
+        // Find the selected area object to get pincode and coordinates
+        const selectedAreaObj = this.availableAreas.find(a => a.name === this.selectedArea);
+        const fullAddressValue = formData.get('fullAddress') as string || '';
+        
+        // Construct full address with all components
+        const addressParts = [];
+        if (fullAddressValue) addressParts.push(fullAddressValue);
+        if (this.selectedArea) addressParts.push(this.selectedArea);
+        if (this.selectedCity) addressParts.push(this.selectedCity);
+        if (this.selectedState) addressParts.push(this.selectedState);
+        if (selectedAreaObj?.pincode) addressParts.push(selectedAreaObj.pincode);
+        
         const taskData = {
             title: formData.get('title') as string,
             description: formData.get('description') as string,
@@ -305,16 +325,20 @@ export class CustomerDashboardComponent implements OnInit {
                 state: this.selectedState,
                 city: this.selectedCity,
                 area: this.selectedArea,
-                fullAddress: formData.get('fullAddress') as string
+                fullAddress: addressParts.join(', ')
             }
         };
 
+        console.log('Submitting task with location:', taskData.location);
         this.appService.postTask(taskData);
         this.isPostingTask = false;
         form.reset();
         this.selectedState = '';
         this.selectedCity = '';
         this.selectedArea = '';
+        this.fullAddress = '';
+        this.availableCities = [];
+        this.availableAreas = [];
     }
 
     get sortedBids(): Bid[] {

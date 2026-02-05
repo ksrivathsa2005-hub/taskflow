@@ -2,10 +2,17 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AppService } from '../app.service';
 import { UserRole } from '../types';
+import { firstValueFrom } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
-export const adminGuard: CanActivateFn = (route, state) => {
+export const adminGuard: CanActivateFn = async (route, state) => {
     const appService = inject(AppService);
     const router = inject(Router);
+    
+    // Wait for app initialization to complete
+    await firstValueFrom(
+        appService.initializationComplete$.pipe(filter(complete => complete === true))
+    );
     
     const currentUser = appService.currentUser;
     

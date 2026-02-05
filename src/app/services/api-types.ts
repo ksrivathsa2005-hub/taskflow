@@ -160,7 +160,7 @@ export interface ApiTask {
   createdDate: string;
   completionDate?: string;
   updatedDate: string;
-  location?: ApiTaskLocation;
+  location?: ApiTaskLocation | string; // Can be object or stringified JSON
   photos: ApiTaskPhoto[];
   bids: ApiBid[];
   progressUpdates: ApiProgressUpdate[];

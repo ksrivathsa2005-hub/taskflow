@@ -20,17 +20,66 @@ export class AppService {
     private tasksSubject = new BehaviorSubject<Task[]>([]);
     private usersSubject = new BehaviorSubject<User[]>([]);
     private disputesSubject = new BehaviorSubject<Dispute[]>([]);
+    private initializationComplete = new BehaviorSubject<boolean>(false);
 
     currentUser$ = this.currentUserSubject.asObservable();
     tasks$ = this.tasksSubject.asObservable();
     users$ = this.usersSubject.asObservable();
     disputes$ = this.disputesSubject.asObservable();
+    initializationComplete$ = this.initializationComplete.asObservable();
 
     private toastService = inject(ToastService);
     private apiService = inject(TaskFlowApiService);
 
     constructor(private mockApi: MockApiService, private router: Router) {
-        this.loadFromLocalStorage();
+        this.initializeApp();
+    }
+
+    private async initializeApp() {
+        if (USE_REAL_API) {
+            // Try to restore user session from token
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                console.log('Token found, restoring user session...');
+                try {
+                    const apiUser = await firstValueFrom(this.apiService.getCurrentUser());
+                    const localUser = ApiMapper.toLocalUser(apiUser);
+                    this.currentUserSubject.next(localUser);
+                    console.log('User session restored:', localUser);
+                    
+                    // Load user-specific data
+                    await this.loadTasksFromApi();
+                    await this.loadDisputesFromApi();
+                } catch (error) {
+                    console.error('Failed to restore user session:', error);
+                    // Token might be expired, clear it
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    this.currentUserSubject.next(null);
+                    
+                    // Only redirect if not already on login/register page
+                    const currentPath = window.location.pathname;
+                    if (!currentPath.includes('/login') && !currentPath.includes('/register') && currentPath !== '/') {
+                        this.router.navigate(['/']);
+                    }
+                }
+            } else {
+                console.log('No token found, user needs to login');
+                this.currentUserSubject.next(null);
+                
+                // Only redirect if trying to access protected route
+                const currentPath = window.location.pathname;
+                if (!currentPath.includes('/login') && !currentPath.includes('/register') && currentPath !== '/') {
+                    this.router.navigate(['/']);
+                }
+            }
+        } else {
+            // Mock mode - use localStorage
+            this.loadFromLocalStorage();
+        }
+        
+        // Mark initialization as complete
+        this.initializationComplete.next(true);
     }
 
     get currentUser() {
@@ -55,7 +104,20 @@ export class AppService {
             try {
                 const state: AppState = JSON.parse(saved);
                 this.currentUserSubject.next(state.currentUser);
-                this.tasksSubject.next(state.tasks);
+                
+                // Fix location data in tasks if it's stringified
+                const fixedTasks = state.tasks.map(task => {
+                    if (task.location && typeof task.location === 'string') {
+                        try {
+                            task.location = JSON.parse(task.location);
+                        } catch (e) {
+                            console.error('Failed to parse location for task:', task.id);
+                        }
+                    }
+                    return task;
+                });
+                
+                this.tasksSubject.next(fixedTasks);
                 this.usersSubject.next(state.users);
                 this.disputesSubject.next(state.disputes || []);
             } catch (error) {

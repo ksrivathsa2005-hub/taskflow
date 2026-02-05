@@ -67,7 +67,7 @@ export class ApiMapper {
 
   // ==================== ADDRESS MAPPING ====================
   
-  static toLocalAddress(apiLocation?: ApiTaskLocation): Address {
+  static toLocalAddress(apiLocation?: ApiTaskLocation | string): Address {
     if (!apiLocation) {
       return {
         state: '',
@@ -77,14 +77,32 @@ export class ApiMapper {
       };
     }
     
+    // Handle case where location comes as a stringified JSON object
+    let locationObj: ApiTaskLocation;
+    if (typeof apiLocation === 'string') {
+      try {
+        locationObj = JSON.parse(apiLocation);
+      } catch (error) {
+        console.error('Failed to parse location string:', apiLocation, error);
+        return {
+          state: '',
+          city: '',
+          area: '',
+          fullAddress: apiLocation
+        };
+      }
+    } else {
+      locationObj = apiLocation;
+    }
+    
     return {
-      state: apiLocation.state,
-      city: apiLocation.city,
-      area: apiLocation.area || '',
-      fullAddress: apiLocation.fullAddress,
-      coordinates: apiLocation.latitude && apiLocation.longitude ? {
-        latitude: apiLocation.latitude,
-        longitude: apiLocation.longitude
+      state: locationObj.state || '',
+      city: locationObj.city || '',
+      area: locationObj.area || '',
+      fullAddress: locationObj.fullAddress || '',
+      coordinates: locationObj.latitude && locationObj.longitude ? {
+        latitude: locationObj.latitude,
+        longitude: locationObj.longitude
       } : undefined
     };
   }

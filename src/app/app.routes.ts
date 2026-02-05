@@ -14,21 +14,22 @@ import { WorkerEarningsComponent } from './pages/worker-earnings/worker-earnings
 import { PostTaskComponent } from './pages/customer-dashboard/post-task/post-task.component';
 import { MyBookingsComponent } from './pages/customer-dashboard/my-bookings/my-bookings.component';
 import { adminGuard } from './guards/admin.guard';
+import { customerGuard, workerGuard, authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
     { path: '', component: LandingPageComponent },
     { path: 'login', component: LoginComponent },
     { path: 'admin-login', component: AdminLoginComponent },
-    { path: 'customer', component: CustomerDashboardComponent },
-    { path: 'customer/post-task', component: PostTaskComponent },
-    { path: 'customer/bookings', component: MyBookingsComponent },
-    { path: 'worker', component: WorkerDashboardComponent },
-    { path: 'worker/earnings', component: WorkerEarningsComponent },
+    { path: 'customer', component: CustomerDashboardComponent, canActivate: [customerGuard] },
+    { path: 'customer/post-task', component: PostTaskComponent, canActivate: [customerGuard] },
+    { path: 'customer/bookings', component: MyBookingsComponent, canActivate: [customerGuard] },
+    { path: 'worker', component: WorkerDashboardComponent, canActivate: [workerGuard] },
+    { path: 'worker/earnings', component: WorkerEarningsComponent, canActivate: [workerGuard] },
     { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
     { path: 'admin/users', component: UserManagementComponent, canActivate: [adminGuard] },
     { path: 'admin/reviews', component: TaskReviewComponent, canActivate: [adminGuard] },
     { path: 'admin/disputes', component: AdminDisputesComponent, canActivate: [adminGuard] },
-    { path: 'reviews', component: ReviewsComponent },
-    { path: 'disputes', component: DisputesComponent },
+    { path: 'reviews', component: ReviewsComponent, canActivate: [authGuard] },
+    { path: 'disputes', component: DisputesComponent, canActivate: [authGuard] },
     { path: '**', redirectTo: '' }
 ];
