@@ -361,6 +361,16 @@ export class CustomerDashboardComponent implements OnInit {
         this.appService.updateTaskStatus(taskId, TaskStatus.VERIFIED);
     }
 
+    makePayment(taskId: string) {
+        // Process payment directly without review
+        this.appService.updateTaskStatus(taskId, TaskStatus.PAID);
+        
+        // After a short delay, mark as completed
+        setTimeout(() => {
+            this.appService.updateTaskStatus(taskId, TaskStatus.COMPLETED);
+        }, 500);
+    }
+
     openReviewModal(taskId: string, workerId: string | null | undefined) {
         if (workerId) {
             this.reviewingTaskId = taskId;

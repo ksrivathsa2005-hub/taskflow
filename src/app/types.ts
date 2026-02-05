@@ -95,6 +95,7 @@ export interface Task {
     status: TaskStatus;
     budgetMin: number;
     budgetMax: number;
+    finalPrice?: number; // Actual price agreed upon (from accepted bid)
     preferredDate: string;
     photos: string[];
     bids: Bid[];

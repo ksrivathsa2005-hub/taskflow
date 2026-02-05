@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Star, X } from 'lucide-angular';
 import { ToastService } from '../../services/toast.service';
+import { AppService } from '../../app.service';
+import { TaskFlowApiService } from '../../services/taskflow-api.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-review-modal',
@@ -85,6 +88,8 @@ export class ReviewModalComponent {
     readonly X = X;
     
     private toastService = inject(ToastService);
+    private appService = inject(AppService);
+    private apiService = inject(TaskFlowApiService);
 
     setRating(value: number) {
         this.rating = value;
@@ -102,7 +107,7 @@ export class ReviewModalComponent {
         this.close.emit();
     }
 
-    submitReview() {
+    async submitReview() {
         this.showRatingError = this.rating === 0;
         this.showCommentError = !this.comment || this.comment.trim().length === 0;
 
@@ -113,62 +118,64 @@ export class ReviewModalComponent {
         this.isSubmitting = true;
 
         try {
-            // Get current reviews from localStorage or initialize empty array
-            const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+            const USE_REAL_API = true; // Match app.service setting
             
-            // Create new review object
-            const newReview = {
-                reviewId: 'review_' + Date.now(),
-                taskId: this.taskId,
-                workerId: this.workerId,
-                customerId: this.customerId,
-                rating: this.rating,
-                reviewText: this.comment,
-                timestamp: new Date().toISOString()
-            };
-
-            // Add to reviews array
-            existingReviews.push(newReview);
-            localStorage.setItem('reviews', JSON.stringify(existingReviews));
-
-            // Update worker's average rating in users array
-            const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-            const workerIndex = existingUsers.findIndex((u: any) => u.id === this.workerId);
-            
-            if (workerIndex >= 0) {
-                const worker = existingUsers[workerIndex];
-                const allReviewsForWorker = existingReviews.filter((r: any) => r.workerId === this.workerId);
-                const avgRating = allReviewsForWorker.reduce((sum: number, r: any) => sum + r.rating, 0) / allReviewsForWorker.length;
+            if (USE_REAL_API && this.apiService.isLoggedIn) {
+                // Submit review via API
+                console.log('Submitting review via API:', {
+                    taskId: this.taskId,
+                    revieweeId: this.workerId,
+                    rating: this.rating,
+                    comment: this.comment
+                });
                 
-                worker.rating = Math.round(avgRating * 10) / 10;
-                existingUsers[workerIndex] = worker;
-                localStorage.setItem('users', JSON.stringify(existingUsers));
-            }
-
-            // Update worker availability status
-            if (workerIndex >= 0) {
-                existingUsers[workerIndex].isBusy = false;
-                localStorage.setItem('users', JSON.stringify(existingUsers));
-            }
-
-            // Add platform activity
-            const customers = JSON.parse(localStorage.getItem('users') || '[]');
-            const customer = customers.find((u: any) => u.id === this.customerId);
-            const workerUser = customers.find((u: any) => u.id === this.workerId);
-            
-            if (customer && workerUser) {
-                const activity = {
-                    id: 'activity_' + Date.now(),
-                    type: 'review-given',
-                    message: `${customer.name} gave ${this.rating}-star review to ${workerUser.name}`,
-                    timestamp: new Date().toISOString(),
-                    icon: 'review-given',
-                    color: 'bg-rose-500'
+                const reviewRequest = {
+                    taskId: this.taskId,
+                    revieweeId: this.workerId,
+                    rating: this.rating,
+                    comment: this.comment
                 };
                 
-                const existingActivities = JSON.parse(localStorage.getItem('platformActivity') || '[]');
-                existingActivities.push(activity);
-                localStorage.setItem('platformActivity', JSON.stringify(existingActivities));
+                await firstValueFrom(this.apiService.createReview(reviewRequest));
+                console.log('Review submitted successfully via API');
+                
+                // Refresh tasks to get updated reviews
+                await this.appService.loadTasksFromApi();
+                
+                this.toastService.success('Review submitted successfully!');
+            } else {
+                // Mock mode - use localStorage
+                const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+                
+                const newReview = {
+                    reviewId: 'review_' + Date.now(),
+                    taskId: this.taskId,
+                    workerId: this.workerId,
+                    customerId: this.customerId,
+                    rating: this.rating,
+                    reviewText: this.comment,
+                    timestamp: new Date().toISOString()
+                };
+
+                existingReviews.push(newReview);
+                localStorage.setItem('reviews', JSON.stringify(existingReviews));
+
+                // Update worker's average rating
+                const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
+                const workerIndex = existingUsers.findIndex((u: any) => u.id === this.workerId);
+                
+                if (workerIndex >= 0) {
+                    const worker = existingUsers[workerIndex];
+                    const allReviewsForWorker = existingReviews.filter((r: any) => r.workerId === this.workerId);
+                    const avgRating = allReviewsForWorker.reduce((sum: number, r: any) => sum + r.rating, 0) / allReviewsForWorker.length;
+                    
+                    worker.rating = Math.round(avgRating * 10) / 10;
+                    worker.isBusy = false;
+                    existingUsers[workerIndex] = worker;
+                    localStorage.setItem('users', JSON.stringify(existingUsers));
+                }
+
+                this.toastService.success('Review submitted successfully!');
             }
 
             // Show success message
@@ -180,9 +187,9 @@ export class ReviewModalComponent {
                 this.closeModal();
             }, 1500);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error submitting review:', error);
-            this.toastService.error('Error submitting review. Please try again.');
+            this.toastService.error(error?.error?.message || 'Error submitting review. Please try again.');
             this.isSubmitting = false;
         }
     }

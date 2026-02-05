@@ -185,6 +185,7 @@ export class ApiMapper {
       status: this.toLocalTaskStatus(apiTask.status),
       budgetMin: apiTask.budgetMin,
       budgetMax: apiTask.budgetMax,
+      finalPrice: apiTask.finalPrice,
       preferredDate: apiTask.preferredDate,
       photos: apiTask.photos?.map(p => p.photoUrl) || [],
       bids: apiTask.bids?.map(b => this.toLocalBid(b)) || [],

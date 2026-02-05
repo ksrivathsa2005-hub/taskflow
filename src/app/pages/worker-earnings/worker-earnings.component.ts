@@ -165,7 +165,7 @@ interface Transaction {
                         </div>
                         <div class="border-b border-slate-100 pb-4">
                             <p class="text-sm text-slate-600 font-medium">Amount Earned</p>
-                            <p class="text-2xl font-black text-indigo-600">{{CURRENCY}}{{selectedReceiptTask.budgetMax}}</p>
+                            <p class="text-2xl font-black text-indigo-600">{{CURRENCY}}{{selectedReceiptTask.finalPrice || selectedReceiptTask.budgetMax}}</p>
                         </div>
                         <div class="border-b border-slate-100 pb-4">
                             <p class="text-sm text-slate-600 font-medium">Completion Date</p>
@@ -245,12 +245,12 @@ export class WorkerEarningsComponent implements OnInit {
         const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
         const thisWeekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-        this.totalEarnings = completedTasks.reduce((sum, task) => sum + (task.budgetMax || 0), 0);
+        this.totalEarnings = completedTasks.reduce((sum, task) => sum + (task.finalPrice || task.budgetMax || 0), 0);
         this.completedTasksCount = completedTasks.length;
 
         this.thisMonthEarnings = completedTasks
             .filter(t => new Date(t.completionDate || '') >= thisMonthStart)
-            .reduce((sum, task) => sum + (task.budgetMax || 0), 0);
+            .reduce((sum, task) => sum + (task.finalPrice || task.budgetMax || 0), 0);
         
         this.thisMonthTasksCount = completedTasks.filter(t => 
             new Date(t.completionDate || '') >= thisMonthStart
@@ -258,7 +258,7 @@ export class WorkerEarningsComponent implements OnInit {
 
         this.thisWeekEarnings = completedTasks
             .filter(t => new Date(t.completionDate || '') >= thisWeekStart)
-            .reduce((sum, task) => sum + (task.budgetMax || 0), 0);
+            .reduce((sum, task) => sum + (task.finalPrice || task.budgetMax || 0), 0);
         
         this.thisWeekTasksCount = completedTasks.filter(t => 
             new Date(t.completionDate || '') >= thisWeekStart
@@ -268,7 +268,7 @@ export class WorkerEarningsComponent implements OnInit {
         const inProgressTasks = this.appService.tasks.filter(
             t => t.workerId === this.currentUser?.id && t.status === TaskStatus.IN_PROGRESS
         );
-        this.pendingPayments = inProgressTasks.reduce((sum, task) => sum + (task.budgetMax || 0), 0);
+        this.pendingPayments = inProgressTasks.reduce((sum, task) => sum + (task.finalPrice || task.budgetMax || 0), 0);
 
         this.buildTransactionList();
     }
@@ -286,7 +286,7 @@ export class WorkerEarningsComponent implements OnInit {
                 date: task.completionDate || '',
                 taskTitle: task.title,
                 customerName: customer?.name || 'Unknown',
-                amount: task.budgetMax || 0,
+                amount: task.finalPrice || task.budgetMax || 0,
                 status: 'Paid',
                 taskId: task.id
             });
@@ -303,7 +303,7 @@ export class WorkerEarningsComponent implements OnInit {
                 date: new Date().toISOString(),
                 taskTitle: task.title,
                 customerName: customer?.name || 'Unknown',
-                amount: task.budgetMax || 0,
+                amount: task.finalPrice || task.budgetMax || 0,
                 status: 'Pending',
                 taskId: task.id
             });

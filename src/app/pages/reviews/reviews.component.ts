@@ -6,6 +6,9 @@ import { Review, Task, UserRole } from '../../types';
 import { LucideAngularModule } from 'lucide-angular';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { ToastService } from '../../services/toast.service';
+import { TaskFlowApiService } from '../../services/taskflow-api.service';
+import { ApiMapper } from '../../services/api-mapper';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-reviews',
@@ -70,51 +73,79 @@ import { ToastService } from '../../services/toast.service';
                 </div>
 
                 <!-- Reviews List -->
-                <div *ngIf="filteredReviews.length === 0" class="bg-white rounded-lg shadow-md p-12 text-center">
-                    <i data-lucide="star" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
-                    <p class="text-gray-600 text-lg">No reviews found</p>
+                <div *ngIf="isLoading" class="bg-white rounded-lg shadow-md p-12 text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                    <p class="text-gray-600 text-lg">Loading reviews...</p>
                 </div>
 
-                <div class="space-y-6">
-                    <div *ngFor="let review of filteredReviews" class="bg-white rounded-lg shadow-md p-6">
-                        <div class="flex justify-between items-start mb-4">
+                <div *ngIf="!isLoading && filteredReviews.length === 0" class="bg-white rounded-lg shadow-md p-12 text-center">
+                    <div class="text-gray-300 text-6xl mb-4">★</div>
+                    <p class="text-gray-600 text-lg font-semibold mb-2">No reviews found</p>
+                    <p class="text-gray-500 text-sm">Reviews will appear here when customers complete and rate tasks.</p>
+                </div>
+
+                <div *ngIf="!isLoading" class="space-y-6">"
+                    <div *ngFor="let review of filteredReviews" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                        <!-- Task Info Header -->
+                        <div class="mb-4 pb-4 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-bold text-lg text-gray-900">{{ getTaskTitle(review.taskId) }}</h3>
+                                    <p class="text-sm text-gray-500">Task #{{ review.taskId.substring(0, 8) }}...</p>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span *ngFor="let i of [1,2,3,4,5]" class="text-2xl" 
+                                        [class.text-yellow-400]="i <= review.rating"
+                                        [class.text-gray-300]="i > review.rating">★</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reviewer Info -->
+                        <div class="flex items-start gap-4 mb-4">
+                            <img [src]="getReviewerAvatar(review)" alt="{{ review.reviewerName }}" 
+                                class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">
                             <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-2">
-                                    <img [src]="getReviewerAvatar(review)" alt="{{ review.reviewerName }}" 
-                                        class="w-10 h-10 rounded-full object-cover">
+                                <div class="flex items-center justify-between mb-2">
                                     <div>
                                         <p class="font-semibold text-gray-900">{{ review.reviewerName }}</p>
-                                        <p class="text-sm text-gray-600">{{ review.createdDate | date: 'medium' }}</p>
+                                        <p class="text-sm text-gray-500">{{ review.createdDate | date: 'MMM d, y • h:mm a' }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-bold text-2xl text-gray-900">{{ review.rating }}</span>
+                                            <span class="text-gray-500">/5</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="flex items-center justify-end gap-1 mb-2">
-                                    <i data-lucide="star" class="w-5 h-5 fill-yellow-400 text-yellow-400"></i>
-                                    <span class="font-bold text-lg text-gray-900">{{ review.rating }}</span>
-                                    <span class="text-sm text-gray-600">/5</span>
+                                
+                                <!-- Review Comment -->
+                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                    <p class="text-gray-800 leading-relaxed">{{ review.comment || 'No comment provided' }}</p>
                                 </div>
-                                <p class="text-xs text-gray-500">Task #{{ review.taskId }}</p>
+
+                                <!-- Worker Info -->
+                                <div class="mt-3 text-sm text-gray-600">
+                                    <span class="font-medium">Worker:</span> {{ getWorkerName(review.revieweeId) }}
+                                </div>
                             </div>
                         </div>
 
-                        <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                            <p class="text-gray-800">{{ review.comment }}</p>
-                        </div>
-
-                        <div class="flex items-center justify-between text-sm">
+                        <!-- Action Buttons -->
+                        <div class="flex items-center justify-between text-sm pt-4 border-t border-gray-100">
                             <div class="flex gap-4">
-                                <button class="text-gray-600 hover:text-blue-600 flex items-center gap-1">
-                                    <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                                    <span>Helpful</span>
+                                <button class="text-gray-600 hover:text-blue-600 flex items-center gap-1 transition-colors">
+                                    <span>👍</span>
+                                    <span class="font-medium">Helpful</span>
                                 </button>
-                                <button class="text-gray-600 hover:text-red-600 flex items-center gap-1">
-                                    <i data-lucide="flag" class="w-4 h-4"></i>
-                                    <span>Report</span>
+                                <button class="text-gray-600 hover:text-red-600 flex items-center gap-1 transition-colors">
+                                    <span>🚩</span>
+                                    <span class="font-medium">Report</span>
                                 </button>
                             </div>
-                            <button *ngIf="canDelete(review)" (click)="deleteReview(review)" class="text-red-600 hover:text-red-800 flex items-center gap-1">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <button *ngIf="canDelete(review)" (click)="deleteReview(review)" 
+                                class="text-red-600 hover:text-red-800 flex items-center gap-1 font-medium transition-colors">
+                                <span>🗑️</span>
                                 <span>Delete</span>
                             </button>
                         </div>
@@ -135,26 +166,67 @@ export class ReviewsComponent implements OnInit {
     averageRating: number = 0;
     fiveStarCount: number = 0;
     lowStarCount: number = 0;
+    isLoading: boolean = false;
+
+    private apiService = inject(TaskFlowApiService);
 
     constructor(private appService: AppService) {}
 
     ngOnInit() {
+        console.log('Reviews component initialized');
+        console.log('Current user:', this.appService.currentUser);
         this.loadReviews();
+        
+        // Re-load reviews whenever tasks change (in case new reviews are added)
+        this.appService.tasks$.subscribe(() => {
+            console.log('Tasks changed, reloading reviews');
+            this.loadReviews();
+        });
     }
 
-    loadReviews() {
-        // Extract all reviews from all tasks
-        const tasks = this.appService.tasks;
-        this.allReviews = [];
+    async loadReviews() {
+        this.isLoading = true;
+        const USE_REAL_API = true; // Match app.service setting
+        
+        try {
+            if (USE_REAL_API && this.apiService.isLoggedIn) {
+                // Load reviews from API
+                console.log('Loading reviews from API...');
+                const currentUser = this.appService.currentUser;
+                const filters: any = {};
+                
+                // For workers, show their reviews
+                if (currentUser?.role === UserRole.WORKER) {
+                    filters.workerId = currentUser.id;
+                }
+                // For admins and customers, show all reviews
+                
+                const response = await firstValueFrom(this.apiService.getReviews(filters));
+                console.log('Reviews API response:', response);
+                
+                // Map API reviews to local format
+                this.allReviews = response.data.map(apiReview => ApiMapper.toLocalReview(apiReview));
+                console.log('Mapped reviews:', this.allReviews);
+            } else {
+                // Load reviews from tasks (mock mode)
+                const tasks = this.appService.tasks;
+                this.allReviews = [];
 
-        tasks.forEach(task => {
-            if (task.reviews && task.reviews.length > 0) {
-                this.allReviews.push(...task.reviews);
+                tasks.forEach(task => {
+                    if (task.reviews && task.reviews.length > 0) {
+                        this.allReviews.push(...task.reviews);
+                    }
+                });
             }
-        });
 
-        this.calculateStats();
-        this.applyFilter();
+            this.calculateStats();
+            this.applyFilter();
+        } catch (error) {
+            console.error('Error loading reviews:', error);
+            this.toastService.error('Failed to load reviews');
+        } finally {
+            this.isLoading = false;
+        }
     }
 
     calculateStats() {
@@ -205,6 +277,16 @@ export class ReviewsComponent implements OnInit {
     getReviewerAvatar(review: Review): string {
         const user = this.appService.users.find(u => u.id === review.reviewerId);
         return user ? user.avatar : 'https://picsum.photos/seed/user/200';
+    }
+
+    getTaskTitle(taskId: string): string {
+        const task = this.appService.tasks.find(t => t.id === taskId);
+        return task ? task.title : 'Unknown Task';
+    }
+
+    getWorkerName(workerId: string): string {
+        const worker = this.appService.users.find(u => u.id === workerId);
+        return worker ? worker.name : 'Unknown Worker';
     }
 
     private confirmService = inject(ConfirmDialogService);

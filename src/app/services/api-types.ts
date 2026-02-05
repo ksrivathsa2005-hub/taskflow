@@ -154,6 +154,7 @@ export interface ApiTask {
   status: ApiTaskStatus;
   budgetMin: number;
   budgetMax: number;
+  finalPrice?: number; // Actual price agreed upon (from accepted bid)
   preferredDate: string;
   checkInTime?: string;
   adminReviewNotes?: string;

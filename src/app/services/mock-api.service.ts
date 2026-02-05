@@ -343,7 +343,8 @@ export class MockApiService {
         const updates: Partial<Task> = {
             bids: updatedBids,
             status: TaskStatus.ASSIGNED,
-            workerId: bid.workerId
+            workerId: bid.workerId,
+            finalPrice: bid.amount // Store the accepted bid amount as finalPrice
         };
 
         // Mark worker as busy
