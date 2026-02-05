@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AppService } from '../../../app.service';
 import { ToastService } from '../../../services/toast.service';
+import { LocationApiService, City, Area } from '../../../services/location-api.service';
 import { SERVICE_CATEGORIES } from '../../../service-categories';
 import {
     LucideAngularModule,
@@ -16,7 +17,17 @@ import {
     CheckCircle2,
     Circle,
     Upload,
-    X
+    X,
+    Droplet,
+    Zap,
+    Hammer,
+    Paintbrush,
+    Trash2,
+    Wind,
+    Bug,
+    Leaf,
+    Lock,
+    Wrench
 } from 'lucide-angular';
 
 @Component({
@@ -95,19 +106,41 @@ import {
                             <!-- Task Title -->
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-2">Task Title *</label>
-                                <input [(ngModel)]="formData.title" name="title" placeholder="e.g., Fix leaky bathroom tap"
+                                <input [(ngModel)]="formData.title" 
+                                    name="title" 
+                                    placeholder="e.g., Fix leaky bathroom tap"
+                                    minlength="5"
+                                    maxlength="100"
+                                    #titleField="ngModel"
                                     class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                    [class.border-red-500]="titleField.invalid && titleField.touched"
                                     required>
+                                <p *ngIf="titleField.invalid && titleField.touched" class="mt-1 text-xs text-red-600">
+                                    <span *ngIf="titleField.errors?.['required']">Title is required</span>
+                                    <span *ngIf="titleField.errors?.['minlength']">Title must be at least 5 characters</span>
+                                </p>
                             </div>
 
                             <!-- Description -->
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-2">Description *</label>
-                                <textarea [(ngModel)]="formData.description" name="description" 
+                                <textarea [(ngModel)]="formData.description" 
+                                    name="description" 
                                     placeholder="Provide detailed information about your task..."
                                     rows="4"
+                                    minlength="20"
+                                    maxlength="1000"
+                                    #descField="ngModel"
                                     class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium resize-none"
+                                    [class.border-red-500]="descField.invalid && descField.touched"
                                     required></textarea>
+                                <div class="flex justify-between items-center mt-1">
+                                    <p *ngIf="descField.invalid && descField.touched" class="text-xs text-red-600">
+                                        <span *ngIf="descField.errors?.['required']">Description is required</span>
+                                        <span *ngIf="descField.errors?.['minlength']">Description must be at least 20 characters</span>
+                                    </p>
+                                    <p class="text-xs text-slate-500 ml-auto">{{formData.description.length}}/1000</p>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -121,28 +154,45 @@ import {
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-bold text-slate-700 mb-2">State *</label>
-                                    <input [(ngModel)]="formData.location.state" name="state" placeholder="e.g., Delhi"
+                                    <select [(ngModel)]="selectedState" 
+                                        name="state"
+                                        (change)="onStateChange()"
                                         class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
                                         required>
+                                        <option value="">-- Select State --</option>
+                                        <option *ngFor="let state of STATES_LIST" [value]="state.name">{{ state.name }}</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-slate-700 mb-2">City *</label>
-                                    <input [(ngModel)]="formData.location.city" name="city" placeholder="e.g., New Delhi"
-                                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                    <select [(ngModel)]="selectedCity" 
+                                        name="city"
+                                        (change)="onCityChange()"
+                                        [disabled]="!selectedState"
+                                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium disabled:bg-slate-100"
                                         required>
+                                        <option value="">-- Select City --</option>
+                                        <option *ngFor="let city of availableCities" [value]="city.name">{{ city.name }}</option>
+                                    </select>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-bold text-slate-700 mb-2">Area/Locality *</label>
-                                    <input [(ngModel)]="formData.location.area" name="area" placeholder="e.g., Connaught Place"
-                                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                    <select [(ngModel)]="selectedArea" 
+                                        name="area"
+                                        [disabled]="!selectedCity"
+                                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium disabled:bg-slate-100"
                                         required>
+                                        <option value="">-- Select Area --</option>
+                                        <option *ngFor="let area of availableAreas" [value]="area.name">{{ area.name }}</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-slate-700 mb-2">Preferred Date *</label>
                                     <input [(ngModel)]="formData.preferredDate" name="date" type="date"
+                                        [min]="getTodayDate()"
                                         class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
                                         required>
                                 </div>
@@ -151,7 +201,7 @@ import {
                             <!-- Full Address -->
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-2">Full Address</label>
-                                <textarea [(ngModel)]="formData.location.fullAddress" name="fullAddress"
+                                <textarea [(ngModel)]="fullAddress" name="fullAddress"
                                     placeholder="Apartment/Building, Street, Landmark (optional)"
                                     rows="3"
                                     class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium resize-none"></textarea>
@@ -169,14 +219,35 @@ import {
                                 <label class="block text-sm font-bold text-slate-700 mb-4">Budget Range (₹) *</label>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <input [(ngModel)]="formData.budgetMin" name="budgetMin" type="number" placeholder="Minimum budget"
+                                        <input [(ngModel)]="formData.budgetMin" 
+                                            name="budgetMin" 
+                                            type="number" 
+                                            placeholder="Minimum budget"
+                                            min="100"
+                                            max="100000"
+                                            #budgetMinField="ngModel"
                                             class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                            [class.border-red-500]="budgetMinField.invalid && budgetMinField.touched"
                                             required>
+                                        <p *ngIf="budgetMinField.invalid && budgetMinField.touched" class="mt-1 text-xs text-red-600">
+                                            Minimum budget required (₹100 - ₹100,000)
+                                        </p>
                                     </div>
                                     <div>
-                                        <input [(ngModel)]="formData.budgetMax" name="budgetMax" type="number" placeholder="Maximum budget"
+                                        <input [(ngModel)]="formData.budgetMax" 
+                                            name="budgetMax" 
+                                            type="number" 
+                                            placeholder="Maximum budget"
+                                            min="100"
+                                            max="100000"
+                                            #budgetMaxField="ngModel"
                                             class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                            [class.border-red-500]="budgetMaxField.invalid && budgetMaxField.touched || formData.budgetMax < formData.budgetMin"
                                             required>
+                                        <p *ngIf="(budgetMaxField.invalid && budgetMaxField.touched) || (formData.budgetMax < formData.budgetMin && budgetMaxField.touched)" class="mt-1 text-xs text-red-600">
+                                            <span *ngIf="budgetMaxField.errors?.['required']">Maximum budget required</span>
+                                            <span *ngIf="formData.budgetMax < formData.budgetMin && !budgetMaxField.errors?.['required']">Max must be greater than min</span>
+                                        </p>
                                     </div>
                                 </div>
                                 <p class="text-xs text-slate-500 mt-2 font-medium">
@@ -214,7 +285,7 @@ import {
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-indigo-700 font-semibold">Location:</span>
-                                        <span class="text-indigo-900 font-bold">{{ formData.location.city }}</span>
+                                        <span class="text-indigo-900 font-bold">{{ selectedArea || 'Not selected' }}, {{ selectedCity || 'Not selected' }}</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-indigo-700 font-semibold">Budget:</span>
@@ -257,12 +328,28 @@ export class PostTaskComponent implements OnInit {
         category: '',
         title: '',
         description: '',
-        location: { state: '', city: '', area: '', fullAddress: '' },
         preferredDate: '',
         budgetMin: 500,
         budgetMax: 2000,
         photos: [] as string[]
     };
+
+    selectedState = '';
+    selectedCity = '';
+    selectedArea = '';
+    fullAddress = '';
+    availableCities: City[] = [];
+    availableAreas: Area[] = [];
+    
+    readonly STATES_LIST = [
+        { id: 'MH', name: 'Maharashtra' },
+        { id: 'DL', name: 'Delhi' },
+        { id: 'KA', name: 'Karnataka' },
+        { id: 'TN', name: 'Tamil Nadu' },
+        { id: 'TG', name: 'Telangana' },
+        { id: 'WB', name: 'West Bengal' },
+        { id: 'GJ', name: 'Gujarat' }
+    ];
 
     SERVICE_CATEGORIES = SERVICE_CATEGORIES;
 
@@ -273,7 +360,11 @@ export class PostTaskComponent implements OnInit {
     readonly Upload = Upload;
     readonly X = X;
 
-    constructor(private appService: AppService, private router: Router) {}
+    constructor(
+        private appService: AppService, 
+        private router: Router,
+        private locationService: LocationApiService
+    ) {}
 
     ngOnInit() {}
 
@@ -283,21 +374,21 @@ export class PostTaskComponent implements OnInit {
 
     getCategoryIcon(categoryId: string): any {
         const category = SERVICE_CATEGORIES.find((c: any) => c.id === categoryId);
-        if (!category) return null;
-        // Map icon names to lucide icons
+        if (!category) return Circle;
+        // Map icon names to actual lucide icon imports
         const iconMap: any = {
-            'Droplet': 'Droplet',
-            'Zap': 'Zap',
-            'Hammer': 'Hammer',
-            'Paintbrush': 'Paintbrush',
-            'Trash2': 'Trash2',
-            'Wind': 'Wind',
-            'Bug': 'Bug',
-            'Leaf': 'Leaf',
-            'Lock': 'Lock',
-            'Wrench': 'Wrench'
+            'Droplet': Droplet,
+            'Zap': Zap,
+            'Hammer': Hammer,
+            'Paintbrush': Paintbrush,
+            'Trash2': Trash2,
+            'Wind': Wind,
+            'Bug': Bug,
+            'Leaf': Leaf,
+            'Lock': Lock,
+            'Wrench': Wrench
         };
-        return iconMap[category.icon];
+        return iconMap[category.icon] || Circle;
     }
 
     getCategoryName(categoryId: string): string {
@@ -330,13 +421,49 @@ export class PostTaskComponent implements OnInit {
             case 1:
                 return !!this.formData.category && !!this.formData.title && !!this.formData.description;
             case 2:
-                return !!this.formData.location.state && !!this.formData.location.city && 
-                       !!this.formData.location.area && !!this.formData.preferredDate;
+                return !!this.selectedState && !!this.selectedCity && 
+                       !!this.selectedArea && !!this.formData.preferredDate;
             case 3:
                 return this.formData.budgetMin > 0 && this.formData.budgetMax >= this.formData.budgetMin;
             default:
                 return true;
         }
+    }
+
+    onStateChange() {
+        this.selectedCity = '';
+        this.selectedArea = '';
+        this.availableAreas = [];
+        
+        if (this.selectedState) {
+            this.locationService.getPopularCities().subscribe(response => {
+                this.availableCities = response.data.filter(city => {
+                    const selectedStateObj = this.STATES_LIST.find(s => s.name === this.selectedState);
+                    return city.state === this.selectedState || 
+                           (selectedStateObj && city.state === selectedStateObj.name);
+                });
+            });
+        } else {
+            this.availableCities = [];
+        }
+    }
+
+    onCityChange() {
+        this.selectedArea = '';
+        if (this.selectedCity) {
+            const selectedCityObj = this.availableCities.find(c => c.name === this.selectedCity);
+            if (selectedCityObj) {
+                this.locationService.getAreas(selectedCityObj.id).subscribe(response => {
+                    this.availableAreas = response.data;
+                });
+            }
+        } else {
+            this.availableAreas = [];
+        }
+    }
+
+    getTodayDate(): string {
+        return new Date().toISOString().split('T')[0];
     }
 
     removePhoto(photo: string) {
@@ -351,9 +478,33 @@ export class PostTaskComponent implements OnInit {
             return;
         }
 
+        // Find the selected area object to get pincode and coordinates
+        const selectedAreaObj = this.availableAreas.find(a => a.name === this.selectedArea);
+        
+        // Construct full address with all components
+        const addressParts = [];
+        if (this.fullAddress) addressParts.push(this.fullAddress);
+        if (this.selectedArea) addressParts.push(this.selectedArea);
+        if (this.selectedCity) addressParts.push(this.selectedCity);
+        if (this.selectedState) addressParts.push(this.selectedState);
+        if (selectedAreaObj?.pincode) addressParts.push(selectedAreaObj.pincode);
+
         const taskData = {
-            ...this.formData,
-            customerId: this.appService.currentUser?.id || 'u1'
+            title: this.formData.title,
+            description: this.formData.description,
+            category: this.formData.category,
+            budgetMin: this.formData.budgetMin,
+            budgetMax: this.formData.budgetMax,
+            preferredDate: this.formData.preferredDate ? new Date(this.formData.preferredDate).toISOString() : new Date().toISOString(),
+            location: {
+                state: this.selectedState,
+                city: this.selectedCity,
+                area: this.selectedArea,
+                fullAddress: addressParts.join(', '),
+                pincode: selectedAreaObj?.pincode
+            },
+            customerId: this.appService.currentUser?.id || 'u1',
+            photos: this.formData.photos
         };
 
         this.appService.postTask(taskData);

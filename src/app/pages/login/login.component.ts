@@ -47,9 +47,19 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 name="name"
                 [(ngModel)]="formData.name"
                 required
+                minlength="3"
+                maxlength="50"
+                pattern="^[a-zA-Z\s]+$"
+                #nameField="ngModel"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                [class.border-red-500]="nameField.invalid && nameField.touched"
                 placeholder="Enter your full name"
               />
+              <p *ngIf="nameField.invalid && nameField.touched" class="mt-1 text-xs text-red-600">
+                <span *ngIf="nameField.errors?.['required']">Name is required</span>
+                <span *ngIf="nameField.errors?.['minlength']">Name must be at least 3 characters</span>
+                <span *ngIf="nameField.errors?.['pattern']">Name can only contain letters and spaces</span>
+              </p>
             </div>
 
             <!-- Email Field -->
@@ -61,9 +71,16 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 [(ngModel)]="formData.email"
                 required
                 email
+                pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                #emailField="ngModel"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                [class.border-red-500]="emailField.invalid && emailField.touched"
                 placeholder="Enter your email"
               />
+              <p *ngIf="emailField.invalid && emailField.touched" class="mt-1 text-xs text-red-600">
+                <span *ngIf="emailField.errors?.['required']">Email is required</span>
+                <span *ngIf="emailField.errors?.['email'] || emailField.errors?.['pattern']">Please enter a valid email address</span>
+              </p>
             </div>
 
             <!-- Password Field -->
@@ -75,10 +92,17 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 [(ngModel)]="formData.password"
                 required
                 minlength="6"
+                maxlength="50"
+                #passwordField="ngModel"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                [class.border-red-500]="passwordField.invalid && passwordField.touched"
                 placeholder="Enter your password"
               />
-              <p *ngIf="isRegisterMode" class="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
+              <p *ngIf="isRegisterMode && !passwordField.touched" class="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
+              <p *ngIf="passwordField.invalid && passwordField.touched" class="mt-1 text-xs text-red-600">
+                <span *ngIf="passwordField.errors?.['required']">Password is required</span>
+                <span *ngIf="passwordField.errors?.['minlength']">Password must be at least 6 characters</span>
+              </p>
             </div>
 
             <!-- Role Selection (Register Only) -->

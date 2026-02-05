@@ -6,7 +6,6 @@ import { AppService } from '../../app.service';
 import { TaskCardComponent } from '../../components/task-card/task-card.component';
 import { TaskStatusTimelineComponent } from '../../components/task-status-timeline/task-status-timeline.component';
 import { ReviewModalComponent } from '../../components/review-modal/review-modal.component';
-import { PlatformActivityComponent } from '../../components/platform-activity/platform-activity.component';
 import { Task, TaskStatus, UserRole, Bid } from '../../types';
 import { STATUS_COLORS, CURRENCY } from '../../constants';
 import { SERVICE_CATEGORIES } from '../../service-categories';
@@ -30,7 +29,7 @@ import { Observable, map } from 'rxjs';
 @Component({
     selector: 'app-customer-dashboard',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule, TaskCardComponent, TaskStatusTimelineComponent, ReviewModalComponent, PlatformActivityComponent],
+    imports: [CommonModule, FormsModule, LucideAngularModule, TaskCardComponent, TaskStatusTimelineComponent, ReviewModalComponent],
     templateUrl: './customer-dashboard.component.html',
     styleUrls: ['./customer-dashboard.component.css']
 })
@@ -97,6 +96,10 @@ export class CustomerDashboardComponent implements OnInit {
         this.appService.tasks$.subscribe(tasks => {
             this.myTasks = tasks.filter(t => t.customerId === this.appService.currentUser?.id);
         });
+    }
+
+    navigateToPostTask() {
+        this.router.navigate(['/customer/post-task']);
 
         // Force load tasks from API when component initializes
         this.appService.loadTasksFromApi();
@@ -380,7 +383,7 @@ export class CustomerDashboardComponent implements OnInit {
         this.disputeReason = '';
     }
 
-    submitDispute() {
+    async submitDispute() {
         if (this.disputeReason.trim() && this.currentUser) {
             const task = this.myTasks.find(t => t.id === this.disputeTaskId);
             if (!task) {
@@ -391,15 +394,18 @@ export class CustomerDashboardComponent implements OnInit {
             // Respondent is the worker if task has one, otherwise it will be handled by backend
             const respondentId = task.workerId || task.customerId;
             
-            this.appService.createDispute({
+            this.showDisputeModal = false;
+            this.disputeReason = '';
+            
+            await this.appService.createDispute({
                 taskId: this.disputeTaskId,
                 initiatorId: this.currentUser.id,
                 initiatorRole: UserRole.CUSTOMER,
                 respondentId: respondentId,
                 reason: this.disputeReason
             });
-            this.showDisputeModal = false;
-            this.disputeReason = '';
+            
+            // Navigate after dispute is created
             this.router.navigate(['/disputes']);
         }
     }

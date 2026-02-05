@@ -41,9 +41,16 @@ import { LucideAngularModule, Shield, Lock, Mail } from 'lucide-angular';
                                 name="email"
                                 [(ngModel)]="email"
                                 required
+                                email
+                                pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                                #emailField="ngModel"
                                 placeholder="admin@taskflow.com"
                                 class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-medium"
+                                [class.border-red-500]="emailField.invalid && emailField.touched"
                             />
+                            <p *ngIf="emailField.invalid && emailField.touched" class="mt-1 text-xs text-red-600">
+                                Please enter a valid admin email
+                            </p>
                         </div>
 
                         <!-- Password Field -->
@@ -57,9 +64,15 @@ import { LucideAngularModule, Shield, Lock, Mail } from 'lucide-angular';
                                 name="password"
                                 [(ngModel)]="password"
                                 required
+                                minlength="6"
+                                #passwordField="ngModel"
                                 placeholder="Enter admin password"
                                 class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-medium"
+                                [class.border-red-500]="passwordField.invalid && passwordField.touched"
                             />
+                            <p *ngIf="passwordField.invalid && passwordField.touched" class="mt-1 text-xs text-red-600">
+                                Password is required (minimum 6 characters)
+                            </p>
                         </div>
 
                         <!-- Login Button -->

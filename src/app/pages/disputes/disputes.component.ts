@@ -11,109 +11,157 @@ import { ToastService } from '../../services/toast.service';
     standalone: true,
     imports: [CommonModule, FormsModule, LucideAngularModule],
     template: `
-        <div class="p-6 bg-gray-50 min-h-screen">
-            <div class="max-w-6xl mx-auto">
+        <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 sm:p-6 lg:p-8">
+            <div class="max-w-7xl mx-auto">
                 <!-- Header with Create Button -->
-                <div class="flex justify-between items-center mb-8">
-                    <h1 class="text-3xl font-bold text-gray-900">Disputes</h1>
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Disputes</h1>
+                        <p class="text-slate-600 text-sm mt-1">Manage and resolve service disputes</p>
+                    </div>
                     <button *ngIf="currentUserRole !== 'ADMIN'" (click)="showCreateDisputeModal = true" 
-                        class="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                        class="flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:scale-105 transition-all duration-200">
                         <i data-lucide="alert-circle" class="w-5 h-5"></i>
                         Raise Dispute
                     </button>
                 </div>
 
                 <!-- No Disputes -->
-                <div *ngIf="disputes.length === 0" class="bg-white rounded-lg shadow-md p-12 text-center">
-                    <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mx-auto mb-4"></i>
-                    <p class="text-gray-600 text-lg">No disputes. All good!</p>
+                <div *ngIf="disputes.length === 0" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-12 text-center">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="check-circle" class="w-10 h-10 text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">All Clear!</h3>
+                    <p class="text-slate-600">No active disputes at the moment</p>
                 </div>
 
                 <!-- Disputes List -->
-                <div *ngIf="disputes.length > 0" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div *ngIf="disputes.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <!-- Disputes Sidebar -->
-                    <div class="lg:col-span-1">
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                            <div *ngFor="let dispute of disputes; let i = index"
-                                (click)="selectDispute(dispute)"
-                                class="p-4 border-b cursor-pointer transition-colors hover:bg-blue-50"
-                                [class.bg-blue-100]="selectedDispute?.id === dispute.id">
-                                <div class="flex items-start justify-between">
-                                    <div class="flex-1">
-                                        <h3 class="font-semibold text-gray-900">Dispute {{i + 1}}</h3>
-                                        <p class="text-xs text-gray-500 mt-1">{{dispute.taskId}}</p>
+                    <div class="lg:col-span-4 xl:col-span-3">
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden sticky top-6">
+                            <div class="p-4 border-b border-slate-100 bg-slate-50">
+                                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">All Disputes</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">{{disputes.length}} total</p>
+                            </div>
+                            <div class="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
+                                <div *ngFor="let dispute of disputes; let i = index"
+                                    (click)="selectDispute(dispute)"
+                                    class="p-4 cursor-pointer transition-all duration-200 hover:bg-slate-50 group"
+                                    [class.bg-blue-50]="selectedDispute?.id === dispute.id"
+                                    [class.border-l-4]="selectedDispute?.id === dispute.id"
+                                    [class.border-l-blue-600]="selectedDispute?.id === dispute.id">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1.5">
+                                                <div class="w-8 h-8 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center flex-shrink-0">
+                                                    <span class="text-xs font-bold text-slate-700">#{{i + 1}}</span>
+                                                </div>
+                                                <h4 class="font-semibold text-slate-900 text-sm truncate">Dispute #{{i + 1}}</h4>
+                                            </div>
+                                            <p class="text-xs text-slate-500 truncate pl-10">Task: {{dispute.taskId}}</p>
+                                            <p class="text-xs text-slate-400 mt-1 pl-10">{{dispute.messages.length || 0}} messages</p>
+                                        </div>
+                                        <span [class]="getStatusBadge(dispute.status)" class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide whitespace-nowrap flex-shrink-0">
+                                            {{dispute.status}}
+                                        </span>
                                     </div>
-                                    <span [class]="getStatusBadge(dispute.status)" class="px-2 py-1 rounded text-xs font-semibold">
-                                        {{dispute.status}}
-                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Dispute Details and Chat -->
-                    <div *ngIf="selectedDispute" class="lg:col-span-2">
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-[600px]">
+                    <div class="lg:col-span-8 xl:col-span-9">
+                        <div *ngIf="selectedDispute" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-[700px]">
                             <!-- Header -->
-                            <div class="border-b p-4 bg-gradient-to-r from-blue-50 to-indigo-50">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div>
-                                        <h2 class="text-xl font-bold text-gray-900">Dispute Details</h2>
-                                        <p class="text-sm text-gray-600 mt-1">Task: {{selectedDispute.taskId}}</p>
+                            <div class="border-b border-slate-100 p-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50">
+                                <div class="flex justify-between items-start gap-4 mb-4">
+                                    <div class="flex-1">
+                                        <h2 class="text-2xl font-black text-slate-900 mb-1">Dispute Details</h2>
+                                        <p class="text-sm text-slate-600">Task ID: <span class="font-mono font-semibold">{{selectedDispute.taskId}}</span></p>
                                     </div>
-                                    <span [class]="getStatusBadge(selectedDispute.status)" class="px-3 py-1 rounded-full text-sm font-semibold">
+                                    <span [class]="getStatusBadge(selectedDispute.status)" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm">
                                         {{selectedDispute.status}}
                                     </span>
                                 </div>
-                                <p class="text-sm text-gray-700 bg-white rounded p-3 mt-2">
-                                    <span class="font-semibold">Issue:</span> {{selectedDispute.reason}}
-                                </p>
+                                <div class="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-white/50 shadow-sm">
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Issue Reported</p>
+                                    <p class="text-sm text-slate-800 leading-relaxed">{{selectedDispute.reason}}</p>
+                                </div>
                             </div>
 
                             <!-- Messages -->
-                            <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                            <div class="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-br from-slate-50 to-white">
                                 <div *ngFor="let message of selectedDispute.messages"
-                                    class="flex"
-                                    [class.justify-end]="message.senderId === currentUserId"
-                                    [class.justify-start]="message.senderId !== currentUserId">
-                                    <div [class]="'max-w-xs px-4 py-2 rounded-lg'"
-                                        [class.bg-blue-500]="message.senderId === currentUserId"
+                                    class="flex items-end gap-2"
+                                    [class.flex-row-reverse]="message.senderId === currentUserId">
+                                    <!-- Avatar -->
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                                        [class.bg-blue-600]="message.senderId === currentUserId"
                                         [class.text-white]="message.senderId === currentUserId"
-                                        [class.bg-white]="message.senderId !== currentUserId"
-                                        [class.text-gray-900]="message.senderId !== currentUserId"
-                                        [class.border]="message.senderId !== currentUserId"
-                                        [class.border-gray-200]="message.senderId !== currentUserId">
-                                        <p class="text-xs font-semibold mb-1 opacity-75">{{message.senderName}}</p>
-                                        <p>{{message.message}}</p>
-                                        <p class="text-xs mt-1 opacity-60">{{message.timestamp | date: 'short'}}</p>
+                                        [class.bg-slate-300]="message.senderId !== currentUserId"
+                                        [class.text-slate-700]="message.senderId !== currentUserId">
+                                        {{message.senderName.charAt(0).toUpperCase()}}
+                                    </div>
+                                    <!-- Message Bubble -->
+                                    <div class="flex flex-col max-w-md"
+                                        [class.items-end]="message.senderId === currentUserId"
+                                        [class.items-start]="message.senderId !== currentUserId">
+                                        <div class="px-4 py-3 rounded-2xl shadow-sm"
+                                            [class.bg-gradient-to-br]="message.senderId === currentUserId"
+                                            [class.from-blue-600]="message.senderId === currentUserId"
+                                            [class.to-blue-700]="message.senderId === currentUserId"
+                                            [class.text-white]="message.senderId === currentUserId"
+                                            [class.bg-white]="message.senderId !== currentUserId"
+                                            [class.text-slate-900]="message.senderId !== currentUserId"
+                                            [class.border]="message.senderId !== currentUserId"
+                                            [class.border-slate-200]="message.senderId !== currentUserId">
+                                            <p class="text-xs font-bold mb-1"
+                                                [class.text-blue-100]="message.senderId === currentUserId"
+                                                [class.text-slate-500]="message.senderId !== currentUserId">
+                                                {{message.senderName}}
+                                            </p>
+                                            <p class="text-sm leading-relaxed">{{message.message}}</p>
+                                        </div>
+                                        <p class="text-[10px] text-slate-400 mt-1 px-1">{{message.timestamp | date: 'short'}}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Input Area -->
-                            <div class="border-t p-4 bg-white">
+                            <div class="border-t border-slate-100 p-6 bg-white">
                                 <div *ngIf="selectedDispute.status !== DisputeStatus.RESOLVED" class="space-y-3">
-                                    <textarea [(ngModel)]="newMessage" placeholder="Type your message..."
-                                        class="w-full border rounded-lg px-3 py-2 resize-none focus:ring-2 focus:ring-blue-500 outline-none"
+                                    <textarea [(ngModel)]="newMessage" 
+                                        name="message"
+                                        placeholder="Type your message..."
+                                        minlength="2"
+                                        maxlength="1000"
+                                        #messageField="ngModel"
+                                        class="w-full border border-slate-200 rounded-xl px-4 py-3 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+                                        [class.border-red-500]="messageField.invalid && messageField.touched"
                                         rows="2"></textarea>
+                                    <p *ngIf="messageField.invalid && messageField.touched" class="text-xs text-red-600">
+                                        Message must be at least 2 characters
+                                    </p>
                                     <div class="flex gap-2">
                                         <button (click)="sendMessage()" [disabled]="!newMessage.trim()"
-                                            class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-300">
+                                            class="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200">
                                             <i data-lucide="send" class="w-4 h-4"></i>
-                                            Send
+                                            Send Message
                                         </button>
                                         <button *ngIf="currentUserRole === 'ADMIN'" (click)="openResolveForm()"
-                                            class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                                            Resolve
+                                            class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 hover:scale-105 transition-all duration-200">
+                                            Mark Resolved
                                         </button>
                                     </div>
                                 </div>
-                                <div *ngIf="selectedDispute.status === DisputeStatus.RESOLVED" class="text-center py-4">
-                                    <div class="flex items-center justify-center gap-2 text-green-600">
-                                        <i data-lucide="check-circle" class="w-5 h-5"></i>
-                                        <span class="font-semibold">Dispute Resolved</span>
+                                <div *ngIf="selectedDispute.status === DisputeStatus.RESOLVED" class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 text-center border border-green-200">
+                                    <div class="flex items-center justify-center gap-2 text-green-700 mb-2">
+                                        <i data-lucide="check-circle" class="w-6 h-6"></i>
+                                        <span class="font-bold text-lg">Dispute Resolved</span>
                                     </div>
-                                    <p class="text-xs text-gray-600 mt-2">Admin Notes: {{selectedDispute.adminNotes}}</p>
+                                    <p class="text-sm text-green-600 bg-white/60 rounded-lg p-3 mt-3"><strong>Resolution:</strong> {{selectedDispute.adminNotes}}</p>
                                 </div>
                             </div>
                         </div>
@@ -122,38 +170,47 @@ import { ToastService } from '../../services/toast.service';
             </div>
 
             <!-- Create Dispute Modal -->
-            <div *ngIf="showCreateDisputeModal" class="fixed inset-0 z-[80] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
-                <div class="bg-white rounded-lg w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh]">
-                    <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
-                        <h3 class="text-lg font-bold">Raise a Dispute</h3>
-                        <button (click)="showCreateDisputeModal = false" class="text-gray-500 hover:text-gray-700">
-                            <i data-lucide="x" class="w-5 h-5"></i>
+            <div *ngIf="showCreateDisputeModal" class="fixed inset-0 z-[80] flex items-center justify-center px-4 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-200">
+                <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+                    <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-red-50 to-rose-50 sticky top-0 z-10">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-900">Raise a Dispute</h3>
+                            <p class="text-xs text-slate-600 mt-0.5">Submit your concern for admin review</p>
+                        </div>
+                        <button (click)="showCreateDisputeModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-colors">
+                            <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </div>
-                    <div class="p-6 space-y-4">
+                    <div class="p-6 space-y-5 overflow-y-auto">
                         <!-- Admin Availability Message -->
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <p class="text-sm text-blue-900"><strong>Admin Support:</strong> Admins are currently busy. Average response time: 5 minutes during business hours</p>
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+                            <div class="flex gap-3">
+                                <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="font-bold text-blue-900 text-sm">Admin Support Available</p>
+                                    <p class="text-xs text-blue-700 mt-1">Average response time: 5 minutes during business hours</p>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Task Selection -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Select Task *</label>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Select Task *</label>
                             <select [(ngModel)]="newDisputeForm.taskId" 
-                                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none">
+                                class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all bg-white text-sm">
                                 <option value="">-- Choose a task --</option>
                                 <option *ngFor="let task of availableTasks" [value]="task.id">
                                     {{task.title}} (ID: {{task.id}})
                                 </option>
                             </select>
-                            <p *ngIf="availableTasks.length === 0" class="text-sm text-gray-500 mt-2">No eligible tasks to raise disputes</p>
+                            <p *ngIf="availableTasks.length === 0" class="text-sm text-amber-600 mt-2 bg-amber-50 rounded-lg px-3 py-2 border border-amber-200">No eligible tasks to raise disputes</p>
                         </div>
 
                         <!-- Issue Type -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Issue Type *</label>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Issue Type *</label>
                             <select [(ngModel)]="newDisputeForm.issueType" 
-                                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none">
+                                class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all bg-white text-sm">
                                 <option value="">-- Select issue type --</option>
                                 <ng-container *ngIf="currentUserRole === 'CUSTOMER'">
                                     <option value="poor-quality">Poor Quality of Work</option>
@@ -172,61 +229,99 @@ import { ToastService } from '../../services/toast.service';
 
                         <!-- Description -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Description of Problem *</label>
-                            <textarea [(ngModel)]="newDisputeForm.reason" placeholder="Describe the issue in detail..."
-                                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none"
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Description of Problem *</label>
+                            <textarea [(ngModel)]="newDisputeForm.reason" 
+                                name="description"
+                                placeholder="Describe the issue in detail..."
+                                required
+                                minlength="20"
+                                maxlength="1000"
+                                #descriptionField="ngModel"
+                                class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm resize-none"
+                                [class.border-red-500]="descriptionField.invalid && descriptionField.touched"
                                 rows="4"></textarea>
+                            <div class="flex justify-between items-center mt-1">
+                                <p *ngIf="descriptionField.invalid && descriptionField.touched" class="text-xs text-red-600">
+                                    <span *ngIf="descriptionField.errors?.['required']">Description is required</span>
+                                    <span *ngIf="descriptionField.errors?.['minlength']">Please provide at least 20 characters</span>
+                                </p>
+                                <p class="text-xs text-slate-500 ml-auto">{{newDisputeForm.reason.length}}/1000</p>
+                            </div>
                         </div>
 
                         <!-- Evidence Upload -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Evidence (Optional)</label>
-                            <p class="text-xs text-gray-500 mb-2">Photos, screenshots, or documents supporting your claim</p>
-                            <input type="file" multiple accept="image/*,.pdf" 
-                                (change)="onEvidenceSelected($event)"
-                                class="w-full border rounded-lg px-3 py-2 text-sm">
-                            <div *ngIf="newDisputeForm.evidence && newDisputeForm.evidence.length > 0" class="mt-2">
-                                <p class="text-xs font-semibold text-gray-600 mb-1">Evidence files: {{newDisputeForm.evidence.length}}</p>
-                                <div class="flex flex-wrap gap-1">
-                                    <span *ngFor="let file of newDisputeForm.evidence" class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Upload Evidence (Optional)</label>
+                            <p class="text-xs text-slate-500 mb-2">Photos, screenshots, or documents supporting your claim</p>
+                            <div class="relative">
+                                <input type="file" multiple accept="image/*,.pdf" 
+                                    (change)="onEvidenceSelected($event)"
+                                    class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer">
+                            </div>
+                            <div *ngIf="newDisputeForm.evidence && newDisputeForm.evidence.length > 0" class="mt-3 bg-red-50 rounded-xl p-3 border border-red-100">
+                                <p class="text-xs font-bold text-red-900 mb-2">Attached files ({{newDisputeForm.evidence.length}})</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span *ngFor="let file of newDisputeForm.evidence" class="text-xs bg-white text-red-800 px-3 py-1.5 rounded-lg border border-red-200 font-medium">
                                         {{file}}
                                     </span>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Submit Button -->
-                        <div class="flex gap-2">
-                            <button (click)="createDispute()" [disabled]="!newDisputeForm.taskId || !newDisputeForm.issueType || !newDisputeForm.reason"
-                                class="flex-1 bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-300">
-                                Submit Dispute
-                            </button>
-                            <button (click)="showCreateDisputeModal = false" class="flex-1 bg-gray-300 text-gray-700 font-bold py-2 rounded-lg hover:bg-gray-400">
-                                Cancel
-                            </button>
-                        </div>
+                    <!-- Submit Button -->
+                    <div class="p-6 border-t border-slate-100 bg-slate-50 flex gap-3">
+                        <button (click)="createDispute()" [disabled]="!newDisputeForm.taskId || !newDisputeForm.issueType || !newDisputeForm.reason"
+                            class="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200">
+                            Submit Dispute
+                        </button>
+                        <button (click)="showCreateDisputeModal = false" class="flex-1 bg-white border-2 border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-200">
+                            Cancel
+                        </button>
                     </div>
                 </div>
             </div>
 
             <!-- Resolve Modal -->
-            <div *ngIf="showResolveModal && selectedDispute" class="fixed inset-0 z-[70] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
-                <div class="bg-white rounded-lg w-full max-w-md shadow-2xl">
-                    <div class="px-6 py-4 border-b flex justify-between items-center">
-                        <h3 class="text-lg font-bold">Resolve Dispute</h3>
-                        <button (click)="showResolveModal = false" class="text-gray-500 hover:text-gray-700">
-                            <i data-lucide="x" class="w-5 h-5"></i>
+            <div *ngIf="showResolveModal && selectedDispute" class="fixed inset-0 z-[70] flex items-center justify-center px-4 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-200">
+                <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                    <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-green-50 to-emerald-50">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-900">Resolve Dispute</h3>
+                            <p class="text-xs text-slate-600 mt-0.5">Mark this dispute as resolved</p>
+                        </div>
+                        <button (click)="showResolveModal = false" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-colors">
+                            <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </div>
                     <div class="p-6 space-y-4">
-                        <textarea [(ngModel)]="resolutionNotes" placeholder="Resolution notes..."
-                            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none"
-                            rows="4"></textarea>
-                        <div class="flex gap-2">
-                            <button (click)="confirmResolve()" class="flex-1 bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700">
-                                Confirm
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Resolution Notes</label>
+                            <textarea [(ngModel)]="resolutionNotes" 
+                                name="resolution"
+                                placeholder="Explain how this dispute was resolved..."
+                                required
+                                minlength="10"
+                                maxlength="500"
+                                #resolutionField="ngModel"
+                                class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all text-sm resize-none"
+                                [class.border-red-500]="resolutionField.invalid && resolutionField.touched"
+                                rows="4"></textarea>
+                            <div class="flex justify-between items-center mt-1">
+                                <p *ngIf="resolutionField.invalid && resolutionField.touched" class="text-xs text-red-600">
+                                    <span *ngIf="resolutionField.errors?.['required']">Resolution notes are required</span>
+                                    <span *ngIf="resolutionField.errors?.['minlength']">Please provide at least 10 characters</span>
+                                </p>
+                                <p class="text-xs text-slate-500 ml-auto">{{resolutionNotes.length}}/500</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button (click)="confirmResolve()" 
+                                [disabled]="resolutionField.invalid"
+                                class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                                Confirm Resolution
                             </button>
-                            <button (click)="showResolveModal = false" class="flex-1 bg-gray-300 text-gray-700 font-bold py-2 rounded-lg hover:bg-gray-400">
+                            <button (click)="showResolveModal = false" class="flex-1 bg-white border-2 border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-200">
                                 Cancel
                             </button>
                         </div>
@@ -407,13 +502,13 @@ export class DisputesComponent implements OnInit {
     getStatusBadge(status: DisputeStatus): string {
         switch (status) {
             case DisputeStatus.PENDING:
-                return 'bg-yellow-100 text-yellow-800';
+                return 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-200';
             case DisputeStatus.IN_PROGRESS:
-                return 'bg-blue-100 text-blue-800';
+                return 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200';
             case DisputeStatus.RESOLVED:
-                return 'bg-green-100 text-green-800';
+                return 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gradient-to-r from-slate-100 to-gray-100 text-slate-800 border border-slate-200';
         }
     }
 }

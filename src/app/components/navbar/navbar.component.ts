@@ -91,6 +91,27 @@ export class NavbarComponent {
     toggleDropdown() {
         this.showDropdown = !this.showDropdown;
     }
+
+    navigateToDashboard() {
+        const currentUser = this.appService.currentUser;
+        if (currentUser) {
+            switch (currentUser.role) {
+                case UserRole.CUSTOMER:
+                    this.router.navigate(['/customer']);
+                    break;
+                case UserRole.WORKER:
+                    this.router.navigate(['/worker']);
+                    break;
+                case UserRole.ADMIN:
+                    this.router.navigate(['/admin']);
+                    break;
+                default:
+                    this.router.navigate(['/']);
+            }
+        } else {
+            this.router.navigate(['/']);
+        }
+    }
 }
 
 
