@@ -13,6 +13,7 @@ import { AdminDisputesComponent } from './pages/admin-dashboard/disputes.compone
 import { WorkerEarningsComponent } from './pages/worker-earnings/worker-earnings.component';
 import { PostTaskComponent } from './pages/customer-dashboard/post-task/post-task.component';
 import { MyBookingsComponent } from './pages/customer-dashboard/my-bookings/my-bookings.component';
+import { PreviousBookingsComponent } from './pages/customer-dashboard/previous-bookings/previous-bookings.component';
 import { adminGuard } from './guards/admin.guard';
 import { customerGuard, workerGuard, authGuard } from './guards/auth.guard';
 
@@ -23,6 +24,7 @@ export const routes: Routes = [
     { path: 'customer', component: CustomerDashboardComponent, canActivate: [customerGuard] },
     { path: 'customer/post-task', component: PostTaskComponent, canActivate: [customerGuard] },
     { path: 'customer/bookings', component: MyBookingsComponent, canActivate: [customerGuard] },
+    { path: 'customer/previous-bookings', component: PreviousBookingsComponent, canActivate: [customerGuard] },
     { path: 'worker', component: WorkerDashboardComponent, canActivate: [workerGuard] },
     { path: 'worker/earnings', component: WorkerEarningsComponent, canActivate: [workerGuard] },
     { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },

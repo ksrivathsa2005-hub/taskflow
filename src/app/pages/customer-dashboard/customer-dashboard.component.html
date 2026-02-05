@@ -5,7 +5,7 @@
             <p class="text-slate-500 mt-2 font-medium">Hello, {{currentUser?.name}}. You have {{(customerTasks$ |
                 async)?.length || 0}} active service requests.</p>
         </div>
-        <button (click)="isPostingTask = true"
+        <button (click)="navigateToPostTask()"
             class="flex items-center justify-center bg-indigo-600 text-white font-black py-4 px-8 rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95 group">
             <lucide-icon [img]="Plus" class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform"></lucide-icon>
             Create New Request
@@ -22,7 +22,7 @@
                 <h3 class="text-2xl font-black text-slate-900">No requests found</h3>
                 <p class="text-slate-500 max-w-sm mx-auto mt-3 font-medium">Post your first task to connect with
                     Indian's top service experts.</p>
-                <button (click)="isPostingTask = true"
+                <button (click)="navigateToPostTask()"
                     class="mt-8 text-indigo-600 font-bold flex items-center mx-auto hover:underline">
                     Start now <lucide-icon [img]="ChevronRight" class="ml-1 w-4 h-4"></lucide-icon>
                 </button>
@@ -110,118 +110,6 @@
         </div>
     </div>
 
-    <!-- Platform Activity Widget -->
-    <div class="mt-16">
-        <app-platform-activity></app-platform-activity>
-    </div>
-
-    <div *ngIf="isPostingTask"
-        class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
-        <div
-            class="bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                <div>
-                    <h2 class="text-2xl font-black text-slate-900">Post a Request</h2>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Get custom bids from
-                        experts</p>
-                </div>
-                <button (click)="isPostingTask = false"
-                    class="bg-slate-50 p-2 rounded-xl text-slate-400 hover:text-slate-600">
-                    <lucide-icon [img]="X"></lucide-icon>
-                </button>
-            </div>
-            <form (submit)="handleSubmitTask($event)" class="p-8 overflow-y-auto max-h-[80vh]">
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Short
-                            Title</label>
-                        <input name="title" required placeholder="e.g. AC Installation in living room"
-                            class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none font-medium" />
-                    </div>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
-                            <label
-                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Category</label>
-                            <select name="category"
-                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium">
-                                <option *ngFor="let c of CATEGORIES" [value]="c.id">{{c.name}}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Service
-                                Date</label>
-                            <input type="date" name="date" required
-                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium" />
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Job
-                            Description</label>
-                        <textarea name="description" rows="3" required placeholder="Detailed requirements..."
-                            class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium"></textarea>
-                    </div>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
-                            <label
-                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">State</label>
-                            <select [(ngModel)]="selectedState" (change)="onStateChange()" name="state"
-                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium">
-                                <option value="">Select State</option>
-                                <option *ngFor="let state of STATES" [value]="state.name">{{ state.name }}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">City</label>
-                            <select [(ngModel)]="selectedCity" (change)="onCityChange()" name="city" [disabled]="!selectedState"
-                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium disabled:bg-slate-100 disabled:cursor-not-allowed">
-                                <option value="">Select City</option>
-                                <option *ngFor="let city of availableCities" [value]="city.name">{{ city.name }}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
-                            <label
-                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Area</label>
-                            <select [(ngModel)]="selectedArea" name="area" [disabled]="!selectedCity"
-                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium disabled:bg-slate-100 disabled:cursor-not-allowed">
-                                <option value="">Select Area</option>
-                                <option *ngFor="let area of availableAreas" [value]="area.name">{{ area.name }} - {{ area.pincode }}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Full Address</label>
-                            <input [(ngModel)]="fullAddress" name="fullAddress" required placeholder="Complete address with street, zip code"
-                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none font-medium" />
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
-                            <label
-                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Min
-                                Budget ({{CURRENCY}})</label>
-                            <input type="number" name="budgetMin" required
-                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium" />
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Max
-                                Budget ({{CURRENCY}})</label>
-                            <input type="number" name="budgetMax" required
-                                class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none font-medium" />
-                        </div>
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl hover:bg-black transition-all mt-4 shadow-xl">
-                        Launch Project
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <!-- Task Details Modal -->
     <div *ngIf="selectedTask"
@@ -432,7 +320,7 @@
                 Please describe the issue with the completed work. Our team will review and assist in resolving the matter.
             </p>
             
-            <form (submit)="submitDispute(); $event.preventDefault()">
+            <form (submit)="submitDispute(); $event.preventDefault()" #disputeForm="ngForm">
                 <div class="mb-6">
                     <label class="block text-sm font-bold text-slate-700 mb-2">Issue Description</label>
                     <textarea 
@@ -440,9 +328,20 @@
                         name="reason"
                         rows="4"
                         required
+                        minlength="10"
+                        maxlength="500"
+                        #reasonField="ngModel"
                         placeholder="Describe what went wrong..."
-                        class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-medium resize-none">
+                        class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-medium resize-none"
+                        [class.border-red-500]="reasonField.invalid && reasonField.touched">
                     </textarea>
+                    <div class="flex justify-between items-center mt-1">
+                        <p *ngIf="reasonField.invalid && reasonField.touched" class="text-xs text-red-600">
+                            <span *ngIf="reasonField.errors?.['required']">Issue description is required</span>
+                            <span *ngIf="reasonField.errors?.['minlength']">Please provide at least 10 characters</span>
+                        </p>
+                        <p class="text-xs text-slate-500 ml-auto">{{disputeReason.length}}/500</p>
+                    </div>
                 </div>
                 
                 <div class="flex gap-3">
@@ -454,7 +353,7 @@
                     </button>
                     <button 
                         type="submit"
-                        [disabled]="!disputeReason.trim()"
+                        [disabled]="!disputeForm.valid"
                         class="flex-1 px-6 py-3 bg-amber-600 text-white font-bold rounded-xl hover:bg-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                         Submit Issue
                     </button>

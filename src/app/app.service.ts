@@ -602,9 +602,9 @@ export class AppService {
     }
 
     // Dispute Operations
-    createDispute(disputeData: any): void {
+    async createDispute(disputeData: any): Promise<void> {
         if (USE_REAL_API) {
-            this.createDisputeApi(disputeData);
+            await this.createDisputeApi(disputeData);
         } else {
             const newDispute = this.mockApi.createDispute(disputeData);
             this.disputesSubject.next(this.mockApi.getAllDisputes());
@@ -620,8 +620,11 @@ export class AppService {
             
             // Reload all disputes
             await this.loadDisputesFromApi();
+            
+            // Reload tasks to get updated status
+            await this.loadTasksFromApi();
+            
             this.toastService.success('Dispute created successfully');
-            this.router.navigate(['/disputes']);
         } catch (error: any) {
             console.error('Error creating dispute:', error);
             this.toastService.error(error.error?.message || 'Failed to create dispute');

@@ -5,11 +5,8 @@ import { AppService } from '../../app.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { User, UserRole, UserStatus } from '../../types';
-import { CategorySelectorComponent } from '../../components/category-selector/category-selector.component';
 import {
     LucideAngularModule,
-    Plus,
-    X,
     CheckCircle,
     XCircle
 } from 'lucide-angular';
@@ -17,111 +14,13 @@ import {
 @Component({
     selector: 'app-user-management',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule, CategorySelectorComponent],
+    imports: [CommonModule, FormsModule, LucideAngularModule],
     template: `
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <!-- Header -->
-            <div class="flex justify-between items-center mb-8">
-                <div>
-                    <h1 class="text-4xl font-black text-slate-900 tracking-tight">User Management</h1>
-                    <p class="text-slate-500 mt-2 font-medium">Manage all platform users</p>
-                </div>
-                <button (click)="showAddUserForm = !showAddUserForm"
-                        class="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 font-bold shadow-lg">
-                    <lucide-icon [img]="Plus" class="w-5 h-5"></lucide-icon>
-                    Add New User
-                </button>
-            </div>
-
-            <!-- Add User Form Modal -->
-            <div *ngIf="showAddUserForm" class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
-                <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                    <div class="px-8 py-6 border-b border-slate-100 sticky top-0 bg-white">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-2xl font-black text-slate-900">Create New User</h2>
-                            <button (click)="showAddUserForm = false" type="button" class="text-slate-400 hover:text-slate-600">
-                                <lucide-icon [img]="X" class="w-6 h-6"></lucide-icon>
-                            </button>
-                        </div>
-                    </div>
-
-                    <form (ngSubmit)="addUser()" class="p-8 space-y-6">
-                        <!-- User Type Selection -->
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-4">User Type</label>
-                            <div class="flex gap-6">
-                                <label class="flex items-center gap-3 cursor-pointer">
-                                    <input [(ngModel)]="newUser.role" name="role" type="radio" value="CUSTOMER" class="w-4 h-4">
-                                    <span class="text-slate-700 font-medium">Customer</span>
-                                </label>
-                                <label class="flex items-center gap-3 cursor-pointer">
-                                    <input [(ngModel)]="newUser.role" name="role" type="radio" value="WORKER" class="w-4 h-4">
-                                    <span class="text-slate-700 font-medium">Worker</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Basic Info -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Full Name *</label>
-                                <input [(ngModel)]="newUser.name" name="name" placeholder="John Doe"
-                                    class="w-full px-4 py-3 border border-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Email *</label>
-                                <input [(ngModel)]="newUser.email" name="email" type="email" placeholder="john@example.com"
-                                    class="w-full px-4 py-3 border border-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Password *</label>
-                                <input [(ngModel)]="newUser.password" name="password" type="password" placeholder="••••••••"
-                                    class="w-full px-4 py-3 border border-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Phone</label>
-                                <input [(ngModel)]="newUser.phone" name="phone" placeholder="+91-9876543210"
-                                    class="w-full px-4 py-3 border border-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-                            </div>
-                        </div>
-
-                        <!-- Address -->
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Address</label>
-                            <input [(ngModel)]="newUser.address" name="address" placeholder="Full address"
-                                class="w-full px-4 py-3 border border-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-                        </div>
-
-                        <!-- Worker-Specific Fields -->
-                        <div *ngIf="newUser.role === 'WORKER'" class="border-t border-slate-100 pt-6 space-y-6">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Years of Experience</label>
-                                <input [(ngModel)]="newUser.experience" name="experience" type="number" min="0" placeholder="5"
-                                    class="w-full px-4 py-3 border border-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-                            </div>
-
-                            <!-- Category Selection -->
-                            <app-category-selector 
-                                [(selectedCategories)]="newUser.selectedCategories"
-                                [maxSelections]="3"
-                                label="Select Service Categories (Max 3)"
-                                (selectionChanged)="onCategoriesChanged($event)">
-                            </app-category-selector>
-                        </div>
-
-                        <!-- Buttons -->
-                        <div class="flex gap-4 pt-6 border-t border-slate-100">
-                            <button type="submit" 
-                                class="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg">
-                                Create User
-                            </button>
-                            <button type="button" (click)="showAddUserForm = false"
-                                class="flex-1 bg-slate-100 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-200 transition-all">
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            <div class="mb-8">
+                <h1 class="text-4xl font-black text-slate-900 tracking-tight">User Management</h1>
+                <p class="text-slate-500 mt-2 font-medium">Manage all platform users</p>
             </div>
 
             <!-- Filters -->
@@ -251,21 +150,7 @@ export class UserManagementComponent implements OnInit {
     filterRole: string = '';
     filterStatus: string = '';
     searchTerm: string = '';
-    showAddUserForm = false;
 
-    newUser = {
-        name: '',
-        email: '',
-        password: '',
-        role: 'CUSTOMER',
-        phone: '',
-        address: '',
-        experience: 0,
-        selectedCategories: [] as string[]
-    };
-
-    readonly Plus = Plus;
-    readonly X = X;
     readonly CheckCircle = CheckCircle;
     readonly XCircle = XCircle;
 
@@ -291,50 +176,6 @@ export class UserManagementComponent implements OnInit {
 
     private toastService = inject(ToastService);
     private confirmService = inject(ConfirmDialogService);
-
-    async addUser() {
-        if (!this.newUser.name || !this.newUser.email || !this.newUser.password) {
-            this.toastService.error('Name, email, and password are required');
-            return;
-        }
-
-        if (this.newUser.role === 'WORKER' && this.newUser.selectedCategories.length === 0) {
-            this.toastService.error('Please select at least one service category for the worker');
-            return;
-        }
-
-        const userData = {
-            name: this.newUser.name,
-            email: this.newUser.email,
-            password: this.newUser.password,
-            phone: this.newUser.phone || undefined,
-            address: this.newUser.address || undefined,
-            role: this.newUser.role,
-            avatar: `https://picsum.photos/seed/${this.newUser.email}/200`,
-            categories: this.newUser.role === 'WORKER' ? this.newUser.selectedCategories : undefined,
-            experience: this.newUser.role === 'WORKER' ? this.newUser.experience : undefined
-        };
-
-        this.appService.createUser(userData);
-        
-        // Reset form
-        this.newUser = {
-            name: '',
-            email: '',
-            password: '',
-            role: 'CUSTOMER',
-            phone: '',
-            address: '',
-            experience: 0,
-            selectedCategories: []
-        };
-        this.showAddUserForm = false;
-        this.toastService.success('User created successfully!');
-    }
-
-    onCategoriesChanged(categories: string[]) {
-        this.newUser.selectedCategories = categories;
-    }
 
     verifyUser(user: User) {
         this.appService.verifyUser(user.id);
