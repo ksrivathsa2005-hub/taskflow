@@ -116,6 +116,36 @@ export class MockApiService {
                 progressUpdates: [],
                 reviews: [],
                 createdDate: '2026-02-02'
+            },
+            {
+                id: 'task_3',
+                title: 'Kitchen Tap Repair',
+                description: 'Kitchen tap is leaking and needs replacement.',
+                category: 'Plumbing',
+                location: delhiAddress,
+                customerId: 'u1',
+                workerId: 'u2',
+                workerName: 'Mike Plumber',
+                status: TaskStatus.COMPLETED,
+                budgetMin: 400,
+                budgetMax: 1200,
+                preferredDate: '2025-01-20',
+                photos: [],
+                bids: [],
+                progressUpdates: [],
+                reviews: [
+                    {
+                        id: 'rev_1',
+                        taskId: 'task_3',
+                        reviewerId: 'u1',
+                        reviewerName: 'Sarah Customer',
+                        rating: 5,
+                        comment: 'Mike did a great job fixing the tap!',
+                        createdDate: '2025-01-21',
+                        revieweeId: 'u2'
+                    }
+                ],
+                createdDate: '2025-01-18'
             }
         ];
     }

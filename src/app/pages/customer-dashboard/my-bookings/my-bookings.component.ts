@@ -6,6 +6,7 @@ import { ToastService } from '../../../services/toast.service';
 import { Task, TaskStatus } from '../../../types';
 import { STATUS_COLORS, CURRENCY } from '../../../constants';
 import { TaskStatusTimelineComponent } from '../../../components/task-status-timeline/task-status-timeline.component';
+import { ReviewModalComponent } from '../../../components/review-modal/review-modal.component';
 import {
     LucideAngularModule,
     MapPin,
@@ -24,7 +25,7 @@ import {
 @Component({
     selector: 'app-my-bookings',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule, TaskStatusTimelineComponent],
+    imports: [CommonModule, FormsModule, LucideAngularModule, TaskStatusTimelineComponent, ReviewModalComponent],
     template: `
         <div class="min-h-screen bg-gradient-to-b from-slate-50 to-white">
             <!-- Header -->
@@ -152,27 +153,42 @@ import {
                             </div>
 
                             <!-- Action Buttons -->
-                            <div class="p-6 flex items-center justify-between gap-3">
+                            <div class="p-6 flex items-center justify-between gap-4">
                                 <button *ngIf="task.status === TaskStatus.WORK_COMPLETED"
                                     (click)="approveTask(task)"
-                                    class="flex-1 bg-emerald-600 text-white px-4 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-bold flex items-center justify-center gap-2">
+                                    class="flex-1 bg-emerald-600 text-white px-6 py-4 rounded-2xl hover:bg-emerald-700 transition-all font-black flex items-center justify-center gap-2 shadow-lg shadow-emerald-100">
                                     <lucide-icon [img]="CheckCircle2" class="w-5 h-5"></lucide-icon>
                                     Approve Work
                                 </button>
-                                <button class="flex-1 bg-slate-100 text-slate-700 px-4 py-3 rounded-lg hover:bg-slate-200 transition-colors font-bold">
+                                <button *ngIf="task.status !== TaskStatus.COMPLETED && task.status !== TaskStatus.CANCELLED"
+                                    class="flex-1 bg-slate-100 text-slate-700 px-6 py-4 rounded-2xl hover:bg-slate-200 transition-all font-black">
                                     Cancel Booking
                                 </button>
-                                <button *ngIf="task.status === TaskStatus.COMPLETED && !hasReviewed(task)"
-                                    (click)="leaveReview(task)"
-                                    class="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-bold">
-                                    Leave Review
+                                <button *ngIf="(task.status === TaskStatus.COMPLETED || task.status === TaskStatus.PAID || task.status === TaskStatus.VERIFIED) && !hasReviewed(task)"
+                                    (click)="openReviewModal(task)"
+                                    class="flex-1 bg-indigo-600 text-white px-6 py-4 rounded-2xl hover:bg-indigo-700 transition-all font-black shadow-lg shadow-indigo-100">
+                                    Rate Professional
                                 </button>
+                                <div *ngIf="hasReviewed(task)" class="flex-1 bg-indigo-50 text-indigo-700 px-6 py-4 rounded-2xl font-black text-center flex items-center justify-center gap-2 border border-indigo-100">
+                                    <lucide-icon [img]="Star" class="w-5 h-5 fill-indigo-600"></lucide-icon>
+                                    Already Reviewed
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Review Modal -->
+        <app-review-modal
+            [showModal]="showReviewModal"
+            [taskId]="selectedTask?.id || ''"
+            [workerId]="selectedTask?.workerId || ''"
+            [customerId]="appService.currentUser?.id || ''"
+            (close)="closeReviewModal()"
+            (submitted)="onReviewSubmitted()">
+        </app-review-modal>
     `,
     styles: []
 })
@@ -181,6 +197,9 @@ export class MyBookingsComponent implements OnInit {
     tabs = ['All', 'Active', 'Pending', 'Completed', 'Cancelled'];
     expandedTaskId: string | null = null;
     myTasks: Task[] = [];
+
+    showReviewModal = false;
+    selectedTask: Task | null = null;
 
     readonly TaskStatus = TaskStatus;
     readonly STATUS_COLORS = STATUS_COLORS;
@@ -269,20 +288,24 @@ export class MyBookingsComponent implements OnInit {
         this.toastService.success('Work approved! Payment processing...');
     }
 
-    leaveReview(task: Task) {
-        const rating = prompt('Rate the worker (1-5):', '5');
-        const reviewText = prompt('Share your feedback:');
-        
-        if (rating && reviewText) {
-            this.appService.submitReview(task.id, {
-                rating: parseInt(rating),
-                text: reviewText,
-                customerId: this.appService.currentUser?.id
-            });
-        }
+    openReviewModal(task: Task) {
+        this.selectedTask = task;
+        this.showReviewModal = true;
+    }
+
+    closeReviewModal() {
+        this.showReviewModal = false;
+        this.selectedTask = null;
+    }
+
+    onReviewSubmitted() {
+        this.showReviewModal = false;
+        this.selectedTask = null;
+        // The modal itself handles the API call and task refresh
     }
 
     hasReviewed(task: Task): boolean {
-        return (task.reviews || []).some((r: any) => r.customerId === this.appService.currentUser?.id);
+        const currentUserId = this.appService.currentUser?.id;
+        return (task.reviews || []).some((r: any) => r.reviewerId === currentUserId);
     }
 }
