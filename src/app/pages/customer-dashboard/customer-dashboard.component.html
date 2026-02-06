@@ -189,7 +189,7 @@
                             <p class="text-lg font-bold mb-6">Partner on-site since {{selectedTask.checkInTime}}</p>
                             <button (click)="approveTask(selectedTask.id)"
                                 class="w-full bg-white text-indigo-600 font-black py-4 rounded-xl hover:bg-slate-50 transition-all shadow-lg">
-                                Release {{CURRENCY}}{{selectedTask.budgetMax}}
+                                Release {{CURRENCY}}{{selectedTask.finalPrice || selectedTask.budgetMax}}
                             </button>
                         </div>
 
@@ -205,7 +205,7 @@
                                 <button (click)="approveTask(selectedTask.id)"
                                     class="flex-1 bg-emerald-600 text-white font-black py-4 rounded-xl hover:bg-emerald-700 transition-all shadow-lg flex items-center justify-center gap-2">
                                     <lucide-icon [img]="CheckCircle" class="w-5 h-5"></lucide-icon>
-                                    Verify & Release {{CURRENCY}}{{selectedTask.budgetMax}}
+                                    Verify & Release {{CURRENCY}}{{selectedTask.finalPrice || selectedTask.budgetMax}}
                                 </button>
                                 <button (click)="openDisputeModal(selectedTask.id)"
                                     class="px-6 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all">

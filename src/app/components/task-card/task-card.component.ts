@@ -22,6 +22,7 @@ import {
 export class TaskCardComponent {
     @Input() task!: Task;
     @Input() role!: UserRole;
+    @Input() currentUserId?: string;
     @Output() select = new EventEmitter<void>();
     @Output() bid = new EventEmitter<void>();
 
@@ -51,5 +52,10 @@ export class TaskCardComponent {
 
     onBidClick() {
         this.bid.emit();
+    }
+
+    hasAlreadyBid(): boolean {
+        if (!this.currentUserId) return false;
+        return this.task.bids.some(bid => bid.workerId === this.currentUserId);
     }
 }

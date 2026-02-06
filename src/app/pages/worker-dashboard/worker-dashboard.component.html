@@ -223,6 +223,69 @@
                 </div>
             </div>
 
+            <!-- Category Filter Section -->
+            <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-3xl p-6 border-2 border-violet-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-violet-600 p-3 rounded-xl">
+                            <lucide-icon [img]="Briefcase" class="w-6 h-6 text-white"></lucide-icon>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900">Filter Tasks by Category</h3>
+                            <p class="text-sm text-slate-600 font-medium">Choose a service type</p>
+                        </div>
+                    </div>
+                    <button 
+                        (click)="toggleCategoryFilter()"
+                        class="bg-violet-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-violet-700 transition-all shadow-lg flex items-center gap-2">
+                        <lucide-icon [img]="Filter" class="w-5 h-5"></lucide-icon>
+                        <span>{{ showCategoryFilter ? 'Hide' : 'Show' }} Categories</span>
+                    </button>
+                </div>
+
+                <!-- Category Selection -->
+                <div *ngIf="showCategoryFilter" class="space-y-4">
+                    <!-- Clear Filter Button -->
+                    <div class="flex items-center justify-between">
+                        <label class="block text-sm font-semibold text-slate-700">Select Category</label>
+                        <button *ngIf="selectedCategoryFilter"
+                            (click)="filterByCategory(null)"
+                            class="text-sm font-semibold text-violet-600 hover:text-violet-700 flex items-center gap-1">
+                            <lucide-icon [img]="X" class="w-4 h-4"></lucide-icon>
+                            Clear Filter
+                        </button>
+                    </div>
+                    
+                    <!-- Categories Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        <button *ngFor="let category of serviceCategories"
+                            (click)="filterByCategory(category.name)"
+                            [class.ring-4]="selectedCategoryFilter === category.name"
+                            [class.ring-violet-300]="selectedCategoryFilter === category.name"
+                            [class]="category.color"
+                            class="p-4 rounded-xl border-2 border-transparent hover:border-violet-400 transition-all text-center font-medium">
+                            <div class="flex flex-col items-center gap-2">
+                                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                                    <span class="text-2xl">🔧</span>
+                                </div>
+                                <p class="font-bold text-xs">{{ category.name }}</p>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Active Filter Badge -->
+                    <div *ngIf="selectedCategoryFilter" class="mt-4">
+                        <div class="inline-flex items-center gap-2 bg-violet-600 text-white font-bold px-4 py-2 rounded-xl">
+                            <lucide-icon [img]="Briefcase" class="w-4 h-4"></lucide-icon>
+                            <span>Filtering: {{ selectedCategoryFilter }}</span>
+                            <button (click)="filterByCategory(null)" class="ml-2 hover:bg-violet-700 rounded-full p-1">
+                                <lucide-icon [img]="X" class="w-4 h-4"></lucide-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <section>
                 <div class="flex items-end justify-between mb-8">
                     <div>
@@ -244,10 +307,11 @@
                                 class="col-span-full py-32 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
                                 <lucide-icon [img]="MapPin" class="w-16 h-16 text-slate-300 mx-auto mb-4"></lucide-icon>
                                 <p class="text-slate-400 font-black">
-                                    {{ selectedAreaFilter ? 'No tasks found in this area' : 'Scanning for new tasks...' }}
+                                    {{ (selectedAreaFilter || selectedCategoryFilter) ? 'No tasks found matching your filters' : 'Scanning for new tasks...' }}
                                 </p>
                             </div>
                             <app-task-card *ngFor="let task of filteredTasks" [task]="task" [role]="UserRole.WORKER"
+                                [currentUserId]="currentUser?.id"
                                 (bid)="!currentUser?.isBusy && setBiddingOn(task)"></app-task-card>
                         </ng-container>
                     </ng-container>
@@ -317,7 +381,8 @@
                             <label
                                 class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Your
                                 Quote ({{CURRENCY}})</label>
-                            <input name="amount" type="number" required [defaultValue]="biddingOn.budgetMax"
+                            <input name="amount" type="number" required placeholder="Enter your quote"
+                                [min]="biddingOn.budgetMin" [max]="biddingOn.budgetMax"
                                 class="w-full px-5 py-3.5 rounded-xl bg-slate-50 border border-slate-100 outline-none focus:ring-2 focus:ring-indigo-500" />
                         </div>
                         <div>

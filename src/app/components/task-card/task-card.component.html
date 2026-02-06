@@ -52,9 +52,14 @@
             Review <lucide-icon [img]="ArrowRight" class="ml-1 w-4 h-4"></lucide-icon>
         </button>
 
-        <button *ngIf="role === UserRole.WORKER && task.status === TaskStatus.POSTED" (click)="onBidClick()"
+        <button *ngIf="role === UserRole.WORKER && (task.status === TaskStatus.POSTED || task.status === TaskStatus.BIDDING) && !hasAlreadyBid()" (click)="onBidClick()"
             class="text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-100 active:scale-95">
             Send Bid
         </button>
+        
+        <span *ngIf="role === UserRole.WORKER && hasAlreadyBid()"
+            class="text-xs font-black text-emerald-600 bg-emerald-50 px-5 py-2.5 rounded-xl">
+            Bid Submitted
+        </span>
     </div>
 </div>

@@ -10,6 +10,7 @@ import { ToastService } from '../../services/toast.service';
 import { LocationApiService, City, Area } from '../../services/location-api.service';
 import { Task, TaskStatus, UserRole, User } from '../../types';
 import { CURRENCY } from '../../constants';
+import { SERVICE_CATEGORIES } from '../../service-categories';
 import {
     LucideAngularModule,
     Search,
@@ -54,6 +55,11 @@ export class WorkerDashboardComponent implements OnInit {
     selectedAreaFilter: string | null = null;
     allCities: City[] = [];
     filteredAreas: Area[] = [];
+
+    // Category filter properties
+    showCategoryFilter = false;
+    selectedCategoryFilter: string | null = null;
+    serviceCategories = SERVICE_CATEGORIES;
 
     readonly CURRENCY = CURRENCY;
     readonly TaskStatus = TaskStatus;
@@ -211,7 +217,7 @@ export class WorkerDashboardComponent implements OnInit {
         const completedTasks = this.appService.tasks.filter(
             t => t.workerId === this.currentUser?.id && t.status === TaskStatus.COMPLETED
         );
-        return completedTasks.reduce((sum, task) => sum + (task.budgetMax || 0), 0);
+        return completedTasks.reduce((sum, task) => sum + (task.finalPrice || task.budgetMax || 0), 0);
     }
 
     getCompletedJobsCount(): number {
@@ -276,13 +282,41 @@ export class WorkerDashboardComponent implements OnInit {
     }
 
     getFilteredTasks(tasks: Task[]): Task[] {
-        if (!this.selectedAreaFilter) {
-            return tasks;
+        let filtered = tasks;
+
+        // Filter by location
+        if (this.selectedAreaFilter) {
+            filtered = filtered.filter(task => {
+                const taskArea = task.location?.area?.toLowerCase();
+                return taskArea === this.selectedAreaFilter?.toLowerCase();
+            });
         }
 
-        return tasks.filter(task => {
-            const taskArea = task.location?.area?.toLowerCase();
-            return taskArea === this.selectedAreaFilter?.toLowerCase();
-        });
+        // Filter by category
+        if (this.selectedCategoryFilter) {
+            filtered = filtered.filter(task => {
+                const taskCategory = task.category?.toLowerCase();
+                return taskCategory === this.selectedCategoryFilter?.toLowerCase();
+            });
+        }
+        
+        return filtered;
+    }
+
+    // Category filter methods
+    toggleCategoryFilter() {
+        this.showCategoryFilter = !this.showCategoryFilter;
+        if (!this.showCategoryFilter) {
+            this.selectedCategoryFilter = null;
+        }
+    }
+
+    filterByCategory(categoryName: string | null) {
+        this.selectedCategoryFilter = categoryName;
+    }
+
+    clearCategoryFilter() {
+        this.selectedCategoryFilter = null;
+        this.showCategoryFilter = false;
     }
 }
