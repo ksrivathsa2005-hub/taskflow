@@ -81,7 +81,7 @@ export class WorkerDashboardComponent implements OnInit {
     private toastService = inject(ToastService);
     private locationApi = inject(LocationApiService);
 
-    constructor(public appService: AppService, private router: Router) {
+    constructor(public appService: AppService, public router: Router) {
         this.availableTasks$ = this.appService.tasks$.pipe(
             map(tasks => {
                 // Filter by status

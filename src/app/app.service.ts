@@ -152,6 +152,18 @@ export class AppService {
         this.saveToLocalStorage();
     }
 
+    updateCurrentUser(updates: Partial<User>) {
+        const currentUser = this.currentUserSubject.value;
+        if (currentUser) {
+            const updatedUser = { ...currentUser, ...updates };
+            this.setCurrentUser(updatedUser);
+            // Also update localStorage
+            if (USE_REAL_API) {
+                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            }
+        }
+    }
+
     loginAs(role: UserRole) {
         if (USE_REAL_API) {
             // For API mode, would need proper login with email/password

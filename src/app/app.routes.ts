@@ -14,6 +14,9 @@ import { WorkerEarningsComponent } from './pages/worker-earnings/worker-earnings
 import { PostTaskComponent } from './pages/customer-dashboard/post-task/post-task.component';
 import { MyBookingsComponent } from './pages/customer-dashboard/my-bookings/my-bookings.component';
 import { PreviousBookingsComponent } from './pages/customer-dashboard/previous-bookings/previous-bookings.component';
+import { WorkerProfileUpdateComponent } from './pages/worker-profile-update/worker-profile-update.component';
+import { CustomerProfileUpdateComponent } from './pages/customer-profile-update/customer-profile-update.component';
+import { WorkerProfileCompletionComponent } from './pages/worker-profile-completion/worker-profile-completion.component';
 import { adminGuard } from './guards/admin.guard';
 import { customerGuard, workerGuard, authGuard } from './guards/auth.guard';
 
@@ -25,8 +28,11 @@ export const routes: Routes = [
     { path: 'customer/post-task', component: PostTaskComponent, canActivate: [customerGuard] },
     { path: 'customer/bookings', component: MyBookingsComponent, canActivate: [customerGuard] },
     { path: 'customer/previous-bookings', component: PreviousBookingsComponent, canActivate: [customerGuard] },
+    { path: 'customer/profile-update', component: CustomerProfileUpdateComponent, canActivate: [customerGuard] },
     { path: 'worker', component: WorkerDashboardComponent, canActivate: [workerGuard] },
     { path: 'worker/earnings', component: WorkerEarningsComponent, canActivate: [workerGuard] },
+    { path: 'worker/profile-update', component: WorkerProfileUpdateComponent, canActivate: [workerGuard] },
+    { path: 'worker/profile-completion', component: WorkerProfileCompletionComponent, canActivate: [workerGuard] },
     { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
     { path: 'admin/users', component: UserManagementComponent, canActivate: [adminGuard] },
     { path: 'admin/reviews', component: TaskReviewComponent, canActivate: [adminGuard] },

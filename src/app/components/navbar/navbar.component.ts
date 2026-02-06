@@ -15,7 +15,8 @@ import {
     FileText,
     AlertCircle,
     Users,
-    TrendingUp
+    TrendingUp,
+    Edit
 } from 'lucide-angular';
 
 @Component({
@@ -35,6 +36,7 @@ export class NavbarComponent {
     readonly AlertCircle = AlertCircle;
     readonly Users = Users;
     readonly TrendingUp = TrendingUp;
+    readonly Edit = Edit;
     readonly UserRole = UserRole;
 
     unreadDisputes = 0;
@@ -90,6 +92,32 @@ export class NavbarComponent {
 
     toggleDropdown() {
         this.showDropdown = !this.showDropdown;
+    }
+
+    navigateToProfileUpdate() {
+        console.log('=== navigateToProfileUpdate called ===');
+        const currentUser = this.appService.currentUser;
+        console.log('Current User:', currentUser);
+        console.log('User Role:', currentUser?.role);
+        console.log('User Role Type:', typeof currentUser?.role);
+        console.log('UserRole.WORKER:', UserRole.WORKER, 'Type:', typeof UserRole.WORKER);
+        console.log('UserRole.CUSTOMER:', UserRole.CUSTOMER, 'Type:', typeof UserRole.CUSTOMER);
+        
+        if (currentUser) {
+            if (currentUser.role === UserRole.WORKER) {
+                console.log('✓ Role matches WORKER - Navigating to worker profile...');
+                this.router.navigate(['/worker/profile-update']);
+            } else if (currentUser.role === UserRole.CUSTOMER) {
+                console.log('✓ Role matches CUSTOMER - Navigating to customer profile...');
+                this.router.navigate(['/customer/profile-update']);
+            } else {
+                console.log('✗ Role does not match either WORKER or CUSTOMER. Role value:', currentUser.role);
+            }
+        } else {
+            console.log('✗ Current user is not defined');
+        }
+        console.log('Setting showDropdown to false');
+        this.showDropdown = false;
     }
 
     navigateToDashboard() {
