@@ -38,7 +38,10 @@ import {
   UpdateBusyStatusRequest,
   AdminDashboardResponse,
   ApproveTaskRequest,
-  RejectTaskRequest
+  RejectTaskRequest,
+  ApiUserAddress,
+  CreateAddressRequest,
+  UpdateAddressRequest
 } from './api-types';
 
 @Injectable({
@@ -261,6 +264,28 @@ export class TaskFlowApiService {
       if (filters.minRating) params = params.set('minRating', filters.minRating.toString());
     }
     return this.http.get<UsersResponse>(`${this.baseUrl}/users/workers`, { params });
+  }
+
+  // ==================== ADDRESSES ====================
+
+  getUserAddresses(userId: string): Observable<{ data: ApiUserAddress[] }> {
+    return this.http.get<{ data: ApiUserAddress[] }>(`${this.baseUrl}/users/${userId}/addresses`);
+  }
+
+  addUserAddress(userId: string, address: CreateAddressRequest): Observable<ApiUserAddress> {
+    return this.http.post<ApiUserAddress>(`${this.baseUrl}/users/${userId}/addresses`, address);
+  }
+
+  updateUserAddress(userId: string, addressId: string, address: UpdateAddressRequest): Observable<ApiUserAddress> {
+    return this.http.put<ApiUserAddress>(`${this.baseUrl}/users/${userId}/addresses/${addressId}`, address);
+  }
+
+  deleteUserAddress(userId: string, addressId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/users/${userId}/addresses/${addressId}`);
+  }
+
+  setDefaultAddress(userId: string, addressId: string): Observable<ApiUserAddress> {
+    return this.http.put<ApiUserAddress>(`${this.baseUrl}/users/${userId}/addresses/${addressId}/default`, {});
   }
 
   // ==================== ADMIN ====================

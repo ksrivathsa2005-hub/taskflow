@@ -22,6 +22,17 @@ export interface AuthResponse {
   user: ApiUser;
 }
 
+export interface ApiUserAddress {
+  id?: string;
+  state: string;
+  city: string;
+  area?: string;
+  fullAddress: string;
+  latitude?: number;
+  longitude?: number;
+  isDefault?: boolean;
+}
+
 export interface ApiUser {
   id: string;
   name: string;
@@ -36,6 +47,9 @@ export interface ApiUser {
   skills?: string[];
   categories?: string[];
   experience?: number;
+  createdDate?: string;
+  updatedDate?: string;
+  addresses?: ApiUserAddress[];
 }
 
 export type ApiTaskStatus = 
@@ -296,6 +310,26 @@ export interface UpdateUserRequest {
   experience?: number;
   skills?: string[];
   categories?: string[];
+}
+
+export interface CreateAddressRequest {
+  state: string;
+  city: string;
+  area?: string;
+  fullAddress: string;
+  latitude?: number;
+  longitude?: number;
+  isDefault?: boolean;
+}
+
+export interface UpdateAddressRequest {
+  state?: string;
+  city?: string;
+  area?: string;
+  fullAddress?: string;
+  latitude?: number;
+  longitude?: number;
+  isDefault?: boolean;
 }
 
 export interface UsersResponse {

@@ -25,7 +25,7 @@ import {
     MapPin,
     Filter
 } from 'lucide-angular';
-import { Observable, map } from 'rxjs';
+import { Observable, map, combineLatest } from 'rxjs';
 
 @Component({
     selector: 'app-worker-dashboard',
@@ -36,8 +36,10 @@ import { Observable, map } from 'rxjs';
 })
 export class WorkerDashboardComponent implements OnInit {
     availableTasks$: Observable<Task[]>;
-    myActiveTask$: Observable<Task | undefined>;
+    myAssignedTasks$: Observable<Task[]>;
+    myActiveWorkTask$: Observable<Task | undefined>;
     myCompletedTasks$: Observable<Task[]>;
+    hasWorkInProgress$: Observable<boolean>;
     currentUser: User | null = null;
 
     biddingOn: any = null;
@@ -76,13 +78,16 @@ export class WorkerDashboardComponent implements OnInit {
     private locationApi = inject(LocationApiService);
 
     constructor(public appService: AppService, private router: Router) {
-        this.availableTasks$ = this.appService.tasks$.pipe(
-            map(tasks => {
+        // Combine tasks with currentUser to make filtering reactive
+        this.availableTasks$ = combineLatest([
+            this.appService.tasks$,
+            this.appService.currentUser$
+        ]).pipe(
+            map(([tasks, currentWorker]) => {
                 // Filter by status
                 let filtered = tasks.filter(t => t.status === TaskStatus.POSTED || t.status === TaskStatus.BIDDING);
                 
                 // Filter by worker categories if worker has categories defined
-                const currentWorker = this.appService.currentUser;
                 if (currentWorker?.categories && currentWorker.categories.length > 0) {
                     // Only show tasks that match worker's categories
                     filtered = filtered.filter(t => {
@@ -96,15 +101,76 @@ export class WorkerDashboardComponent implements OnInit {
                     });
                 }
                 
+                // Filter by worker's location (city OR state)
+                // Show tasks in the same city, or same state if no city match
+                if (currentWorker?.address?.city || currentWorker?.address?.state) {
+                    filtered = filtered.filter(t => {
+                        // Task must have a location
+                        if (!t.location) {
+                            return false;
+                        }
+                        
+                        const workerCity = currentWorker.address?.city?.toLowerCase() || '';
+                        const workerState = currentWorker.address?.state?.toLowerCase() || '';
+                        const taskCity = t.location.city?.toLowerCase() || '';
+                        const taskState = t.location.state?.toLowerCase() || '';
+                        
+                        // First priority: exact city match
+                        if (workerCity && taskCity && workerCity === taskCity) {
+                            return true;
+                        }
+                        
+                        // Second priority: same state (allows workers to see tasks from nearby cities)
+                        if (workerState && taskState && workerState === taskState) {
+                            return true;
+                        }
+                        
+                        // Also check if city name appears in fullAddress (handles variations)
+                        const fullAddress = t.location.fullAddress?.toLowerCase() || '';
+                        if (workerCity && fullAddress.includes(workerCity)) {
+                            return true;
+                        }
+                        
+                        return false;
+                    });
+                } else {
+                    // Worker has no location set - show no tasks
+                    filtered = [];
+                }
+                
                 return filtered;
             })
         );
-        this.myActiveTask$ = this.appService.tasks$.pipe(
-            map(tasks => tasks.find(t => 
+        
+        // All tasks assigned to this worker (shows as a list)
+        this.myAssignedTasks$ = this.appService.tasks$.pipe(
+            map(tasks => tasks.filter(t => 
                 t.workerId === this.appService.currentUser?.id && 
                 (t.status === TaskStatus.ASSIGNED || 
                  t.status === TaskStatus.CONFIRMED ||
                  t.status === TaskStatus.TRAVELING ||
+                 t.status === TaskStatus.ARRIVED ||
+                 t.status === TaskStatus.IN_PROGRESS ||
+                 t.status === TaskStatus.WORK_COMPLETED)
+            ))
+        );
+        
+        // Currently active work (in progress statuses - only one allowed at a time)
+        this.myActiveWorkTask$ = this.appService.tasks$.pipe(
+            map(tasks => tasks.find(t => 
+                t.workerId === this.appService.currentUser?.id && 
+                (t.status === TaskStatus.TRAVELING ||
+                 t.status === TaskStatus.ARRIVED ||
+                 t.status === TaskStatus.IN_PROGRESS ||
+                 t.status === TaskStatus.WORK_COMPLETED)
+            ))
+        );
+        
+        // Check if worker has any task currently in progress
+        this.hasWorkInProgress$ = this.appService.tasks$.pipe(
+            map(tasks => tasks.some(t => 
+                t.workerId === this.appService.currentUser?.id && 
+                (t.status === TaskStatus.TRAVELING ||
                  t.status === TaskStatus.ARRIVED ||
                  t.status === TaskStatus.IN_PROGRESS ||
                  t.status === TaskStatus.WORK_COMPLETED)
@@ -284,5 +350,39 @@ export class WorkerDashboardComponent implements OnInit {
             const taskArea = task.location?.area?.toLowerCase();
             return taskArea === this.selectedAreaFilter?.toLowerCase();
         });
+    }
+
+    getTaskCardClass(task: Task): string {
+        // Active work in progress - highlight with emerald
+        if (task.status === TaskStatus.TRAVELING || 
+            task.status === TaskStatus.ARRIVED || 
+            task.status === TaskStatus.IN_PROGRESS) {
+            return 'bg-emerald-600 border-emerald-500 shadow-emerald-200';
+        }
+        // Waiting for customer verification
+        if (task.status === TaskStatus.WORK_COMPLETED) {
+            return 'bg-amber-600 border-amber-500 shadow-amber-200';
+        }
+        // Assigned or confirmed - default indigo
+        return 'bg-indigo-600 border-indigo-500 shadow-indigo-200';
+    }
+
+    getTaskStatusLabel(status: TaskStatus): string {
+        switch (status) {
+            case TaskStatus.ASSIGNED:
+                return 'Awaiting Confirmation';
+            case TaskStatus.CONFIRMED:
+                return 'Ready to Start';
+            case TaskStatus.TRAVELING:
+                return 'On the Way';
+            case TaskStatus.ARRIVED:
+                return 'At Location';
+            case TaskStatus.IN_PROGRESS:
+                return 'Work In Progress';
+            case TaskStatus.WORK_COMPLETED:
+                return 'Pending Approval';
+            default:
+                return 'Active Engagement';
+        }
     }
 }

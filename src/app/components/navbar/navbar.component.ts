@@ -15,7 +15,8 @@ import {
     FileText,
     AlertCircle,
     Users,
-    TrendingUp
+    TrendingUp,
+    User
 } from 'lucide-angular';
 
 @Component({
@@ -36,6 +37,7 @@ export class NavbarComponent {
     readonly Users = Users;
     readonly TrendingUp = TrendingUp;
     readonly UserRole = UserRole;
+    readonly User = User;
 
     unreadDisputes = 0;
     showDropdown = false;
@@ -70,6 +72,23 @@ export class NavbarComponent {
 
     navigateToEarnings() {
         this.router.navigate(['/worker/earnings']);
+        this.showDropdown = false;
+    }
+
+    navigateToProfile() {
+        const currentUser = this.appService.currentUser;
+        if (currentUser) {
+            switch (currentUser.role) {
+                case UserRole.CUSTOMER:
+                    this.router.navigate(['/customer/profile']);
+                    break;
+                case UserRole.WORKER:
+                    this.router.navigate(['/worker/profile']);
+                    break;
+                default:
+                    break;
+            }
+        }
         this.showDropdown = false;
     }
 

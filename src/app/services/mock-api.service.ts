@@ -30,7 +30,13 @@ export class MockApiService {
             skills: ['Plumbing', 'Pipe Repair'],
             status: UserStatus.ACTIVE,
             phone: '+91-9876543211',
-            createdDate: '2024-06-15'
+            createdDate: '2024-06-15',
+            address: {
+                state: 'Maharashtra',
+                city: 'Mumbai',
+                area: 'Bandra',
+                fullAddress: '456 Oak Avenue, Bandra, Mumbai, Maharashtra 400050'
+            }
         },
         {
             id: 'u3',

@@ -24,6 +24,13 @@
             <!-- Dropdown Menu -->
             <div *ngIf="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-50">
               <div class="py-2">
+                <!-- My Profile (for Customer and Worker) -->
+                <button *ngIf="currentUser.role === UserRole.CUSTOMER || currentUser.role === UserRole.WORKER"
+                  (click)="navigateToProfile()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-2 transition-colors">
+                  <lucide-icon [img]="User" class="w-4 h-4 text-indigo-600"></lucide-icon>
+                  My Profile
+                </button>
+
                 <!-- Reviews -->
                 <button (click)="navigateToReviews()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-2 transition-colors">
                   <lucide-icon [img]="FileText" class="w-4 h-4 text-indigo-600"></lucide-icon>
@@ -74,7 +81,7 @@
               </span>
             </button>
 
-            <div class="flex items-center space-x-3 group cursor-pointer">
+            <div (click)="navigateToProfile()" class="flex items-center space-x-3 group cursor-pointer hover:opacity-80 transition-opacity">
               <div class="text-right hidden sm:block">
                 <p class="text-sm font-bold text-slate-800 leading-none">{{currentUser.name}}</p>
                 <p class="text-[10px] font-black text-indigo-600 uppercase mt-1 tracking-wider">{{currentUser.role}}</p>

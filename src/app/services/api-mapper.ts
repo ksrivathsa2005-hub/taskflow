@@ -18,6 +18,18 @@ export class ApiMapper {
 
     const role = roleMap[String(apiUser.role)] || UserRole.CUSTOMER;
 
+    // Map primary address from addresses array
+    let address: Address | undefined = undefined;
+    if (apiUser.addresses && apiUser.addresses.length > 0) {
+      const primaryAddress = apiUser.addresses.find(a => a.isDefault) || apiUser.addresses[0];
+      address = {
+        state: primaryAddress.state || '',
+        city: primaryAddress.city || '',
+        area: primaryAddress.area || '',
+        fullAddress: primaryAddress.fullAddress || ''
+      };
+    }
+
     return {
       id: apiUser.id,
       name: apiUser.name,
@@ -25,6 +37,7 @@ export class ApiMapper {
       role: role,
       avatar: apiUser.avatar || '',
       phone: apiUser.phone,
+      address: address,
       rating: apiUser.rating,
       completedJobs: apiUser.completedJobs,
       isBusy: apiUser.isBusy,
@@ -32,7 +45,7 @@ export class ApiMapper {
       categories: apiUser.categories,
       experience: apiUser.experience,
       status: apiUser.status as any,
-      createdDate: apiUser.email // Using email as placeholder since createdDate not in ApiUser
+      createdDate: apiUser.createdDate || apiUser.email // fallback to email if no createdDate
     };
   }
 

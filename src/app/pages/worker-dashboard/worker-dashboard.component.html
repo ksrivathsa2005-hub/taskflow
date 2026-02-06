@@ -55,81 +55,100 @@
 
         <!-- Main Content -->
         <div class="lg:col-span-3 space-y-12">
-            <div *ngIf="myActiveTask$ | async as myActiveTask"
-                class="bg-indigo-600 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-indigo-200 border border-indigo-500 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-8 opacity-10">
-                    <lucide-icon [img]="Navigation" class="w-32 h-32"></lucide-icon>
-                </div>
-                <div class="relative z-10">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
-                        <div>
-                            <span
-                                class="text-[10px] font-black uppercase tracking-widest bg-white/20 px-3 py-1 rounded-lg">Active
-                                Engagement</span>
-                            <h2 class="text-3xl font-black mt-3 leading-tight">{{myActiveTask.title}}</h2>
-                            <p class="text-sm text-indigo-200 mt-2 font-medium">Status: {{myActiveTask.status.replace('_', ' ')}}</p>
+            <!-- All Assigned Tasks Section -->
+            <div *ngIf="(myAssignedTasks$ | async)?.length" class="space-y-6">
+                <h2 class="text-2xl font-black text-slate-900 flex items-center gap-3">
+                    <lucide-icon [img]="Briefcase" class="w-7 h-7 text-indigo-600"></lucide-icon>
+                    My Assigned Tasks
+                    <span class="text-sm font-bold bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">
+                        {{(myAssignedTasks$ | async)?.length}} active
+                    </span>
+                </h2>
+                
+                <!-- Task Cards List -->
+                <div class="space-y-4">
+                    <div *ngFor="let task of myAssignedTasks$ | async"
+                        [class]="getTaskCardClass(task)"
+                        class="rounded-[2rem] p-8 text-white shadow-xl border relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-6 opacity-10">
+                            <lucide-icon [img]="Navigation" class="w-24 h-24"></lucide-icon>
                         </div>
-                        <div class="flex flex-col gap-3">
-                            <!-- Assigned: Show Confirm and Start Travel buttons -->
-                            <button *ngIf="myActiveTask.status === TaskStatus.ASSIGNED"
-                                (click)="confirmBooking(myActiveTask.id)"
-                                class="bg-white text-indigo-600 font-black px-6 py-3 rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95 flex items-center gap-2">
-                                <lucide-icon [img]="CheckCircle2" class="w-5 h-5"></lucide-icon>
-                                Confirm Booking
-                            </button>
-                            
-                            <!-- Confirmed: Show Start Travel button -->
-                            <button *ngIf="myActiveTask.status === TaskStatus.CONFIRMED"
-                                (click)="startTraveling(myActiveTask.id)"
-                                class="bg-white text-indigo-600 font-black px-6 py-3 rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95 flex items-center gap-2">
-                                <lucide-icon [img]="Navigation" class="w-5 h-5"></lucide-icon>
-                                Start Traveling
-                            </button>
-                            
-                            <!-- Traveling: Show Mark Arrived button -->
-                            <button *ngIf="myActiveTask.status === TaskStatus.TRAVELING"
-                                (click)="markAsArrived(myActiveTask.id)"
-                                class="bg-white text-indigo-600 font-black px-6 py-3 rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95 flex items-center gap-2">
-                                <lucide-icon [img]="CheckCircle2" class="w-5 h-5"></lucide-icon>
-                                Mark as Arrived
-                            </button>
-                            
-                            <!-- Arrived: Show Start Work button -->
-                            <button *ngIf="myActiveTask.status === TaskStatus.ARRIVED"
-                                (click)="startWork(myActiveTask.id)"
-                                class="bg-emerald-500 text-white font-black px-6 py-3 rounded-xl hover:bg-emerald-600 transition-all shadow-lg active:scale-95 flex items-center gap-2">
-                                <lucide-icon [img]="Briefcase" class="w-5 h-5"></lucide-icon>
-                                Start Work
-                            </button>
-                            
-                            <!-- In Progress: Show Complete Work button -->
-                            <button *ngIf="myActiveTask.status === TaskStatus.IN_PROGRESS"
-                                (click)="completeWork(myActiveTask.id)"
-                                class="bg-emerald-500 text-white font-black px-6 py-3 rounded-xl hover:bg-emerald-600 transition-all shadow-lg active:scale-95 flex items-center gap-2">
-                                <lucide-icon [img]="CheckCircle2" class="w-5 h-5"></lucide-icon>
-                                Complete Work
-                            </button>
-                            
-                            <!-- Work Completed: Waiting for customer verification -->
-                            <div *ngIf="myActiveTask.status === TaskStatus.WORK_COMPLETED"
-                                class="bg-white/20 backdrop-blur-sm text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2">
-                                <lucide-icon [img]="Clock" class="w-5 h-5"></lucide-icon>
-                                Waiting for Customer Approval
+                        <div class="relative z-10">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                                <div>
+                                    <span class="text-[10px] font-black uppercase tracking-widest bg-white/20 px-3 py-1 rounded-lg">
+                                        {{getTaskStatusLabel(task.status)}}
+                                    </span>
+                                    <h3 class="text-2xl font-black mt-3 leading-tight">{{task.title}}</h3>
+                                    <p class="text-sm opacity-80 mt-1 font-medium">Status: {{task.status.replace('_', ' ')}}</p>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <!-- Assigned: Show Confirm Booking -->
+                                    <button *ngIf="task.status === TaskStatus.ASSIGNED"
+                                        (click)="confirmBooking(task.id)"
+                                        class="bg-white text-indigo-600 font-black px-5 py-2.5 rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95 flex items-center gap-2 text-sm">
+                                        <lucide-icon [img]="CheckCircle2" class="w-4 h-4"></lucide-icon>
+                                        Confirm Booking
+                                    </button>
+                                    
+                                    <!-- Confirmed: Show Start Travel (only if no other work in progress) -->
+                                    <ng-container *ngIf="task.status === TaskStatus.CONFIRMED">
+                                        <button *ngIf="!(hasWorkInProgress$ | async)"
+                                            (click)="startTraveling(task.id)"
+                                            class="bg-white text-indigo-600 font-black px-5 py-2.5 rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95 flex items-center gap-2 text-sm">
+                                            <lucide-icon [img]="Navigation" class="w-4 h-4"></lucide-icon>
+                                            Start Traveling
+                                        </button>
+                                        <div *ngIf="hasWorkInProgress$ | async"
+                                            class="bg-white/20 backdrop-blur-sm text-white font-medium px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm">
+                                            <lucide-icon [img]="Clock" class="w-4 h-4"></lucide-icon>
+                                            Complete current task first
+                                        </div>
+                                    </ng-container>
+                                    
+                                    <!-- Traveling: Show Mark Arrived -->
+                                    <button *ngIf="task.status === TaskStatus.TRAVELING"
+                                        (click)="markAsArrived(task.id)"
+                                        class="bg-white text-indigo-600 font-black px-5 py-2.5 rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95 flex items-center gap-2 text-sm">
+                                        <lucide-icon [img]="CheckCircle2" class="w-4 h-4"></lucide-icon>
+                                        Mark as Arrived
+                                    </button>
+                                    
+                                    <!-- Arrived: Show Start Work -->
+                                    <button *ngIf="task.status === TaskStatus.ARRIVED"
+                                        (click)="startWork(task.id)"
+                                        class="bg-emerald-500 text-white font-black px-5 py-2.5 rounded-xl hover:bg-emerald-600 transition-all shadow-lg active:scale-95 flex items-center gap-2 text-sm">
+                                        <lucide-icon [img]="Briefcase" class="w-4 h-4"></lucide-icon>
+                                        Start Work
+                                    </button>
+                                    
+                                    <!-- In Progress: Show Complete Work -->
+                                    <button *ngIf="task.status === TaskStatus.IN_PROGRESS"
+                                        (click)="completeWork(task.id)"
+                                        class="bg-emerald-500 text-white font-black px-5 py-2.5 rounded-xl hover:bg-emerald-600 transition-all shadow-lg active:scale-95 flex items-center gap-2 text-sm">
+                                        <lucide-icon [img]="CheckCircle2" class="w-4 h-4"></lucide-icon>
+                                        Complete Work
+                                    </button>
+                                    
+                                    <!-- Work Completed: Waiting for customer -->
+                                    <div *ngIf="task.status === TaskStatus.WORK_COMPLETED"
+                                        class="bg-white/20 backdrop-blur-sm text-white font-medium px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm">
+                                        <lucide-icon [img]="Clock" class="w-4 h-4"></lucide-icon>
+                                        Waiting for Customer Approval
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white/10 backdrop-blur-sm p-6 rounded-3xl border border-white/10">
-                            <p class="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-2">Location
-                                Detail</p>
-                            <p class="font-bold">{{myActiveTask.location}}</p>
-                        </div>
-                        <div class="bg-white/10 backdrop-blur-sm p-6 rounded-3xl border border-white/10">
-                            <p class="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-2">Service Fee
-                            </p>
-                            <p class="font-bold text-2xl">{{CURRENCY}}{{myActiveTask.budgetMax.toLocaleString('en-IN')}}
-                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white/10 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
+                                    <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Location</p>
+                                    <p class="font-bold text-sm">{{task.location.fullAddress}}</p>
+                                </div>
+                                <div class="bg-white/10 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
+                                    <p class="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Service Fee</p>
+                                    <p class="font-bold text-xl">{{CURRENCY}}{{(task.finalPrice || task.budgetMax || 0).toLocaleString('en-IN')}}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -241,11 +260,24 @@
                     <ng-container *ngIf="availableTasks$ | async as availableTasks; else loadingTasks">
                         <ng-container *ngIf="getFilteredTasks(availableTasks) as filteredTasks">
                             <div *ngIf="filteredTasks.length === 0"
-                                class="col-span-full py-32 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                                <lucide-icon [img]="MapPin" class="w-16 h-16 text-slate-300 mx-auto mb-4"></lucide-icon>
-                                <p class="text-slate-400 font-black">
-                                    {{ selectedAreaFilter ? 'No tasks found in this area' : 'Scanning for new tasks...' }}
-                                </p>
+                                class="col-span-full py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                                <ng-container *ngIf="!currentUser?.address?.city; else noTasksInArea">
+                                    <lucide-icon [img]="MapPin" class="w-16 h-16 text-amber-300 mx-auto mb-4"></lucide-icon>
+                                    <h3 class="text-xl font-black text-slate-800 mb-2">Location Required</h3>
+                                    <p class="text-slate-500 font-medium max-w-sm mx-auto mb-6">
+                                        Please update your profile with your city to see available jobs in your area.
+                                    </p>
+                                    <a routerLink="/worker/profile" 
+                                       class="inline-block bg-indigo-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg">
+                                       Update Profile
+                                    </a>
+                                </ng-container>
+                                <ng-template #noTasksInArea>
+                                    <lucide-icon [img]="MapPin" class="w-16 h-16 text-slate-300 mx-auto mb-4"></lucide-icon>
+                                    <p class="text-slate-400 font-black">
+                                        {{ selectedAreaFilter ? 'No tasks found in ' + selectedAreaFilter : 'No new tasks available in ' + currentUser?.address?.city }}
+                                    </p>
+                                </ng-template>
                             </div>
                             <app-task-card *ngFor="let task of filteredTasks" [task]="task" [role]="UserRole.WORKER"
                                 (bid)="!currentUser?.isBusy && setBiddingOn(task)"></app-task-card>
