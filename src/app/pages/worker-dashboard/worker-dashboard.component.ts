@@ -8,6 +8,8 @@ import { TaskCardComponent } from '../../components/task-card/task-card.componen
 import { PlatformActivityComponent } from '../../components/platform-activity/platform-activity.component';
 import { ToastService } from '../../services/toast.service';
 import { LocationApiService, City, Area } from '../../services/location-api.service';
+import { TaskFlowApiService } from '../../services/taskflow-api.service';
+import { ApiMapper } from '../../services/api-mapper';
 import { Task, TaskStatus, UserRole, User } from '../../types';
 import { CURRENCY } from '../../constants';
 import { SERVICE_CATEGORIES } from '../../service-categories';
@@ -26,7 +28,7 @@ import {
     MapPin,
     Filter
 } from 'lucide-angular';
-import { Observable, map } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 @Component({
     selector: 'app-worker-dashboard',
@@ -36,10 +38,17 @@ import { Observable, map } from 'rxjs';
     styleUrls: ['./worker-dashboard.component.css']
 })
 export class WorkerDashboardComponent implements OnInit {
-    availableTasks$: Observable<Task[]>;
-    myActiveTask$: Observable<Task | undefined>;
-    myCompletedTasks$: Observable<Task[]>;
+    // Use BehaviorSubjects to manage data locally
+    private availableTasksSubject = new BehaviorSubject<Task[]>([]);
+    private activeTaskSubject = new BehaviorSubject<Task | undefined>(undefined);
+    private completedTasksSubject = new BehaviorSubject<Task[]>([]);
+
+    availableTasks$ = this.availableTasksSubject.asObservable();
+    myActiveTask$ = this.activeTaskSubject.asObservable();
+    myCompletedTasks$ = this.completedTasksSubject.asObservable();
+    
     currentUser: User | null = null;
+    isLoadingTasks = false;
 
     biddingOn: any = null;
     showDisputeModal = false;
@@ -80,55 +89,104 @@ export class WorkerDashboardComponent implements OnInit {
 
     private toastService = inject(ToastService);
     private locationApi = inject(LocationApiService);
+    private apiService = inject(TaskFlowApiService);
 
-    constructor(public appService: AppService, public router: Router) {
-        this.availableTasks$ = this.appService.tasks$.pipe(
-            map(tasks => {
-                // Filter by status
-                let filtered = tasks.filter(t => t.status === TaskStatus.POSTED || t.status === TaskStatus.BIDDING);
-                
-                // Filter by worker categories if worker has categories defined
-                const currentWorker = this.appService.currentUser;
-                if (currentWorker?.categories && currentWorker.categories.length > 0) {
-                    // Only show tasks that match worker's categories
-                    filtered = filtered.filter(t => {
-                        // If task has a category, check if it matches worker's categories
-                        if (t.category) {
-                            return currentWorker.categories!.some(cat => 
-                                cat.toLowerCase() === t.category!.toLowerCase()
-                            );
-                        }
-                        return true; // Show tasks without category
-                    });
-                }
-                
-                return filtered;
-            })
-        );
-        this.myActiveTask$ = this.appService.tasks$.pipe(
-            map(tasks => tasks.find(t => 
-                t.workerId === this.appService.currentUser?.id && 
-                (t.status === TaskStatus.ASSIGNED || 
-                 t.status === TaskStatus.CONFIRMED ||
-                 t.status === TaskStatus.TRAVELING ||
-                 t.status === TaskStatus.ARRIVED ||
-                 t.status === TaskStatus.IN_PROGRESS ||
-                 t.status === TaskStatus.WORK_COMPLETED)
-            ))
-        );
-        this.myCompletedTasks$ = this.appService.tasks$.pipe(
-            map(tasks => tasks.filter(t => 
-                t.workerId === this.appService.currentUser?.id && 
-                (t.status === TaskStatus.VERIFIED || 
-                 t.status === TaskStatus.PAID || 
-                 t.status === TaskStatus.COMPLETED)
-            ))
-        );
-    }
+    constructor(public appService: AppService, public router: Router) {}
 
     ngOnInit() {
         this.appService.currentUser$.subscribe(user => {
             this.currentUser = user;
+            if (user && user.role === UserRole.WORKER) {
+                // Load tasks only for worker
+                this.loadWorkerTasks();
+            }
+        });
+    }
+
+    private loadWorkerTasks() {
+        if (!this.currentUser) return;
+        
+        this.isLoadingTasks = true;
+
+        // Load available tasks (POSTED or BIDDING status)
+        this.apiService.getTasks({ 
+            status: 'POSTED' as any 
+        }).subscribe({
+            next: (response) => {
+                let tasks = response.data.map(apiTask => ApiMapper.toLocalTask(apiTask));
+                
+                // Filter by worker categories if defined
+                if (this.currentUser?.categories && this.currentUser.categories.length > 0) {
+                    tasks = tasks.filter(t => {
+                        if (t.category) {
+                            return this.currentUser!.categories!.some(cat => 
+                                cat.toLowerCase() === t.category!.toLowerCase()
+                            );
+                        }
+                        return true;
+                    });
+                }
+                
+                // Also include BIDDING tasks
+                this.apiService.getTasks({ 
+                    status: 'BIDDING' as any 
+                }).subscribe({
+                    next: (biddingResponse) => {
+                        let biddingTasks = biddingResponse.data.map(apiTask => ApiMapper.toLocalTask(apiTask));
+                        
+                        // Filter by worker categories
+                        if (this.currentUser?.categories && this.currentUser.categories.length > 0) {
+                            biddingTasks = biddingTasks.filter(t => {
+                                if (t.category) {
+                                    return this.currentUser!.categories!.some(cat => 
+                                        cat.toLowerCase() === t.category!.toLowerCase()
+                                    );
+                                }
+                                return true;
+                            });
+                        }
+                        
+                        this.availableTasksSubject.next([...tasks, ...biddingTasks]);
+                    },
+                    error: (error) => console.error('Error loading bidding tasks:', error)
+                });
+            },
+            error: (error) => {
+                console.error('Error loading available tasks:', error);
+                this.isLoadingTasks = false;
+            }
+        });
+
+        // Load worker's active task
+        this.apiService.getTasks({ 
+            workerId: this.currentUser.id 
+        }).subscribe({
+            next: (response) => {
+                const tasks = response.data.map(apiTask => ApiMapper.toLocalTask(apiTask));
+                const activeTask = tasks.find(t => 
+                    t.status === TaskStatus.ASSIGNED ||
+                    t.status === TaskStatus.CONFIRMED ||
+                    t.status === TaskStatus.TRAVELING ||
+                    t.status === TaskStatus.ARRIVED ||
+                    t.status === TaskStatus.IN_PROGRESS ||
+                    t.status === TaskStatus.WORK_COMPLETED
+                );
+                this.activeTaskSubject.next(activeTask);
+                
+                // Also extract completed tasks
+                const completedTasks = tasks.filter(t => 
+                    t.status === TaskStatus.VERIFIED ||
+                    t.status === TaskStatus.PAID ||
+                    t.status === TaskStatus.COMPLETED
+                );
+                this.completedTasksSubject.next(completedTasks);
+                
+                this.isLoadingTasks = false;
+            },
+            error: (error) => {
+                console.error('Error loading worker tasks:', error);
+                this.isLoadingTasks = false;
+            }
         });
     }
 
@@ -150,6 +208,8 @@ export class WorkerDashboardComponent implements OnInit {
 
         this.appService.placeBid(data);
         this.biddingOn = null;
+        // Reload available tasks after bid
+        setTimeout(() => this.loadWorkerTasks(), 500);
     }
 
     markArrival(taskId: string) {
@@ -158,22 +218,27 @@ export class WorkerDashboardComponent implements OnInit {
 
     markAsArrived(taskId: string) {
         this.appService.updateTaskStatus(taskId, TaskStatus.ARRIVED);
+        setTimeout(() => this.loadWorkerTasks(), 500);
     }
 
     startWork(taskId: string) {
         this.appService.updateTaskStatus(taskId, TaskStatus.IN_PROGRESS);
+        setTimeout(() => this.loadWorkerTasks(), 500);
     }
 
     completeWork(taskId: string) {
         this.appService.updateTaskStatus(taskId, TaskStatus.WORK_COMPLETED);
+        setTimeout(() => this.loadWorkerTasks(), 500);
     }
 
     confirmBooking(taskId: string) {
         this.appService.updateTaskStatus(taskId, TaskStatus.CONFIRMED);
+        setTimeout(() => this.loadWorkerTasks(), 500);
     }
 
     startTraveling(taskId: string) {
         this.appService.updateTaskStatus(taskId, TaskStatus.TRAVELING);
+        setTimeout(() => this.loadWorkerTasks(), 500);
     }
 
     setBiddingOn(task: Task | null) {
@@ -182,6 +247,20 @@ export class WorkerDashboardComponent implements OnInit {
 
     formatDate(date: string) {
         return new Date(date).toLocaleDateString();
+    }
+
+    getLocationDisplay(location: any): string {
+        if (!location) return 'N/A';
+        if (typeof location === 'string') return location;
+        if (typeof location === 'object' && location.fullAddress) {
+            return location.fullAddress;
+        }
+        // Fallback: construct from available parts
+        const parts = [];
+        if (location.area) parts.push(location.area);
+        if (location.city) parts.push(location.city);
+        if (location.state) parts.push(location.state);
+        return parts.length > 0 ? parts.join(', ') : 'Location not specified';
     }
 
     canRaiseDispute(task: Task): boolean {
@@ -214,16 +293,12 @@ export class WorkerDashboardComponent implements OnInit {
     }
 
     getEarnings(): number {
-        const completedTasks = this.appService.tasks.filter(
-            t => t.workerId === this.currentUser?.id && t.status === TaskStatus.COMPLETED
-        );
+        const completedTasks = this.completedTasksSubject.value;
         return completedTasks.reduce((sum, task) => sum + (task.finalPrice || task.budgetMax || 0), 0);
     }
 
     getCompletedJobsCount(): number {
-        return this.appService.tasks.filter(
-            t => t.workerId === this.currentUser?.id && t.status === TaskStatus.COMPLETED
-        ).length;
+        return this.completedTasksSubject.value.length;
     }
 
     getAverageRating(): number {

@@ -10,6 +10,8 @@ import { Task, TaskStatus, UserRole, Bid } from '../../types';
 import { STATUS_COLORS, CURRENCY } from '../../constants';
 import { SERVICE_CATEGORIES } from '../../service-categories';
 import { LocationApiService, City, Area } from '../../services/location-api.service';
+import { TaskFlowApiService } from '../../services/taskflow-api.service';
+import { ApiMapper } from '../../services/api-mapper';
 import {
     LucideAngularModule,
     Plus,
@@ -24,7 +26,7 @@ import {
     X,
     Star
 } from 'lucide-angular';
-import { Observable, map } from 'rxjs';
+import { Observable, map, BehaviorSubject, firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-customer-dashboard',
@@ -36,6 +38,20 @@ import { Observable, map } from 'rxjs';
 export class CustomerDashboardComponent implements OnInit {
     currentUser: any = null;
     selectedTaskTab = 'All';
+    
+    // Local BehaviorSubjects for different task categories
+    private postedTasksSubject = new BehaviorSubject<Task[]>([]);
+    private activeTasksSubject = new BehaviorSubject<Task[]>([]);
+    private completedTasksSubject = new BehaviorSubject<Task[]>([]);
+    private cancelledTasksSubject = new BehaviorSubject<Task[]>([]);
+    private allTasksSubject = new BehaviorSubject<Task[]>([]);
+    
+    postedTasks$ = this.postedTasksSubject.asObservable();
+    activeTasks$ = this.activeTasksSubject.asObservable();
+    completedTasks$ = this.completedTasksSubject.asObservable();
+    cancelledTasks$ = this.cancelledTasksSubject.asObservable();
+    allTasks$ = this.allTasksSubject.asObservable();
+    
     myTasks: Task[] = [];
     expandedTaskIds: Set<string> = new Set();
     selectedTask: Task | null = null;
@@ -85,33 +101,63 @@ export class CustomerDashboardComponent implements OnInit {
     constructor(
         public appService: AppService, 
         public router: Router,
-        private locationService: LocationApiService
+        private locationService: LocationApiService,
+        private apiService: TaskFlowApiService
     ) {}
 
     ngOnInit() {
         this.appService.currentUser$.subscribe(user => {
             this.currentUser = user;
+            if (user?.id) {
+                this.loadCustomerTasks();
+            }
         });
+    }
 
-        this.appService.tasks$.subscribe(tasks => {
-            this.myTasks = tasks.filter(t => t.customerId === this.appService.currentUser?.id);
-        });
+    async loadCustomerTasks() {
+        if (!this.currentUser?.id) return;
+
+        try {
+            // Make targeted API calls - fetch tasks by customer ID and filter client-side by status
+            const allCustomerTasksResponse = await firstValueFrom(
+                this.apiService.getTasks({ customerId: this.currentUser.id })
+            );
+            
+            const allTasks = ApiMapper.toLocalTasks(allCustomerTasksResponse.data);
+            
+            // Filter tasks by status categories
+            const posted = allTasks.filter(t => t.status === TaskStatus.POSTED);
+            const active = allTasks.filter(t => 
+                [TaskStatus.BIDDING, TaskStatus.ASSIGNED, TaskStatus.CONFIRMED,
+                 TaskStatus.TRAVELING, TaskStatus.ARRIVED, TaskStatus.IN_PROGRESS,
+                 TaskStatus.WORK_COMPLETED].includes(t.status)
+            );
+            const completed = allTasks.filter(t => 
+                [TaskStatus.VERIFIED, TaskStatus.PAID, TaskStatus.COMPLETED].includes(t.status)
+            );
+            const cancelled = allTasks.filter(t => t.status === TaskStatus.CANCELLED);
+
+            // Update local subjects
+            this.postedTasksSubject.next(posted);
+            this.activeTasksSubject.next(active);
+            this.completedTasksSubject.next(completed);
+            this.cancelledTasksSubject.next(cancelled);
+            this.allTasksSubject.next(allTasks);
+            this.myTasks = allTasks;
+        } catch (error) {
+            console.error('Error loading customer tasks:', error);
+        }
     }
 
     navigateToPostTask() {
         this.router.navigate(['/customer/post-task']);
-
-        // Force load tasks from API when component initializes
-        this.appService.loadTasksFromApi();
     }
 
     getPendingActions(): Observable<Task[]> {
-        return this.appService.tasks$.pipe(
+        return this.allTasks$.pipe(
             map(tasks => {
-                const userTasks = tasks.filter(t => t.customerId === this.appService.currentUser?.id);
-                
                 // Filter tasks that need action
-                const pendingTasks = userTasks.filter(t => {
+                const pendingTasks = tasks.filter(t => {
                     // Tasks with bids pending review
                     if (t.status === TaskStatus.POSTED && t.bids.length > 0) return true;
                     
@@ -182,34 +228,29 @@ export class CustomerDashboardComponent implements OnInit {
     }
 
     getFilteredTasks(): Observable<Task[]> {
-        return this.appService.tasks$.pipe(
-            map(tasks => {
-                let filtered = tasks.filter(t => t.customerId === this.appService.currentUser?.id);
-
-                switch (this.selectedTaskTab) {
-                    case 'Active':
-                        filtered = filtered.filter(t => 
-                            [TaskStatus.BIDDING, TaskStatus.ASSIGNED, TaskStatus.CONFIRMED,
-                             TaskStatus.TRAVELING, TaskStatus.ARRIVED, TaskStatus.IN_PROGRESS].includes(t.status)
-                        );
-                        break;
-                    case 'Pending':
-                        filtered = filtered.filter(t => t.status === TaskStatus.POSTED);
-                        break;
-                    case 'Completed':
-                        filtered = filtered.filter(t => 
-                            t.status === TaskStatus.VERIFIED || 
-                            t.status === TaskStatus.PAID || 
-                            t.status === TaskStatus.COMPLETED
-                        );
-                        break;
-                    case 'Cancelled':
-                        filtered = filtered.filter(t => t.status === TaskStatus.CANCELLED);
-                        break;
-                }
-
-                return filtered.sort((a, b) => new Date(b.createdDate || '').getTime() - new Date(a.createdDate || '').getTime());
-            })
+        let observable: Observable<Task[]>;
+        
+        switch (this.selectedTaskTab) {
+            case 'Active':
+                observable = this.activeTasks$;
+                break;
+            case 'Pending':
+                observable = this.postedTasks$;
+                break;
+            case 'Completed':
+                observable = this.completedTasks$;
+                break;
+            case 'Cancelled':
+                observable = this.cancelledTasks$;
+                break;
+            default:
+                observable = this.allTasks$;
+        }
+        
+        return observable.pipe(
+            map(tasks => tasks.sort((a, b) => 
+                new Date(b.createdDate || '').getTime() - new Date(a.createdDate || '').getTime()
+            ))
         );
     }
 
@@ -222,17 +263,11 @@ export class CustomerDashboardComponent implements OnInit {
     }
 
     get customerTasks$(): Observable<Task[]> {
-        return this.appService.tasks$.pipe(
-            map(tasks => tasks.filter(t => t.customerId === this.appService.currentUser?.id))
-        );
+        return this.allTasks$;
     }
 
     get completedTasks(): Task[] {
-        return this.myTasks.filter(t => 
-            t.status === TaskStatus.VERIFIED || 
-            t.status === TaskStatus.PAID || 
-            t.status === TaskStatus.COMPLETED
-        );
+        return this.completedTasksSubject.value;
     }
 
     get CATEGORIES() {
@@ -342,6 +377,9 @@ export class CustomerDashboardComponent implements OnInit {
         this.fullAddress = '';
         this.availableCities = [];
         this.availableAreas = [];
+        
+        // Reload tasks after posting
+        setTimeout(() => this.loadCustomerTasks(), 500);
     }
 
     get sortedBids(): Bid[] {
@@ -358,10 +396,12 @@ export class CustomerDashboardComponent implements OnInit {
 
     selectWorker(taskId: string, bidId: string) {
         this.appService.selectWorker(taskId, bidId);
+        setTimeout(() => this.loadCustomerTasks(), 500);
     }
 
     approveTask(taskId: string) {
         this.appService.updateTaskStatus(taskId, TaskStatus.VERIFIED);
+        setTimeout(() => this.loadCustomerTasks(), 500);
     }
 
     makePayment(taskId: string) {
@@ -371,6 +411,7 @@ export class CustomerDashboardComponent implements OnInit {
         // After a short delay, mark as completed
         setTimeout(() => {
             this.appService.updateTaskStatus(taskId, TaskStatus.COMPLETED);
+            setTimeout(() => this.loadCustomerTasks(), 500);
         }, 500);
     }
 
@@ -414,6 +455,9 @@ export class CustomerDashboardComponent implements OnInit {
                 respondentId: respondentId,
                 reason: this.disputeReason
             });
+            
+            // Reload tasks after dispute creation
+            await this.loadCustomerTasks();
             
             // Navigate after dispute is created
             this.router.navigate(['/disputes']);

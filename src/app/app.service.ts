@@ -20,66 +20,19 @@ export class AppService {
     private tasksSubject = new BehaviorSubject<Task[]>([]);
     private usersSubject = new BehaviorSubject<User[]>([]);
     private disputesSubject = new BehaviorSubject<Dispute[]>([]);
-    private initializationComplete = new BehaviorSubject<boolean>(false);
+    private initializationCompleteSubject = new BehaviorSubject<boolean>(false);
 
     currentUser$ = this.currentUserSubject.asObservable();
     tasks$ = this.tasksSubject.asObservable();
     users$ = this.usersSubject.asObservable();
     disputes$ = this.disputesSubject.asObservable();
-    initializationComplete$ = this.initializationComplete.asObservable();
+    initializationComplete$ = this.initializationCompleteSubject.asObservable();
 
     private toastService = inject(ToastService);
     private apiService = inject(TaskFlowApiService);
 
     constructor(private mockApi: MockApiService, private router: Router) {
-        this.initializeApp();
-    }
-
-    private async initializeApp() {
-        if (USE_REAL_API) {
-            // Try to restore user session from token
-            const token = localStorage.getItem('accessToken');
-            if (token) {
-                console.log('Token found, restoring user session...');
-                try {
-                    const apiUser = await firstValueFrom(this.apiService.getCurrentUser());
-                    const localUser = ApiMapper.toLocalUser(apiUser);
-                    this.currentUserSubject.next(localUser);
-                    console.log('User session restored:', localUser);
-                    
-                    // Load user-specific data
-                    await this.loadTasksFromApi();
-                    await this.loadDisputesFromApi();
-                } catch (error) {
-                    console.error('Failed to restore user session:', error);
-                    // Token might be expired, clear it
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('refreshToken');
-                    this.currentUserSubject.next(null);
-                    
-                    // Only redirect if not already on login/register page
-                    const currentPath = window.location.pathname;
-                    if (!currentPath.includes('/login') && !currentPath.includes('/register') && currentPath !== '/') {
-                        this.router.navigate(['/']);
-                    }
-                }
-            } else {
-                console.log('No token found, user needs to login');
-                this.currentUserSubject.next(null);
-                
-                // Only redirect if trying to access protected route
-                const currentPath = window.location.pathname;
-                if (!currentPath.includes('/login') && !currentPath.includes('/register') && currentPath !== '/') {
-                    this.router.navigate(['/']);
-                }
-            }
-        } else {
-            // Mock mode - use localStorage
-            this.loadFromLocalStorage();
-        }
-        
-        // Mark initialization as complete
-        this.initializationComplete.next(true);
+        this.loadFromLocalStorage();
     }
 
     get currentUser() {
@@ -104,20 +57,7 @@ export class AppService {
             try {
                 const state: AppState = JSON.parse(saved);
                 this.currentUserSubject.next(state.currentUser);
-                
-                // Fix location data in tasks if it's stringified
-                const fixedTasks = state.tasks.map(task => {
-                    if (task.location && typeof task.location === 'string') {
-                        try {
-                            task.location = JSON.parse(task.location);
-                        } catch (e) {
-                            console.error('Failed to parse location for task:', task.id);
-                        }
-                    }
-                    return task;
-                });
-                
-                this.tasksSubject.next(fixedTasks);
+                this.tasksSubject.next(state.tasks);
                 this.usersSubject.next(state.users);
                 this.disputesSubject.next(state.disputes || []);
             } catch (error) {
@@ -156,24 +96,20 @@ export class AppService {
         const currentUser = this.currentUserSubject.value;
         if (currentUser) {
             const updatedUser = { ...currentUser, ...updates };
-            this.setCurrentUser(updatedUser);
-            // Also update localStorage
-            if (USE_REAL_API) {
-                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-            }
+            this.currentUserSubject.next(updatedUser);
+            this.saveToLocalStorage();
         }
     }
 
+    // For backward compatibility - quick role switching in mock mode
     loginAs(role: UserRole) {
         if (USE_REAL_API) {
-            // For API mode, would need proper login with email/password
             console.log('API login not implemented - use mock mode or implement proper authentication');
             this.toastService.error('Please use mock mode for quick role switching');
         } else {
             const user = this.users.find(u => u.role === role);
             if (user) {
                 this.setCurrentUser(user);
-                // Navigate to appropriate dashboard
                 const loginAsRoleRoute: { [key in UserRole]: string } = {
                     [UserRole.CUSTOMER]: '/customer',
                     [UserRole.WORKER]: '/worker',
@@ -184,7 +120,6 @@ export class AppService {
         }
     }
 
-    // New API authentication methods
     async login(email: string, password: string): Promise<boolean> {
         if (!USE_REAL_API) {
             this.toastService.error('Please enable API mode to use login');
@@ -211,6 +146,7 @@ export class AppService {
             this.router.navigate([loginRoleRoute[localUser.role]]);
             
             this.toastService.success('Login successful');
+            this.initializationCompleteSubject.next(true);
             await this.loadTasksFromApi();
             await this.loadDisputesFromApi();
             return true;
@@ -256,6 +192,7 @@ export class AppService {
             this.router.navigate([roleToRoute[localUser.role]]);
             
             this.toastService.success('Registration successful');
+            this.initializationCompleteSubject.next(true);
             await this.loadTasksFromApi();
             await this.loadDisputesFromApi();
             return true;
@@ -299,18 +236,23 @@ export class AppService {
             const localTask = ApiMapper.toLocalTask(apiTask);
             console.log('Mapped to local task:', localTask);
             
-            // Add the new task to the beginning of the list
             const currentTasks = this.tasksSubject.value;
             this.tasksSubject.next([localTask, ...currentTasks]);
             
             this.toastService.success('Task created successfully');
-            
-            // Refresh all tasks from API to ensure consistency
             await this.loadTasksFromApi();
         } catch (error: any) {
             console.error('Error creating task:', error);
             this.toastService.error(error?.error?.message || 'Failed to create task');
         }
+    }
+
+    createTask(taskData: any) {
+        return this.postTask(taskData);
+    }
+
+    acceptBid(taskId: string, bidId: string) {
+        return this.selectWorker(taskId, bidId);
     }
 
     placeBid(bidData: any) {
@@ -768,6 +710,7 @@ export class AppService {
         }
         
         this.setCurrentUser(null);
+        this.initializationCompleteSubject.next(false);
         localStorage.removeItem('taskflow_appstate');
         this.router.navigate(['/']);
     }
