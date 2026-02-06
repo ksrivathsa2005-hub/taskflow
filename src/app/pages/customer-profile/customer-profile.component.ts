@@ -32,7 +32,6 @@ import {
     standalone: true,
     imports: [CommonModule, FormsModule, LucideAngularModule, NavbarComponent],
     template: `
-        <app-navbar></app-navbar>
         <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 py-8 px-4">
             <div class="max-w-4xl mx-auto">
                 <!-- Back Button -->

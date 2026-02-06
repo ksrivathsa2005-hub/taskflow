@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AppService } from '../../app.service';
 import { Task, User } from '../../types';
-import { PlatformActivityComponent } from '../../components/platform-activity/platform-activity.component';
 import {
     LucideAngularModule,
     Users,
@@ -20,7 +19,7 @@ import { Observable, map } from 'rxjs';
 @Component({
     selector: 'app-admin-dashboard',
     standalone: true,
-    imports: [CommonModule, LucideAngularModule, PlatformActivityComponent],
+    imports: [CommonModule, LucideAngularModule],
     templateUrl: './admin-dashboard.component.html',
     styleUrls: ['./admin-dashboard.component.css']
 })

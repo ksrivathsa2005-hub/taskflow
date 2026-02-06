@@ -14,8 +14,6 @@ import { WorkerEarningsComponent } from './pages/worker-earnings/worker-earnings
 import { PostTaskComponent } from './pages/customer-dashboard/post-task/post-task.component';
 import { MyBookingsComponent } from './pages/customer-dashboard/my-bookings/my-bookings.component';
 import { PreviousBookingsComponent } from './pages/customer-dashboard/previous-bookings/previous-bookings.component';
-import { CustomerProfileComponent } from './pages/customer-profile/customer-profile.component';
-import { WorkerProfileComponent } from './pages/worker-profile/worker-profile.component';
 import { adminGuard } from './guards/admin.guard';
 import { customerGuard, workerGuard, authGuard } from './guards/auth.guard';
 
@@ -27,10 +25,8 @@ export const routes: Routes = [
     { path: 'customer/post-task', component: PostTaskComponent, canActivate: [customerGuard] },
     { path: 'customer/bookings', component: MyBookingsComponent, canActivate: [customerGuard] },
     { path: 'customer/previous-bookings', component: PreviousBookingsComponent, canActivate: [customerGuard] },
-    { path: 'customer/profile', component: CustomerProfileComponent, canActivate: [customerGuard] },
     { path: 'worker', component: WorkerDashboardComponent, canActivate: [workerGuard] },
     { path: 'worker/earnings', component: WorkerEarningsComponent, canActivate: [workerGuard] },
-    { path: 'worker/profile', component: WorkerProfileComponent, canActivate: [workerGuard] },
     { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
     { path: 'admin/users', component: UserManagementComponent, canActivate: [adminGuard] },
     { path: 'admin/reviews', component: TaskReviewComponent, canActivate: [adminGuard] },

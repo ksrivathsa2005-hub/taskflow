@@ -108,6 +108,12 @@ export class ReviewModalComponent {
     }
 
     async submitReview() {
+        // Prevent duplicate submissions
+        if (this.isSubmitting) {
+            console.log('Review submission already in progress');
+            return;
+        }
+
         this.showRatingError = this.rating === 0;
         this.showCommentError = !this.comment || this.comment.trim().length === 0;
 
@@ -144,37 +150,20 @@ export class ReviewModalComponent {
                 
                 this.toastService.success('Review submitted successfully!');
             } else {
-                // Mock mode - use localStorage
-                const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+                // Mock mode - use app service which updates tasks properly
+                console.log('Submitting review via mock service');
                 
-                const newReview = {
-                    reviewId: 'review_' + Date.now(),
-                    taskId: this.taskId,
-                    workerId: this.workerId,
-                    customerId: this.customerId,
+                const reviewData = {
+                    reviewerId: this.customerId,
+                    reviewerName: this.appService.currentUser?.name || 'Customer',
+                    revieweeId: this.workerId,
                     rating: this.rating,
-                    reviewText: this.comment,
-                    timestamp: new Date().toISOString()
+                    comment: this.comment
                 };
-
-                existingReviews.push(newReview);
-                localStorage.setItem('reviews', JSON.stringify(existingReviews));
-
-                // Update worker's average rating
-                const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-                const workerIndex = existingUsers.findIndex((u: any) => u.id === this.workerId);
                 
-                if (workerIndex >= 0) {
-                    const worker = existingUsers[workerIndex];
-                    const allReviewsForWorker = existingReviews.filter((r: any) => r.workerId === this.workerId);
-                    const avgRating = allReviewsForWorker.reduce((sum: number, r: any) => sum + r.rating, 0) / allReviewsForWorker.length;
-                    
-                    worker.rating = Math.round(avgRating * 10) / 10;
-                    worker.isBusy = false;
-                    existingUsers[workerIndex] = worker;
-                    localStorage.setItem('users', JSON.stringify(existingUsers));
-                }
-
+                // Use app service submitReview which calls mock API and updates tasks
+                this.appService.submitReview(this.taskId, reviewData);
+                
                 this.toastService.success('Review submitted successfully!');
             }
 

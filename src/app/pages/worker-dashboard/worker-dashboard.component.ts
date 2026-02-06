@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AppService } from '../../app.service';
 import { TaskCardComponent } from '../../components/task-card/task-card.component';
-import { PlatformActivityComponent } from '../../components/platform-activity/platform-activity.component';
 import { ToastService } from '../../services/toast.service';
 import { LocationApiService, City, Area } from '../../services/location-api.service';
 import { Task, TaskStatus, UserRole, User } from '../../types';
@@ -30,7 +29,7 @@ import { Observable, map, combineLatest } from 'rxjs';
 @Component({
     selector: 'app-worker-dashboard',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule, TaskCardComponent, PlatformActivityComponent],
+    imports: [CommonModule, FormsModule, LucideAngularModule, TaskCardComponent],
     templateUrl: './worker-dashboard.component.html',
     styleUrls: ['./worker-dashboard.component.css']
 })
@@ -161,8 +160,7 @@ export class WorkerDashboardComponent implements OnInit {
                 t.workerId === this.appService.currentUser?.id && 
                 (t.status === TaskStatus.TRAVELING ||
                  t.status === TaskStatus.ARRIVED ||
-                 t.status === TaskStatus.IN_PROGRESS ||
-                 t.status === TaskStatus.WORK_COMPLETED)
+                 t.status === TaskStatus.IN_PROGRESS)
             ))
         );
         
@@ -172,8 +170,7 @@ export class WorkerDashboardComponent implements OnInit {
                 t.workerId === this.appService.currentUser?.id && 
                 (t.status === TaskStatus.TRAVELING ||
                  t.status === TaskStatus.ARRIVED ||
-                 t.status === TaskStatus.IN_PROGRESS ||
-                 t.status === TaskStatus.WORK_COMPLETED)
+                 t.status === TaskStatus.IN_PROGRESS)
             ))
         );
         this.myCompletedTasks$ = this.appService.tasks$.pipe(

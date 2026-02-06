@@ -217,7 +217,8 @@ export class CustomerDashboardComponent implements OnInit {
         return status.replace(/_/g, ' ');
     }
 
-    formatDate(date: string): string {
+    formatDate(date: string | undefined): string {
+        if (!date) return 'N/A';
         return new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
     }
 
@@ -256,7 +257,7 @@ export class CustomerDashboardComponent implements OnInit {
     }
 
     getAverageRating(task: Task): number {
-        const reviews = (task as any).reviews || [];
+        const reviews = task.reviews || [];
         if (reviews.length === 0) return 0;
         const sum = reviews.reduce((acc: number, r: any) => acc + r.rating, 0);
         return +(sum / reviews.length).toFixed(1);
@@ -375,6 +376,13 @@ export class CustomerDashboardComponent implements OnInit {
     }
 
     openReviewModal(taskId: string, workerId: string | null | undefined) {
+        // Silently prevent opening modal if review already exists
+        const task = this.myTasks.find(t => t.id === taskId);
+        if (task && this.hasReview(task)) {
+            console.log('Task already has review, blocking modal');
+            return; // Already reviewed, do nothing
+        }
+        
         if (workerId) {
             this.reviewingTaskId = taskId;
             this.reviewingWorkerId = workerId;
@@ -385,6 +393,16 @@ export class CustomerDashboardComponent implements OnInit {
     handleReviewSubmit(event: any) {
         console.log('Review submitted:', event);
         this.showReviewModal = false;
+        
+        // Force refresh of tasks to ensure UI updates
+        this.appService.tasks$.subscribe(tasks => {
+            this.myTasks = tasks.filter(t => t.customerId === this.appService.currentUser?.id);
+            console.log('Tasks refreshed after review:', this.myTasks.map(t => ({
+                id: t.id,
+                title: t.title,
+                reviewCount: t.reviews?.length || 0
+            })));
+        });
     }
 
     openDisputeModal(taskId: string) {

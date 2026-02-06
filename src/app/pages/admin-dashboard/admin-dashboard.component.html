@@ -12,7 +12,7 @@
         </button>
         <button (click)="navigateToTaskReview()" class="px-6 py-4 bg-indigo-50 border border-indigo-200 rounded-xl hover:bg-indigo-100 transition-colors text-left">
             <p class="font-bold text-indigo-900">Review Tasks</p>
-            <p class="text-sm text-indigo-700 mt-1">Approve or reject pending tasks</p>
+            <p class="text-sm text-indigo-700 mt-1">Check prevoius activity</p>
         </button>
         <button (click)="navigateToDisputes()" class="px-6 py-4 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors text-left">
             <p class="font-bold text-red-900">Manage Disputes</p>
@@ -29,34 +29,6 @@
             <div>
                 <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{stat.label}}</p>
                 <p class="text-2xl font-black text-slate-900">{{stat.value}}</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        <div class="lg:col-span-2">
-            <app-platform-activity></app-platform-activity>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-6">System Health</h3>
-            <div class="space-y-6">
-                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <div class="flex items-center">
-                        <lucide-icon [img]="CheckCircle" class="w-5 h-5 text-emerald-500 mr-3"></lucide-icon>
-                        <span class="text-sm font-bold text-slate-700">API Gateway</span>
-                    </div>
-                    <span
-                        class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">STABLE</span>
-                </div>
-                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <div class="flex items-center">
-                        <lucide-icon [img]="ShieldAlert" class="w-5 h-5 text-amber-500 mr-3"></lucide-icon>
-                        <span class="text-sm font-bold text-slate-700">Payment Engine</span>
-                    </div>
-                    <span
-                        class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">STABLE</span>
-                </div>
             </div>
         </div>
     </div>
