@@ -74,6 +74,10 @@
                     <p *ngIf="task.reviews && task.reviews.length > 0" class="text-xs text-slate-500">
                         {{task.reviews.length}} review<span *ngIf="task.reviews.length !== 1">s</span>
                     </p>
+                    <!-- Show review comment if available -->
+                    <div *ngIf="task.reviews && task.reviews.length > 0" class="mt-2 p-3 bg-slate-50 rounded-lg border border-slate-100 italic text-sm text-slate-600">
+                        "{{task.reviews[0].comment}}"
+                    </div>
                 </div>
 
                 <!-- Task Details -->

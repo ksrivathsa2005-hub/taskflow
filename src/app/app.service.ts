@@ -589,16 +589,32 @@ export class AppService {
     }
 
     // Review Operations
-    submitReview(taskId: string, reviewData: any) {
-        const review = this.mockApi.submitReview(taskId, reviewData);
-        const updatedTasks = this.mockApi.getAllTasks();
-        this.tasksSubject.next(updatedTasks);
+    async submitReview(taskId: string, reviewData: any) {
+        if (USE_REAL_API) {
+            try {
+                const request = {
+                    taskId: taskId,
+                    revieweeId: reviewData.workerId || reviewData.revieweeId,
+                    rating: reviewData.rating,
+                    comment: reviewData.text || reviewData.comment
+                };
+                await firstValueFrom(this.apiService.createReview(request));
+                this.toastService.success('Review submitted successfully');
+                await this.loadTasksFromApi();
+            } catch (error: any) {
+                console.error('Error submitting review:', error);
+                this.toastService.error(error?.error?.message || 'Failed to submit review');
+            }
+        } else {
+            const review = this.mockApi.submitReview(taskId, reviewData);
+            const updatedTasks = this.mockApi.getAllTasks();
+            this.tasksSubject.next(updatedTasks);
 
-        const updatedUsers = this.mockApi.getAllUsers();
-        this.usersSubject.next(updatedUsers);
-        this.saveToLocalStorage();
-
-        return review;
+            const updatedUsers = this.mockApi.getAllUsers();
+            this.usersSubject.next(updatedUsers);
+            this.saveToLocalStorage();
+            this.toastService.success('Review submitted successfully');
+        }
     }
 
     // Dispute Operations

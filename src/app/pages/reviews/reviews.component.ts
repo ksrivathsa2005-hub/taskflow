@@ -73,78 +73,76 @@ import { firstValueFrom } from 'rxjs';
                 </div>
 
                 <!-- Reviews List -->
-                <div *ngIf="isLoading" class="bg-white rounded-lg shadow-md p-12 text-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p class="text-gray-600 text-lg">Loading reviews...</p>
+                <div *ngIf="isLoading" class="bg-white rounded-[2.5rem] shadow-xl p-16 text-center border border-slate-100">
+                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-indigo-600 border-t-transparent mx-auto mb-6"></div>
+                    <p class="text-slate-600 text-xl font-bold">Loading reviews...</p>
                 </div>
 
-                <div *ngIf="!isLoading && filteredReviews.length === 0" class="bg-white rounded-lg shadow-md p-12 text-center">
-                    <div class="text-gray-300 text-6xl mb-4">★</div>
-                    <p class="text-gray-600 text-lg font-semibold mb-2">No reviews found</p>
-                    <p class="text-gray-500 text-sm">Reviews will appear here when customers complete and rate tasks.</p>
+                <div *ngIf="!isLoading && filteredReviews.length === 0" class="bg-white rounded-[2.5rem] shadow-xl p-16 text-center border border-slate-100">
+                    <div class="text-slate-200 text-8xl mb-6">★</div>
+                    <p class="text-slate-900 text-2xl font-black mb-3">No reviews found</p>
+                    <p class="text-slate-500 font-medium">Reviews will appear here when customers complete and rate tasks.</p>
                 </div>
 
-                <div *ngIf="!isLoading" class="space-y-6">"
-                    <div *ngFor="let review of filteredReviews" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div *ngIf="!isLoading" class="space-y-8">
+                    <div *ngFor="let review of filteredReviews" class="bg-white rounded-[2.5rem] shadow-xl p-8 hover:shadow-2xl transition-all border border-slate-100">
                         <!-- Task Info Header -->
-                        <div class="mb-4 pb-4 border-b border-gray-200">
-                            <div class="flex items-center justify-between">
+                        <div class="mb-6 pb-6 border-b border-slate-100">
+                            <div class="flex items-center justify-between flex-wrap gap-4">
                                 <div>
-                                    <h3 class="font-bold text-lg text-gray-900">{{ getTaskTitle(review.taskId) }}</h3>
-                                    <p class="text-sm text-gray-500">Task #{{ review.taskId.substring(0, 8) }}...</p>
+                                    <h3 class="font-black text-xl text-slate-900 mb-1">{{ getTaskTitle(review.taskId) }}</h3>
+                                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Task ID: #{{ review.taskId.substring(0, 8) }}</p>
                                 </div>
-                                <div class="flex items-center gap-1">
+                                <div class="flex items-center gap-1 bg-amber-50 px-4 py-2 rounded-2xl">
                                     <span *ngFor="let i of [1,2,3,4,5]" class="text-2xl" 
-                                        [class.text-yellow-400]="i <= review.rating"
-                                        [class.text-gray-300]="i > review.rating">★</span>
+                                        [class.text-amber-400]="i <= review.rating"
+                                        [class.text-slate-200]="i > review.rating">★</span>
+                                    <span class="ml-2 font-black text-amber-700 text-lg">{{ review.rating }}</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Reviewer Info -->
-                        <div class="flex items-start gap-4 mb-4">
+                        <div class="flex flex-col md:flex-row items-start gap-6 mb-6">
                             <img [src]="getReviewerAvatar(review)" alt="{{ review.reviewerName }}" 
-                                class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between mb-2">
+                                class="w-16 h-16 rounded-[1.5rem] object-cover border-4 border-slate-50 shadow-lg">
+                            <div class="flex-1 w-full">
+                                <div class="flex items-center justify-between mb-4">
                                     <div>
-                                        <p class="font-semibold text-gray-900">{{ review.reviewerName }}</p>
-                                        <p class="text-sm text-gray-500">{{ review.createdDate | date: 'MMM d, y • h:mm a' }}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="flex items-center gap-1">
-                                            <span class="font-bold text-2xl text-gray-900">{{ review.rating }}</span>
-                                            <span class="text-gray-500">/5</span>
-                                        </div>
+                                        <p class="font-black text-slate-900 text-lg">{{ review.reviewerName }}</p>
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{{ review.createdDate | date: 'MMM d, y • h:mm a' }}</p>
                                     </div>
                                 </div>
                                 
                                 <!-- Review Comment -->
-                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                                    <p class="text-gray-800 leading-relaxed">{{ review.comment || 'No comment provided' }}</p>
+                                <div class="bg-slate-50 rounded-[2rem] p-6 border border-slate-100 relative">
+                                    <span class="absolute -top-4 -left-2 text-6xl text-indigo-200 opacity-50 font-serif">"</span>
+                                    <p class="text-slate-700 font-medium leading-relaxed relative z-10">{{ review.comment || 'No comment provided' }}</p>
+                                    <span class="absolute -bottom-10 -right-2 text-6xl text-indigo-200 opacity-50 font-serif rotate-180">"</span>
                                 </div>
 
                                 <!-- Worker Info -->
-                                <div class="mt-3 text-sm text-gray-600">
-                                    <span class="font-medium">Worker:</span> {{ getWorkerName(review.revieweeId) }}
+                                <div class="mt-6 flex items-center gap-2">
+                                    <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Expert:</span>
+                                    <span class="text-sm font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">{{ getWorkerName(review.revieweeId) }}</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="flex items-center justify-between text-sm pt-4 border-t border-gray-100">
+                        <div class="flex items-center justify-between text-sm pt-6 border-t border-slate-100">
                             <div class="flex gap-4">
-                                <button class="text-gray-600 hover:text-blue-600 flex items-center gap-1 transition-colors">
+                                <button class="bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 px-4 py-2 rounded-xl flex items-center gap-2 transition-all font-bold">
                                     <span>👍</span>
-                                    <span class="font-medium">Helpful</span>
+                                    <span>Helpful</span>
                                 </button>
-                                <button class="text-gray-600 hover:text-red-600 flex items-center gap-1 transition-colors">
+                                <button class="bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 px-4 py-2 rounded-xl flex items-center gap-2 transition-all font-bold">
                                     <span>🚩</span>
-                                    <span class="font-medium">Report</span>
+                                    <span>Report</span>
                                 </button>
                             </div>
                             <button *ngIf="canDelete(review)" (click)="deleteReview(review)" 
-                                class="text-red-600 hover:text-red-800 flex items-center gap-1 font-medium transition-colors">
+                                class="text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl flex items-center gap-2 font-bold transition-all">
                                 <span>🗑️</span>
                                 <span>Delete</span>
                             </button>

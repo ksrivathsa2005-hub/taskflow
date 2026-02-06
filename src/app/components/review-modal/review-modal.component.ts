@@ -118,65 +118,11 @@ export class ReviewModalComponent {
         this.isSubmitting = true;
 
         try {
-            const USE_REAL_API = true; // Match app.service setting
-            
-            if (USE_REAL_API && this.apiService.isLoggedIn) {
-                // Submit review via API
-                console.log('Submitting review via API:', {
-                    taskId: this.taskId,
-                    revieweeId: this.workerId,
-                    rating: this.rating,
-                    comment: this.comment
-                });
-                
-                const reviewRequest = {
-                    taskId: this.taskId,
-                    revieweeId: this.workerId,
-                    rating: this.rating,
-                    comment: this.comment
-                };
-                
-                await firstValueFrom(this.apiService.createReview(reviewRequest));
-                console.log('Review submitted successfully via API');
-                
-                // Refresh tasks to get updated reviews
-                await this.appService.loadTasksFromApi();
-                
-                this.toastService.success('Review submitted successfully!');
-            } else {
-                // Mock mode - use localStorage
-                const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-                
-                const newReview = {
-                    reviewId: 'review_' + Date.now(),
-                    taskId: this.taskId,
-                    workerId: this.workerId,
-                    customerId: this.customerId,
-                    rating: this.rating,
-                    reviewText: this.comment,
-                    timestamp: new Date().toISOString()
-                };
-
-                existingReviews.push(newReview);
-                localStorage.setItem('reviews', JSON.stringify(existingReviews));
-
-                // Update worker's average rating
-                const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-                const workerIndex = existingUsers.findIndex((u: any) => u.id === this.workerId);
-                
-                if (workerIndex >= 0) {
-                    const worker = existingUsers[workerIndex];
-                    const allReviewsForWorker = existingReviews.filter((r: any) => r.workerId === this.workerId);
-                    const avgRating = allReviewsForWorker.reduce((sum: number, r: any) => sum + r.rating, 0) / allReviewsForWorker.length;
-                    
-                    worker.rating = Math.round(avgRating * 10) / 10;
-                    worker.isBusy = false;
-                    existingUsers[workerIndex] = worker;
-                    localStorage.setItem('users', JSON.stringify(existingUsers));
-                }
-
-                this.toastService.success('Review submitted successfully!');
-            }
+            await this.appService.submitReview(this.taskId, {
+                revieweeId: this.workerId,
+                rating: this.rating,
+                comment: this.comment
+            });
 
             // Show success message
             this.successMessage = '✓ Review submitted successfully!';
@@ -189,7 +135,7 @@ export class ReviewModalComponent {
 
         } catch (error: any) {
             console.error('Error submitting review:', error);
-            this.toastService.error(error?.error?.message || 'Error submitting review. Please try again.');
+            // Error handling is now partly in appService, but we keep isSubmitting reset here
             this.isSubmitting = false;
         }
     }

@@ -11,14 +11,17 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 flex items-center justify-center p-4">
-      <div class="max-w-md w-full">
+    <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 flex items-center justify-center p-6">
+      <div class="max-w-lg w-full">
         <!-- Card -->
-        <div class="bg-white rounded-2xl shadow-xl p-8">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100 p-10 md:p-12 border border-slate-100">
           <!-- Logo/Header -->
-          <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">TaskFlow</h1>
-            <p class="text-gray-600">{{ isRegisterMode ? 'Create your account' : 'Welcome back' }}</p>
+          <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl mb-6 shadow-lg shadow-indigo-200">
+                <lucide-icon [img]="LogIn" class="w-8 h-8 text-white"></lucide-icon>
+            </div>
+            <h1 class="text-4xl font-black text-slate-900 mb-3 tracking-tight">TaskFlow</h1>
+            <p class="text-slate-500 font-medium text-lg">{{ isRegisterMode ? 'Create your account' : 'Welcome back' }}</p>
           </div>
 
           <!-- Error Alert -->
@@ -40,8 +43,8 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
           <!-- Login/Register Form -->
           <form (ngSubmit)="handleSubmit()" #authForm="ngForm">
             <!-- Name Field (Register Only) -->
-            <div *ngIf="isRegisterMode" class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+            <div *ngIf="isRegisterMode" class="mb-6">
+              <label class="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
               <input
                 type="text"
                 name="name"
@@ -51,11 +54,11 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 maxlength="50"
                 pattern="^[a-zA-Z\s]+$"
                 #nameField="ngModel"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-medium"
                 [class.border-red-500]="nameField.invalid && nameField.touched"
                 placeholder="Enter your full name"
               />
-              <p *ngIf="nameField.invalid && nameField.touched" class="mt-1 text-xs text-red-600">
+              <p *ngIf="nameField.invalid && nameField.touched" class="mt-2 text-xs text-red-600 font-bold">
                 <span *ngIf="nameField.errors?.['required']">Name is required</span>
                 <span *ngIf="nameField.errors?.['minlength']">Name must be at least 3 characters</span>
                 <span *ngIf="nameField.errors?.['pattern']">Name can only contain letters and spaces</span>
@@ -63,8 +66,8 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
             </div>
 
             <!-- Email Field -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
               <input
                 type="email"
                 name="email"
@@ -73,19 +76,19 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 email
                 pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                 #emailField="ngModel"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-medium"
                 [class.border-red-500]="emailField.invalid && emailField.touched"
                 placeholder="Enter your email"
               />
-              <p *ngIf="emailField.invalid && emailField.touched" class="mt-1 text-xs text-red-600">
+              <p *ngIf="emailField.invalid && emailField.touched" class="mt-2 text-xs text-red-600 font-bold">
                 <span *ngIf="emailField.errors?.['required']">Email is required</span>
                 <span *ngIf="emailField.errors?.['email'] || emailField.errors?.['pattern']">Please enter a valid email address</span>
               </p>
             </div>
 
             <!-- Password Field -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-slate-700 mb-2">Password</label>
               <input
                 type="password"
                 name="password"
@@ -94,42 +97,40 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 minlength="6"
                 maxlength="50"
                 #passwordField="ngModel"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 outline-none transition-all font-medium"
                 [class.border-red-500]="passwordField.invalid && passwordField.touched"
                 placeholder="Enter your password"
               />
-              <p *ngIf="isRegisterMode && !passwordField.touched" class="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
-              <p *ngIf="passwordField.invalid && passwordField.touched" class="mt-1 text-xs text-red-600">
+              <p *ngIf="isRegisterMode && !passwordField.touched" class="mt-2 text-xs text-slate-500 font-medium italic">Minimum 6 characters</p>
+              <p *ngIf="passwordField.invalid && passwordField.touched" class="mt-2 text-xs text-red-600 font-bold">
                 <span *ngIf="passwordField.errors?.['required']">Password is required</span>
                 <span *ngIf="passwordField.errors?.['minlength']">Password must be at least 6 characters</span>
               </p>
             </div>
 
             <!-- Role Selection (Register Only) -->
-            <div *ngIf="isRegisterMode" class="mb-6">
-              <label class="block text-sm font-medium text-gray-700 mb-2">I want to</label>
-              <div class="grid grid-cols-2 gap-3">
+            <div *ngIf="isRegisterMode" class="mb-10">
+              <label class="block text-sm font-bold text-slate-700 mb-3">I want to</label>
+              <div class="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   (click)="formData.role = UserRole.CUSTOMER"
-                  [class.ring-2]="formData.role === UserRole.CUSTOMER"
-                  [class.ring-indigo-600]="formData.role === UserRole.CUSTOMER"
+                  [class.border-indigo-600]="formData.role === UserRole.CUSTOMER"
                   [class.bg-indigo-50]="formData.role === UserRole.CUSTOMER"
-                  class="p-4 border-2 border-gray-200 rounded-lg hover:border-indigo-300 transition-all"
+                  class="p-5 border-2 border-slate-100 rounded-[1.5rem] hover:border-indigo-300 transition-all text-left group"
                 >
-                  <p class="font-semibold text-gray-900">Hire</p>
-                  <p class="text-xs text-gray-600 mt-1">Find service providers</p>
+                  <p class="font-black text-slate-900 group-hover:text-indigo-600 transition-colors">Hire</p>
+                  <p class="text-xs text-slate-500 mt-1 font-medium">Find service providers</p>
                 </button>
                 <button
                   type="button"
                   (click)="formData.role = UserRole.WORKER"
-                  [class.ring-2]="formData.role === UserRole.WORKER"
-                  [class.ring-indigo-600]="formData.role === UserRole.WORKER"
+                  [class.border-indigo-600]="formData.role === UserRole.WORKER"
                   [class.bg-indigo-50]="formData.role === UserRole.WORKER"
-                  class="p-4 border-2 border-gray-200 rounded-lg hover:border-indigo-300 transition-all"
+                  class="p-5 border-2 border-slate-100 rounded-[1.5rem] hover:border-indigo-300 transition-all text-left group"
                 >
-                  <p class="font-semibold text-gray-900">Work</p>
-                  <p class="text-xs text-gray-600 mt-1">Provide services</p>
+                  <p class="font-black text-slate-900 group-hover:text-indigo-600 transition-colors">Work</p>
+                  <p class="text-xs text-slate-500 mt-1 font-medium">Provide services</p>
                 </button>
               </div>
             </div>
@@ -138,12 +139,12 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
             <button
               type="submit"
               [disabled]="isLoading || !authForm.valid"
-              class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              class="w-full py-4 px-6 bg-slate-900 hover:bg-black text-white font-black rounded-2xl transition-all disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl active:scale-[0.98]"
             >
-              <lucide-icon *ngIf="isLoading" [img]="Loader2" class="w-5 h-5 animate-spin"></lucide-icon>
-              <lucide-icon *ngIf="!isLoading && !isRegisterMode" [img]="LogIn" class="w-5 h-5"></lucide-icon>
-              <lucide-icon *ngIf="!isLoading && isRegisterMode" [img]="UserPlus" class="w-5 h-5"></lucide-icon>
-              <span>{{ isLoading ? 'Please wait...' : (isRegisterMode ? 'Create Account' : 'Sign In') }}</span>
+              <lucide-icon *ngIf="isLoading" [img]="Loader2" class="w-6 h-6 animate-spin"></lucide-icon>
+              <lucide-icon *ngIf="!isLoading && !isRegisterMode" [img]="LogIn" class="w-6 h-6"></lucide-icon>
+              <lucide-icon *ngIf="!isLoading && isRegisterMode" [img]="UserPlus" class="w-6 h-6"></lucide-icon>
+              <span class="text-lg">{{ isLoading ? 'Processing...' : (isRegisterMode ? 'Create Account' : 'Sign In') }}</span>
             </button>
           </form>
 
