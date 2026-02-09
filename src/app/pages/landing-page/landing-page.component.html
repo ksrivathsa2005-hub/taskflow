@@ -1,109 +1,386 @@
 <div class="bg-white">
-    <!-- Hero Section -->
-    <section class="relative pt-20 pb-32 overflow-hidden">
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-10">
-            <div class="absolute top-0 left-0 w-96 h-96 bg-indigo-500 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl"></div>
+
+    <!-- ═══════ HERO SECTION ═══════ -->
+    <section class="relative pt-24 pb-36 overflow-hidden bg-grid">
+        <!-- Animated gradient blobs -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
+            <div class="absolute top-10 left-[10%] w-[500px] h-[500px] bg-indigo-400 rounded-full blur-[120px] opacity-[0.07] animate-float-slow"></div>
+            <div class="absolute bottom-10 right-[10%] w-[500px] h-[500px] bg-blue-400 rounded-full blur-[120px] opacity-[0.07] animate-float-reverse"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-violet-400 rounded-full blur-[100px] opacity-[0.05] animate-float"></div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div
-                class="inline-flex items-center space-x-2 bg-indigo-50 border border-indigo-100 rounded-full px-4 py-1.5 mb-8">
-                <lucide-icon [img]="ShieldCheck" class="w-4 h-4 text-indigo-600"></lucide-icon>
-                <span class="text-xs font-bold text-indigo-700 uppercase tracking-widest">India's Most Trusted
-                    Network</span>
+        <!-- CSS Particles -->
+        <div class="absolute inset-0 -z-10 overflow-hidden">
+            <span class="particle particle-1" style="top: 15%; left: 10%;"></span>
+            <span class="particle particle-2" style="top: 25%; left: 85%;"></span>
+            <span class="particle particle-3" style="top: 60%; left: 20%;"></span>
+            <span class="particle particle-1" style="top: 70%; left: 75%;"></span>
+            <span class="particle particle-2" style="top: 40%; left: 50%;"></span>
+            <span class="particle particle-3" style="top: 80%; left: 40%;"></span>
+            <span class="particle particle-1" style="top: 10%; left: 60%;"></span>
+            <span class="particle particle-2" style="top: 50%; left: 30%;"></span>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <!-- Left: Text content -->
+                <div class="text-center lg:text-left">
+                    <div class="hero-badge opacity-0 inline-flex items-center space-x-2 bg-indigo-50 border border-indigo-100 rounded-full px-5 py-2 mb-8">
+                        <lucide-icon [img]="ShieldCheck" class="w-4 h-4 text-indigo-600"></lucide-icon>
+                        <span class="text-xs font-bold text-indigo-700 uppercase tracking-widest">India's Most Trusted Network</span>
+                    </div>
+
+                    <h1 class="hero-title opacity-0 text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-6">
+                        Hire the best
+                        <span class="text-gradient block mt-2">Experts locally.</span>
+                    </h1>
+
+                    <p class="hero-subtitle opacity-0 max-w-xl text-lg text-slate-500 mb-10 leading-relaxed mx-auto lg:mx-0">
+                        From plumbing to electrical work, TaskFlow connects you with verified service partners at
+                        transparent prices. Reliable, fast, and backed by our quality guarantee.
+                    </p>
+
+                    <div class="hero-cta opacity-0 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                        <button (click)="goToLogin()"
+                            class="btn-glow w-full sm:w-auto px-10 py-4 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 flex items-center justify-center group animate-pulse-glow">
+                            Get Started Free
+                            <lucide-icon [img]="ArrowRight" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"></lucide-icon>
+                        </button>
+                        <button class="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-bold rounded-2xl border-2 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 transition-all flex items-center justify-center group">
+                            <lucide-icon [img]="Play" class="mr-2 w-5 h-5 text-indigo-500"></lucide-icon>
+                            Watch Demo
+                        </button>
+                    </div>
+
+                    <!-- Trust badges -->
+                    <div class="mt-12 flex flex-wrap items-center justify-center lg:justify-start gap-6">
+                        <div *ngFor="let badge of trustBadges"
+                            class="flex items-center space-x-2 text-slate-500 text-sm">
+                            <lucide-icon [img]="badge.icon" class="w-4 h-4 text-indigo-500"></lucide-icon>
+                            <span class="font-medium">{{ badge.label }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Hero Visual -->
+                <div class="hidden lg:block relative">
+                    <div class="relative">
+                        <!-- Main hero image -->
+                        <div class="relative rounded-3xl overflow-hidden shadow-2xl animate-float border border-slate-100">
+                            <img
+                                src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=600&h=500&fit=crop"
+                                alt="Professional service expert"
+                                class="w-full h-[460px] object-cover"
+                                loading="eager"
+                            />
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
+
+                            <!-- Floating stat card 1 -->
+                            <div class="absolute bottom-6 left-6 glass rounded-2xl px-5 py-3 animate-fade-up">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                                        <lucide-icon [img]="CheckCircle" class="w-5 h-5 text-green-600"></lucide-icon>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-500 uppercase">Task Completed</p>
+                                        <p class="text-lg font-black text-slate-900">Plumbing Fix</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Floating rating card -->
+                        <div class="absolute -top-4 -right-4 glass rounded-2xl px-5 py-4 shadow-lg animate-float-slow z-10">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span *ngFor="let s of getStarArray(5)" class="text-amber-400 text-lg">★</span>
+                            </div>
+                            <p class="text-xs font-bold text-slate-600">25,000+ 5-star reviews</p>
+                        </div>
+
+                        <!-- Floating verified badge -->
+                        <div class="absolute -bottom-3 -right-6 bg-indigo-600 text-white rounded-2xl px-5 py-3 shadow-xl animate-float-reverse z-10">
+                            <div class="flex items-center space-x-2">
+                                <lucide-icon [img]="ShieldCheck" class="w-5 h-5"></lucide-icon>
+                                <span class="text-sm font-bold">Verified Expert</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ STATS SECTION (Animated Counters) ═══════ -->
+    <section #statsSection class="py-16 bg-slate-50 border-y border-slate-100 relative overflow-hidden">
+        <div class="absolute inset-0 bg-dots opacity-30"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div *ngFor="let stat of stats; let i = index"
+                    class="text-center group"
+                    data-aos="fade-up"
+                    [attr.data-aos-delay]="i * 100">
+                    <p class="stat-value text-4xl md:text-5xl font-black text-slate-900 mb-2 tracking-tight">0</p>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider">{{ stat.label }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ TRUST MARQUEE ═══════ -->
+    <section class="py-8 bg-white border-b border-slate-100 overflow-hidden">
+        <div class="flex animate-marquee whitespace-nowrap">
+            <div class="flex items-center space-x-12 mx-6" *ngFor="let _ of [1,2]">
+                <span class="text-slate-300 font-black text-xl tracking-wider uppercase">★ Verified Experts</span>
+                <span class="text-slate-300 font-black text-xl tracking-wider uppercase">★ Transparent Pricing</span>
+                <span class="text-slate-300 font-black text-xl tracking-wider uppercase">★ 12+ Cities</span>
+                <span class="text-slate-300 font-black text-xl tracking-wider uppercase">★ Quality Guaranteed</span>
+                <span class="text-slate-300 font-black text-xl tracking-wider uppercase">★ Instant Support</span>
+                <span class="text-slate-300 font-black text-xl tracking-wider uppercase">★ 25,000+ Tasks Done</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ HOW IT WORKS ═══════ -->
+    <section #stepsSection class="py-28 bg-white relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <div class="inline-flex items-center space-x-2 bg-indigo-50 border border-indigo-100 rounded-full px-4 py-1.5 mb-6"
+                    data-aos="fade-up">
+                    <lucide-icon [img]="Sparkles" class="w-4 h-4 text-indigo-600"></lucide-icon>
+                    <span class="text-xs font-bold text-indigo-700 uppercase tracking-widest">Simple Process</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-4" data-aos="fade-up" data-aos-delay="100">
+                    How TaskFlow Works
+                </h2>
+                <p class="text-slate-500 max-w-xl mx-auto text-lg" data-aos="fade-up" data-aos-delay="200">
+                    From posting a task to getting it done — three easy steps.
+                </p>
             </div>
 
-            <h1 class="text-5xl md:text-7xl font-black text-slate-900 leading-tight mb-6">
-                Hire the best <br />
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">Experts
-                    locally.</span>
-            </h1>
+            <div class="steps-container relative">
+                <!-- Connector line (desktop) -->
+                <div class="hidden md:block absolute top-24 left-[16.67%] right-[16.67%] h-[2px] bg-slate-100">
+                    <div class="step-connector-line h-full bg-gradient-to-r from-indigo-500 via-blue-500 to-emerald-500" style="width: 0%;"></div>
+                </div>
 
-            <p class="max-w-2xl mx-auto text-lg text-slate-500 mb-10 leading-relaxed">
-                From plumbing to electrical work, TaskFlow connects you with verified service partners at fixed or
-                bid-based prices. Transparent, reliable, and fast.
-            </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+                    <div *ngFor="let step of steps; let i = index"
+                        class="step-card text-center relative">
+                        <!-- Step number circle -->
+                        <div class="relative inline-flex mb-8">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg relative z-10 mx-auto"
+                                [ngClass]="{
+                                    'from-indigo-500 to-indigo-600 shadow-indigo-200': i === 0,
+                                    'from-blue-500 to-blue-600 shadow-blue-200': i === 1,
+                                    'from-emerald-500 to-emerald-600 shadow-emerald-200': i === 2
+                                }">
+                                <lucide-icon [img]="step.icon" class="w-8 h-8 text-white"></lucide-icon>
+                            </div>
+                            <span class="absolute -top-2 -right-2 w-8 h-8 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center text-xs font-black text-slate-600 z-20">
+                                {{ step.number }}
+                            </span>
+                        </div>
 
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button (click)="goToLogin()"
-                    class="w-full sm:w-auto px-10 py-4 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 flex items-center justify-center group">
-                    Get Started
-                    <lucide-icon [img]="ArrowRight"
-                        class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"></lucide-icon>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">{{ step.title }}</h3>
+                        <p class="text-slate-500 leading-relaxed max-w-xs mx-auto">{{ step.desc }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ CATEGORIES ═══════ -->
+    <section #categoriesSection class="py-28 bg-slate-50 relative overflow-hidden">
+        <div class="absolute inset-0 bg-grid opacity-40"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-14">
+                <div class="max-w-xl mb-6 sm:mb-0">
+                    <div class="inline-flex items-center space-x-2 bg-indigo-50 border border-indigo-100 rounded-full px-4 py-1.5 mb-4"
+                        data-aos="fade-up">
+                        <lucide-icon [img]="Globe" class="w-4 h-4 text-indigo-600"></lucide-icon>
+                        <span class="text-xs font-bold text-indigo-700 uppercase tracking-widest">Services</span>
+                    </div>
+                    <h2 class="text-4xl font-black text-slate-900 mb-4" data-aos="fade-up" data-aos-delay="100">
+                        What do you need done?
+                    </h2>
+                    <p class="text-slate-500 text-lg" data-aos="fade-up" data-aos-delay="200">
+                        Choose from our most popular service categories.
+                    </p>
+                </div>
+                <button class="hidden sm:flex items-center text-indigo-600 font-bold text-sm hover:underline group"
+                    data-aos="fade-left">
+                    View all categories
+                    <lucide-icon [img]="ArrowRight" class="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform"></lucide-icon>
                 </button>
             </div>
-        </div>
-    </section>
 
-    <!-- Stats Section -->
-    <section class="py-12 bg-slate-50 border-y border-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                <div *ngFor="let stat of stats" class="text-center">
-                    <p class="text-3xl font-black text-slate-900 mb-1">{{stat.value}}</p>
-                    <p class="text-sm font-medium text-slate-500">{{stat.label}}</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Categories -->
-    <section class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between mb-12">
-            <div class="max-w-xl">
-                <h2 class="text-3xl font-extrabold text-slate-900 mb-4">What do you need done?</h2>
-                <p class="text-slate-500">Choose from our most popular service categories.</p>
-            </div>
-            <button class="hidden sm:flex items-center text-indigo-600 font-bold text-sm hover:underline">
-                View all categories <lucide-icon [img]="ArrowRight" class="ml-1 w-4 h-4"></lucide-icon>
-            </button>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div *ngFor="let cat of CATEGORIES"
-                class="group p-6 bg-white border border-slate-100 rounded-2xl hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-50 transition-all text-center cursor-pointer">
-                <div
-                    class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors text-slate-400">
-                    <lucide-icon [img]="iconMap[cat.icon]" class="w-5 h-5"></lucide-icon>
-                </div>
-                <h3 class="text-sm font-bold text-slate-800">{{cat.name}}</h3>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Grid -->
-    <section class="py-24 bg-slate-900 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-black mb-4">Designed for confidence.</h2>
-                <p class="text-slate-400 max-w-xl mx-auto">We've built a platform where trust is the primary currency.
-                    Quality and safety are never compromised.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div *ngFor="let feature of FEATURES" class="bg-slate-800/50 p-8 rounded-3xl border border-slate-700">
-                    <div class="bg-indigo-600/20 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
-                        <lucide-icon [img]="iconMap[feature.icon]" class="w-6 h-6 text-indigo-600"></lucide-icon>
+            <div class="categories-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
+                <div *ngFor="let cat of CATEGORIES; let i = index"
+                    class="category-card group p-8 bg-white border border-slate-100 rounded-2xl hover:border-indigo-200 transition-all text-center cursor-pointer card-hover shine-effect"
+                    (click)="goToLogin()">
+                    <div class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-5 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all text-slate-400 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-indigo-100">
+                        <lucide-icon [img]="iconMap[cat.icon]" class="w-6 h-6"></lucide-icon>
                     </div>
-                    <h3 class="text-xl font-bold mb-4">{{feature.title}}</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">{{feature.desc}}</p>
+                    <h3 class="text-sm font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{{ cat.name }}</h3>
+                    <p class="text-xs text-slate-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Explore →</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="py-24">
-        <div
-            class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-[3rem] p-12 text-center text-white shadow-2xl shadow-indigo-200">
-            <h2 class="text-4xl font-black mb-6">Ready to find your expert?</h2>
-            <p class="text-indigo-100 mb-10 max-w-lg mx-auto">Join thousands of customers who have already found their
-                perfect service partner on TaskFlow.</p>
-            <button (click)="goToLogin()"
-                class="px-10 py-5 bg-white text-indigo-600 font-bold rounded-2xl hover:scale-105 transition-all shadow-xl">
-                Get Started Now
-            </button>
+    <!-- ═══════ FEATURES ═══════ -->
+    <section class="py-28 bg-slate-900 text-white relative overflow-hidden">
+        <!-- Animated background  -->
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-20 left-[20%] w-64 h-64 bg-indigo-500 rounded-full blur-[100px] animate-float-slow"></div>
+            <div class="absolute bottom-20 right-[20%] w-64 h-64 bg-blue-500 rounded-full blur-[100px] animate-float-reverse"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center mb-20">
+                <div class="inline-flex items-center space-x-2 bg-white/10 border border-white/10 rounded-full px-4 py-1.5 mb-6"
+                    data-aos="fade-up">
+                    <lucide-icon [img]="Heart" class="w-4 h-4 text-indigo-300"></lucide-icon>
+                    <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest">Why TaskFlow</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-black mb-4" data-aos="fade-up" data-aos-delay="100">
+                    Designed for confidence.
+                </h2>
+                <p class="text-slate-400 max-w-xl mx-auto text-lg" data-aos="fade-up" data-aos-delay="200">
+                    We've built a platform where trust is the primary currency.
+                    Quality and safety are never compromised.
+                </p>
+            </div>
+
+            <div class="features-grid grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div *ngFor="let feature of FEATURES; let i = index"
+                    class="feature-card glass-dark p-10 rounded-3xl border border-white/10 card-hover group">
+                    <div class="bg-indigo-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-indigo-500/30 group-hover:scale-110 transition-all">
+                        <lucide-icon [img]="iconMap[feature.icon]" class="w-7 h-7 text-indigo-400"></lucide-icon>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 group-hover:text-indigo-300 transition-colors">{{ feature.title }}</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">{{ feature.desc }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ TESTIMONIALS ═══════ -->
+    <section class="py-28 bg-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-50 rounded-full blur-[100px] opacity-50"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center space-x-2 bg-amber-50 border border-amber-100 rounded-full px-4 py-1.5 mb-6"
+                    data-aos="fade-up">
+                    <lucide-icon [img]="Star" class="w-4 h-4 text-amber-500"></lucide-icon>
+                    <span class="text-xs font-bold text-amber-700 uppercase tracking-widest">Testimonials</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-4" data-aos="fade-up" data-aos-delay="100">
+                    Loved by thousands.
+                </h2>
+                <p class="text-slate-500 max-w-xl mx-auto text-lg" data-aos="fade-up" data-aos-delay="200">
+                    Don't just take our word for it — hear from our satisfied customers.
+                </p>
+            </div>
+
+            <!-- Testimonial Carousel -->
+            <div class="max-w-4xl mx-auto" data-aos="fade-up" data-aos-delay="300">
+                <div class="relative">
+                    <!-- Large quote icon -->
+                    <div class="absolute -top-6 -left-4 text-indigo-100 z-0">
+                        <lucide-icon [img]="Quote" class="w-20 h-20 rotate-180 opacity-50"></lucide-icon>
+                    </div>
+
+                    <!-- Card -->
+                    <div class="relative bg-white border border-slate-100 rounded-3xl p-10 md:p-14 shadow-xl shadow-slate-100/50 z-10">
+                        <div class="testimonial-enter" [style.animation-name]="'testimonial-slide'">
+                            <!-- Stars -->
+                            <div class="flex items-center space-x-1 mb-6">
+                                <span *ngFor="let s of getStarArray(testimonials[currentTestimonial].rating)"
+                                    class="text-amber-400 text-xl star-animate"
+                                    [style.animation-delay]="s * 80 + 'ms'">★</span>
+                            </div>
+
+                            <!-- Quote -->
+                            <p class="text-xl md:text-2xl text-slate-700 leading-relaxed mb-10 font-medium italic">
+                                "{{ testimonials[currentTestimonial].text }}"
+                            </p>
+
+                            <!-- Author -->
+                            <div class="flex items-center space-x-4">
+                                <img [src]="testimonials[currentTestimonial].avatar"
+                                    [alt]="testimonials[currentTestimonial].name"
+                                    class="w-14 h-14 rounded-full object-cover border-2 border-indigo-100 shadow-md" />
+                                <div>
+                                    <p class="font-bold text-slate-900 text-lg">{{ testimonials[currentTestimonial].name }}</p>
+                                    <p class="text-sm text-slate-500">{{ testimonials[currentTestimonial].role }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="flex items-center justify-between mt-8">
+                        <!-- Dots -->
+                        <div class="flex items-center space-x-3">
+                            <button *ngFor="let t of testimonials; let i = index"
+                                (click)="goToTestimonial(i)"
+                                class="transition-all duration-300 rounded-full"
+                                [ngClass]="{
+                                    'w-8 h-2 bg-indigo-600': i === currentTestimonial,
+                                    'w-2 h-2 bg-slate-300 hover:bg-slate-400': i !== currentTestimonial
+                                }">
+                            </button>
+                        </div>
+
+                        <!-- Arrows -->
+                        <div class="flex items-center space-x-3">
+                            <button (click)="prevTestimonial()"
+                                class="w-12 h-12 rounded-full border-2 border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-300 transition-all hover:shadow-md">
+                                <lucide-icon [img]="ChevronLeft" class="w-5 h-5"></lucide-icon>
+                            </button>
+                            <button (click)="nextTestimonial()"
+                                class="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 hover:shadow-xl">
+                                <lucide-icon [img]="ChevronRight" class="w-5 h-5"></lucide-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ CTA SECTION ═══════ -->
+    <section class="py-28">
+        <div class="cta-card max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-800 rounded-[3rem] p-14 md:p-20 text-center text-white shadow-2xl shadow-indigo-200 overflow-hidden animated-gradient">
+                <!-- Decorative elements -->
+                <div class="absolute top-0 left-0 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
+                <div class="absolute bottom-0 right-0 w-60 h-60 bg-blue-400/10 rounded-full blur-3xl"></div>
+
+                <div class="relative z-10">
+                    <div class="inline-flex items-center space-x-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-8">
+                        <lucide-icon [img]="Sparkles" class="w-4 h-4 text-indigo-200"></lucide-icon>
+                        <span class="text-xs font-bold text-indigo-100 uppercase tracking-widest">Get Started Today</span>
+                    </div>
+
+                    <h2 class="text-4xl md:text-5xl font-black mb-6">Ready to find your expert?</h2>
+                    <p class="text-indigo-100 mb-12 max-w-lg mx-auto text-lg">
+                        Join thousands of customers who have already found their perfect service partner on TaskFlow.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button (click)="goToLogin()"
+                            class="px-10 py-5 bg-white text-indigo-600 font-bold rounded-2xl hover:scale-105 transition-all shadow-xl hover:shadow-2xl">
+                            Get Started Now
+                            <lucide-icon [img]="ArrowRight" class="ml-2 w-5 h-5 inline"></lucide-icon>
+                        </button>
+                        <button class="px-8 py-5 border-2 border-white/30 text-white font-bold rounded-2xl hover:bg-white/10 transition-all">
+                            Learn More
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 </div>

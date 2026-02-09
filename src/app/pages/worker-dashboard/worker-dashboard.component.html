@@ -2,11 +2,13 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-10">
         <!-- Sidebar -->
         <div class="lg:col-span-1 space-y-8">
-            <div class="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
-                <div class="h-24 bg-gradient-to-r from-indigo-600 to-blue-600"></div>
-                <div class="px-6 pb-8 -mt-12 text-center">
+            <div class="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-lg card-hover">
+                <div class="h-28 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 relative">
+                    <div class="absolute inset-0 bg-grid opacity-10"></div>
+                </div>
+                <div class="px-6 pb-8 -mt-14 text-center relative z-10">
                     <img [src]="currentUser?.avatar"
-                        class="w-24 h-24 rounded-[2rem] border-4 border-white mx-auto shadow-xl mb-4 object-cover" />
+                        class="w-24 h-24 rounded-[2rem] border-4 border-white mx-auto shadow-xl mb-4 object-cover ring-4 ring-indigo-100" />
                     <h2 class="text-2xl font-black text-slate-900">{{currentUser?.name}}</h2>
                     <div class="flex items-center justify-center space-x-1 mt-2 mb-6">
                         <lucide-icon [img]="Star" class="w-4 h-4 text-amber-500 fill-amber-500"></lucide-icon>
@@ -14,40 +16,58 @@
                         <span class="text-slate-400 text-xs font-bold">({{currentUser?.completedJobs}} jobs)</span>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 border-t border-slate-50 pt-6">
+                    <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-6">
                         <div class="text-center">
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                            <span class="text-[10px] font-black px-3 py-1 rounded-full"
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status</p>
+                            <span class="text-[10px] font-black px-3 py-1.5 rounded-full inline-flex items-center gap-1"
                                 [ngClass]="currentUser?.isBusy ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'">
+                                <span class="w-1.5 h-1.5 rounded-full" [ngClass]="currentUser?.isBusy ? 'bg-amber-500' : 'bg-emerald-500 status-dot-active'"></span>
                                 {{currentUser?.isBusy ? 'ENGAGED' : 'AVAILABLE'}}
                             </span>
                         </div>
                         <div class="text-center">
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Earned</p>
-                            <span class="text-[10px] font-black px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Earned</p>
+                            <span class="text-sm font-black text-emerald-700">
                                 {{CURRENCY}}{{getEarnings().toLocaleString('en-IN')}}
                             </span>
                         </div>
                     </div>
+
+                    <!-- Profile Link -->
+                    <a routerLink="/worker/profile"
+                        class="mt-6 w-full flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold py-3 rounded-xl transition-all text-sm">
+                        <lucide-icon [img]="UserIcon" class="w-4 h-4"></lucide-icon>
+                        My Profile
+                    </a>
                 </div>
             </div>
 
-            <div class="bg-slate-900 rounded-[2rem] p-8 text-white">
+            <div class="bg-slate-900 rounded-[2rem] p-8 text-white shadow-xl">
                 <h3 class="text-lg font-black mb-6 flex items-center">
                     <lucide-icon [img]="TrendingUp" class="w-5 h-5 mr-3 text-indigo-400"></lucide-icon> Performance
                 </h3>
                 <div class="space-y-6">
                     <div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Completion Rate
-                        </p>
-                        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                            <div class="bg-indigo-500 h-full w-[98%]"></div>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Completion Rate</p>
+                            <span class="text-sm font-black text-indigo-400">98%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-indigo-500 to-indigo-400 h-full rounded-full animate-progress" style="width: 98%"></div>
                         </div>
                     </div>
                     <div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Response Time
-                        </p>
-                        <p class="text-xl font-black">~15 Mins</p>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Rating</p>
+                            <span class="text-sm font-black text-amber-400">{{currentUser?.rating || 4.9}}/5</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-amber-500 to-amber-400 h-full rounded-full animate-progress" style="width: 96%"></div>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Response Time</p>
+                        <p class="text-xl font-black text-white">~15 Mins</p>
                     </div>
                 </div>
             </div>
@@ -249,7 +269,7 @@
                         <p class="text-slate-500 mt-1 font-medium">New tasks matching your skills.</p>
                     </div>
                     <div
-                        class="flex items-center bg-white border border-slate-200 rounded-2xl px-4 py-2 text-slate-400">
+                        class="flex items-center bg-white border-2 border-slate-200 rounded-2xl px-4 py-2.5 text-slate-400 focus-within:border-indigo-400 focus-within:ring-4 focus-within:ring-indigo-100 transition-all">
                         <lucide-icon [img]="Search" class="w-5 h-5 mr-3"></lucide-icon>
                         <input placeholder="Filter by area..."
                             class="bg-transparent text-sm font-medium outline-none text-slate-900 w-32" />
@@ -260,9 +280,11 @@
                     <ng-container *ngIf="availableTasks$ | async as availableTasks; else loadingTasks">
                         <ng-container *ngIf="getFilteredTasks(availableTasks) as filteredTasks">
                             <div *ngIf="filteredTasks.length === 0"
-                                class="col-span-full py-16 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                                class="col-span-full py-16 text-center bg-gradient-to-br from-slate-50 to-indigo-50/30 rounded-[2.5rem] border-2 border-dashed border-slate-200">
                                 <ng-container *ngIf="!currentUser?.address?.city; else noTasksInArea">
-                                    <lucide-icon [img]="MapPin" class="w-16 h-16 text-amber-300 mx-auto mb-4"></lucide-icon>
+                                    <div class="bg-white w-16 h-16 rounded-2xl shadow-lg flex items-center justify-center mx-auto mb-4 animate-float">
+                                        <lucide-icon [img]="MapPin" class="w-8 h-8 text-amber-400"></lucide-icon>
+                                    </div>
                                     <h3 class="text-xl font-black text-slate-800 mb-2">Location Required</h3>
                                     <p class="text-slate-500 font-medium max-w-sm mx-auto mb-6">
                                         Please update your profile with your city to see available jobs in your area.
@@ -284,19 +306,23 @@
                         </ng-container>
                     </ng-container>
                     <ng-template #loadingTasks>
-                        <p>Loading opportunities...</p>
+                        <div class="skeleton skeleton-card"></div>
+                        <div class="skeleton skeleton-card"></div>
                     </ng-template>
                 </div>
             </section>
 
             <section>
-                <h2 class="text-2xl font-black text-slate-900 mb-8">Work History</h2>
+                <h2 class="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
+                    Work History
+                    <span class="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">Completed</span>
+                </h2>
                 <div class="grid grid-cols-1 gap-4">
                     <div *ngFor="let task of myCompletedTasks$ | async"
-                        class="bg-white p-6 rounded-2xl border border-slate-100 flex items-center justify-between hover:shadow-md transition-all group">
+                        class="bg-white p-6 rounded-2xl border border-slate-100 flex items-center justify-between card-hover group">
                         <div class="flex items-center space-x-5">
                             <div
-                                class="bg-emerald-50 p-3 rounded-xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                class="bg-emerald-50 p-3 rounded-xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
                                 <lucide-icon [img]="CheckCircle2" class="w-6 h-6"></lucide-icon>
                             </div>
                             <div>
@@ -327,10 +353,10 @@
 
     <!-- Bidding Modal -->
     <div *ngIf="biddingOn"
-        class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm modal-backdrop">
         <div
-            class="bg-white rounded-[2rem] w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0">
+            class="bg-white rounded-[2rem] w-full max-w-lg overflow-hidden shadow-2xl modal-content">
+            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-white to-indigo-50/30 sticky top-0">
                 <h2 class="text-2xl font-black text-slate-900">Prepare Proposal</h2>
                 <button (click)="setBiddingOn(null)"
                     class="p-2 bg-slate-50 rounded-xl text-slate-400 hover:text-slate-600 font-bold">
@@ -377,9 +403,9 @@
 
     <!-- Dispute Modal -->
     <div *ngIf="showDisputeModal"
-        class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm modal-backdrop">
         <div
-            class="bg-white rounded-[2rem] w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+            class="bg-white rounded-[2rem] w-full max-w-lg overflow-hidden shadow-2xl modal-content">
             <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0">
                 <h2 class="text-2xl font-black text-slate-900">Raise Dispute</h2>
                 <button (click)="showDisputeModal = false"

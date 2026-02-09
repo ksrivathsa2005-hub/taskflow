@@ -1,30 +1,40 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
-        <div>
-            <h1 class="text-4xl font-black text-slate-900 tracking-tight">Project Dashboard</h1>
-            <p class="text-slate-500 mt-2 font-medium">Hello, {{currentUser?.name}}. You have {{(customerTasks$ |
-                async)?.length || 0}} active service requests.</p>
+    <!-- Welcome Header with gradient card -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 rounded-3xl p-8 md:p-10 mb-10 shadow-xl shadow-indigo-200 animate-fade-up">
+        <div class="absolute inset-0 bg-grid opacity-10"></div>
+        <div class="absolute -top-20 -right-20 w-60 h-60 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-cyan-400/10 rounded-full blur-2xl"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+                <p class="text-indigo-200 text-sm font-bold uppercase tracking-widest mb-2">Dashboard</p>
+                <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">Welcome back, {{currentUser?.name}} 👋</h1>
+                <p class="text-indigo-200 mt-2 font-medium">You have {{(customerTasks$ |
+                    async)?.length || 0}} active service requests.</p>
+            </div>
+            <button (click)="navigateToPostTask()"
+                class="flex items-center justify-center bg-white text-indigo-600 font-black py-4 px-8 rounded-2xl hover:bg-indigo-50 shadow-xl transition-all active:scale-95 group">
+                <lucide-icon [img]="Plus" class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300"></lucide-icon>
+                Create New Request
+            </button>
         </div>
-        <button (click)="navigateToPostTask()"
-            class="flex items-center justify-center bg-indigo-600 text-white font-black py-4 px-8 rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95 group">
-            <lucide-icon [img]="Plus" class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform"></lucide-icon>
-            Create New Request
-        </button>
     </div>
 
+    <!-- Task Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <ng-container *ngIf="customerTasks$ | async as customerTasks; else loading">
             <div *ngIf="customerTasks.length === 0"
-                class="col-span-full py-32 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                <div class="bg-white w-20 h-20 rounded-3xl shadow-sm flex items-center justify-center mx-auto mb-6">
+                class="col-span-full py-32 text-center bg-gradient-to-br from-slate-50 to-indigo-50/30 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                <div class="bg-white w-20 h-20 rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-6 animate-float">
                     <lucide-icon [img]="Search" class="text-indigo-500 w-10 h-10"></lucide-icon>
                 </div>
                 <h3 class="text-2xl font-black text-slate-900">No requests found</h3>
                 <p class="text-slate-500 max-w-sm mx-auto mt-3 font-medium">Post your first task to connect with
-                    Indian's top service experts.</p>
+                    India's top service experts.</p>
                 <button (click)="navigateToPostTask()"
-                    class="mt-8 text-indigo-600 font-bold flex items-center mx-auto hover:underline">
-                    Start now <lucide-icon [img]="ChevronRight" class="ml-1 w-4 h-4"></lucide-icon>
+                    class="mt-8 bg-indigo-600 text-white font-bold px-8 py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 inline-flex items-center gap-2">
+                    <lucide-icon [img]="Plus" class="w-4 h-4"></lucide-icon>
+                    Post your first task
                 </button>
             </div>
 
@@ -32,16 +42,20 @@
                 (select)="setSelectedTask(task)"></app-task-card>
         </ng-container>
         <ng-template #loading>
-            <p>Loading tasks...</p>
+            <div class="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+            </div>
         </ng-template>
     </div>
 
     <!-- Previous Bookings Section -->
     <div class="mt-16">
         <button (click)="togglePreviousBookings()" 
-            class="flex items-center gap-3 mb-8 px-6 py-3 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors border border-indigo-200">
+            class="flex items-center gap-3 mb-8 px-6 py-3 bg-gradient-to-r from-indigo-50 to-indigo-100/50 hover:from-indigo-100 hover:to-indigo-100 rounded-xl transition-all border border-indigo-200 shadow-sm">
             <span class="text-sm font-black text-indigo-600 uppercase tracking-widest">{{ showCompletedTasks ? 'Hide' : 'View' }} Previous Bookings</span>
-            <lucide-icon [img]="ChevronRight" class="w-4 h-4 text-indigo-600" [ngClass]="{'rotate-90': showCompletedTasks}"></lucide-icon>
+            <lucide-icon [img]="ChevronRight" class="w-4 h-4 text-indigo-600 transition-transform duration-300" [ngClass]="{'rotate-90': showCompletedTasks}"></lucide-icon>
         </button>
 
         <div *ngIf="showCompletedTasks" class="space-y-4 animate-in fade-in">
@@ -131,8 +145,8 @@
 
     <!-- Task Details Modal -->
     <div *ngIf="selectedTask"
-        class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm modal-backdrop">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] modal-content">
             <div
                 class="px-10 py-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
                 <h2 class="text-2xl font-black text-slate-900">{{selectedTask.title}}</h2>

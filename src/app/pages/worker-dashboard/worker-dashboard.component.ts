@@ -2,7 +2,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AppService } from '../../app.service';
 import { TaskCardComponent } from '../../components/task-card/task-card.component';
 import { ToastService } from '../../services/toast.service';
@@ -22,14 +22,15 @@ import {
     X,
     AlertCircle,
     MapPin,
-    Filter
+    Filter,
+    User as UserIcon
 } from 'lucide-angular';
 import { Observable, map, combineLatest } from 'rxjs';
 
 @Component({
     selector: 'app-worker-dashboard',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule, TaskCardComponent],
+    imports: [CommonModule, FormsModule, LucideAngularModule, TaskCardComponent, RouterModule],
     templateUrl: './worker-dashboard.component.html',
     styleUrls: ['./worker-dashboard.component.css']
 })
@@ -72,6 +73,7 @@ export class WorkerDashboardComponent implements OnInit {
     readonly AlertCircle = AlertCircle;
     readonly MapPin = MapPin;
     readonly Filter = Filter;
+    readonly UserIcon = UserIcon;
 
     private toastService = inject(ToastService);
     private locationApi = inject(LocationApiService);

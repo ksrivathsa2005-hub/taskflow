@@ -1,8 +1,13 @@
-<nav class="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
+<nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+  [ngClass]="{
+    'bg-white/90 backdrop-blur-xl shadow-lg shadow-slate-100/50 border-b border-slate-100': scrolled,
+    'bg-white/80 backdrop-blur-md border-b border-slate-100': !scrolled
+  }">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between h-20 items-center">
-      <div class="flex items-center space-x-2 cursor-pointer" (click)="navigateToDashboard()">
-        <div class="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-200">
+      <!-- Logo -->
+      <div class="flex items-center space-x-2 cursor-pointer group" (click)="navigateToDashboard()">
+        <div class="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-200 group-hover:shadow-indigo-300 transition-shadow group-hover:scale-105 transition-transform">
           <lucide-icon [img]="LayoutGrid" class="text-white w-6 h-6"></lucide-icon>
         </div>
         <span class="text-2xl font-black text-slate-900 tracking-tight">
@@ -10,59 +15,52 @@
         </span>
       </div>
 
-      <div class="flex items-center space-x-6">
+      <!-- Desktop nav -->
+      <div class="hidden md:flex items-center space-x-6">
         <ng-container *ngIf="appService.currentUser$ | async as currentUser; else guest">
 
           <!-- Quick Navigation Menu -->
           <div class="relative">
-            <button (click)="toggleDropdown()"
+            <button (click)="toggleDropdown()" (keydown.escape)="showDropdown = false"
               class="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
               title="Quick Links">
               <lucide-icon [img]="FileText" class="w-5 h-5"></lucide-icon>
             </button>
 
             <!-- Dropdown Menu -->
-            <div *ngIf="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-50">
+            <div *ngIf="showDropdown"
+              class="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden z-50 modal-content">
               <div class="py-2">
-                <!-- My Profile (for Customer and Worker) -->
                 <button *ngIf="currentUser.role === UserRole.CUSTOMER || currentUser.role === UserRole.WORKER"
-                  (click)="navigateToProfile()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-2 transition-colors">
+                  (click)="navigateToProfile()" class="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-3 transition-colors">
                   <lucide-icon [img]="User" class="w-4 h-4 text-indigo-600"></lucide-icon>
                   My Profile
                 </button>
-
-                <!-- Reviews -->
-                <button (click)="navigateToReviews()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-2 transition-colors">
+                <button (click)="navigateToReviews()" class="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-3 transition-colors">
                   <lucide-icon [img]="FileText" class="w-4 h-4 text-indigo-600"></lucide-icon>
                   Reviews
                 </button>
-
-                <!-- Disputes -->
-                <button (click)="navigateToDisputes()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-2 transition-colors">
+                <button (click)="navigateToDisputes()" class="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-3 transition-colors">
                   <lucide-icon [img]="AlertCircle" class="w-4 h-4 text-red-600"></lucide-icon>
                   Disputes
                 </button>
-
-                <!-- Worker Earnings -->
                 <div *ngIf="currentUser.role === UserRole.WORKER" class="border-t border-slate-100 mt-2 pt-2">
-                  <button (click)="navigateToEarnings()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-green-50 flex items-center gap-2 transition-colors">
+                  <button (click)="navigateToEarnings()" class="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-green-50 flex items-center gap-3 transition-colors">
                     <lucide-icon [img]="TrendingUp" class="w-4 h-4 text-green-600"></lucide-icon>
                     My Earnings
                   </button>
                 </div>
-
-                <!-- Admin Section -->
                 <div *ngIf="currentUser.role === UserRole.ADMIN" class="border-t border-slate-100 mt-2 pt-2">
                   <p class="px-4 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider">Admin Panel</p>
-                  <button (click)="navigateToAdminUsers()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
+                  <button (click)="navigateToAdminUsers()" class="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-3 transition-colors">
                     <lucide-icon [img]="Users" class="w-4 h-4 text-purple-600"></lucide-icon>
                     User Management
                   </button>
-                  <button (click)="navigateToAdminReviews()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
+                  <button (click)="navigateToAdminReviews()" class="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-3 transition-colors">
                     <lucide-icon [img]="FileText" class="w-4 h-4 text-purple-600"></lucide-icon>
                     Task Reviews
                   </button>
-                  <button (click)="navigateToAdminDisputes()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
+                  <button (click)="navigateToAdminDisputes()" class="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-3 transition-colors">
                     <lucide-icon [img]="AlertCircle" class="w-4 h-4 text-purple-600"></lucide-icon>
                     Manage Disputes
                   </button>
@@ -76,17 +74,18 @@
               class="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative"
               title="Disputes">
               <lucide-icon [img]="Bell" class="w-5 h-5"></lucide-icon>
-              <span *ngIf="unreadDisputes > 0" class="absolute top-2 right-2 w-5 h-5 bg-rose-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                {{unreadDisputes}}
+              <span *ngIf="unreadDisputes > 0"
+                class="absolute -top-0.5 -right-0.5 w-5 h-5 bg-rose-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-scale-in">
+                {{ unreadDisputes }}
               </span>
             </button>
 
             <div (click)="navigateToProfile()" class="flex items-center space-x-3 group cursor-pointer hover:opacity-80 transition-opacity">
               <div class="text-right hidden sm:block">
-                <p class="text-sm font-bold text-slate-800 leading-none">{{currentUser.name}}</p>
-                <p class="text-[10px] font-black text-indigo-600 uppercase mt-1 tracking-wider">{{currentUser.role}}</p>
+                <p class="text-sm font-bold text-slate-800 leading-none">{{ currentUser.name }}</p>
+                <p class="text-[10px] font-black text-indigo-600 uppercase mt-1 tracking-wider">{{ currentUser.role }}</p>
               </div>
-              <img [src]="currentUser.avatar" class="w-10 h-10 rounded-xl border-2 border-slate-100 shadow-sm"
+              <img [src]="currentUser.avatar" class="w-10 h-10 rounded-xl border-2 border-slate-100 shadow-sm object-cover"
                 alt="Profile" />
               <lucide-icon [img]="ChevronDown" class="w-4 h-4 text-slate-400"></lucide-icon>
             </div>
@@ -101,9 +100,75 @@
 
         <ng-template #guest>
           <div class="flex items-center space-x-4">
-            <button routerLink="/"
-              class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">
+            <button routerLink="/login"
+              class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all hover:shadow-xl hover:scale-105">
               Login
+            </button>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Mobile hamburger -->
+      <button (click)="toggleMobileMenu()" class="md:hidden p-2 text-slate-600 hover:text-indigo-600 rounded-xl hover:bg-indigo-50 transition-all">
+        <lucide-icon [img]="showMobileMenu ? X : Menu" class="w-6 h-6"></lucide-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div *ngIf="showMobileMenu" class="md:hidden fixed inset-0 top-20 z-50">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm modal-backdrop" (click)="closeMobileMenu()"></div>
+
+    <!-- Menu panel -->
+    <div class="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-white shadow-2xl mobile-menu-enter overflow-y-auto">
+      <div class="p-6 space-y-2">
+        <ng-container *ngIf="appService.currentUser$ | async as currentUser; else mobileGuest">
+          <!-- User info -->
+          <div class="flex items-center space-x-3 p-4 bg-slate-50 rounded-2xl mb-4">
+            <img [src]="currentUser.avatar" class="w-12 h-12 rounded-xl border-2 border-slate-100 shadow-sm object-cover" alt="Profile" />
+            <div>
+              <p class="font-bold text-slate-900">{{ currentUser.name }}</p>
+              <p class="text-xs font-black text-indigo-600 uppercase tracking-wider">{{ currentUser.role }}</p>
+            </div>
+          </div>
+
+          <button *ngIf="currentUser.role === UserRole.CUSTOMER || currentUser.role === UserRole.WORKER"
+            (click)="navigateToProfile()" class="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-3 rounded-xl transition-colors">
+            <lucide-icon [img]="User" class="w-5 h-5 text-indigo-600"></lucide-icon>
+            My Profile
+          </button>
+          <button (click)="navigateToReviews()" class="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-3 rounded-xl transition-colors">
+            <lucide-icon [img]="FileText" class="w-5 h-5 text-indigo-600"></lucide-icon>
+            Reviews
+          </button>
+          <button (click)="navigateToDisputes()" class="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-3 rounded-xl transition-colors">
+            <lucide-icon [img]="AlertCircle" class="w-5 h-5 text-red-500"></lucide-icon>
+            Disputes
+            <span *ngIf="unreadDisputes > 0" class="ml-auto px-2 py-0.5 bg-rose-500 text-white text-xs font-bold rounded-full">{{ unreadDisputes }}</span>
+          </button>
+
+          <div *ngIf="currentUser.role === UserRole.WORKER" class="border-t border-slate-100 pt-2 mt-2">
+            <button (click)="navigateToEarnings()" class="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-green-50 flex items-center gap-3 rounded-xl transition-colors">
+              <lucide-icon [img]="TrendingUp" class="w-5 h-5 text-green-600"></lucide-icon>
+              My Earnings
+            </button>
+          </div>
+
+          <div class="border-t border-slate-100 pt-4 mt-4">
+            <button (click)="logout()"
+              class="w-full px-4 py-3 text-sm font-medium text-rose-600 hover:bg-rose-50 flex items-center gap-3 rounded-xl transition-colors">
+              <lucide-icon [img]="LogOut" class="w-5 h-5"></lucide-icon>
+              Sign Out
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-template #mobileGuest>
+          <div class="p-4">
+            <button routerLink="/login" (click)="closeMobileMenu()"
+              class="w-full px-6 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-all text-center">
+              Login / Sign Up
             </button>
           </div>
         </ng-template>
@@ -111,3 +176,5 @@
     </div>
   </div>
 </nav>
+<!-- Spacer to account for fixed navbar -->
+<div class="h-20"></div>

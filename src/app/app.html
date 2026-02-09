@@ -7,41 +7,59 @@
     <router-outlet></router-outlet>
   </main>
 
-  <footer class="bg-slate-900 border-t border-slate-800 py-16 text-white mt-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <footer class="bg-slate-900 border-t border-slate-800 py-20 text-white mt-20 relative overflow-hidden">
+    <!-- Decorative gradient -->
+    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500 to-transparent"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-indigo-500/10 rounded-full blur-[80px]"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
         <div class="col-span-1 md:col-span-2">
-          <h2 class="text-2xl font-black mb-6">TaskFlow</h2>
-          <p class="text-slate-400 max-w-sm leading-relaxed">
+          <div class="flex items-center space-x-2 mb-6">
+            <div class="bg-indigo-600 p-2 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+            </div>
+            <h2 class="text-2xl font-black">TaskFlow</h2>
+          </div>
+          <p class="text-slate-400 max-w-sm leading-relaxed mb-8">
             India's leading professional service marketplace connecting experts with those who need them. Trust,
             quality, and transparency in every task.
           </p>
+          <!-- Social icons -->
+          <div class="flex space-x-4">
+            <a href="#" class="w-10 h-10 bg-slate-800 hover:bg-indigo-600 rounded-xl flex items-center justify-center transition-all hover:scale-110">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+            </a>
+            <a href="#" class="w-10 h-10 bg-slate-800 hover:bg-indigo-600 rounded-xl flex items-center justify-center transition-all hover:scale-110">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.016 18.6h-2.472v-3.87c0-.924-.018-2.112-1.287-2.112-1.29 0-1.488 1.005-1.488 2.046v3.936H9.297V9.394h2.376v1.254h.033c.33-.627 1.14-1.287 2.346-1.287 2.508 0 2.97 1.65 2.97 3.798v5.442h-.006zM7.032 8.14a1.434 1.434 0 110-2.868 1.434 1.434 0 010 2.868zM8.268 18.6H5.796V9.394h2.472V18.6z"/></svg>
+            </a>
+            <a href="#" class="w-10 h-10 bg-slate-800 hover:bg-indigo-600 rounded-xl flex items-center justify-center transition-all hover:scale-110">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            </a>
+          </div>
         </div>
         <div>
           <h3 class="font-bold mb-6 text-sm uppercase tracking-widest text-slate-500">Platform</h3>
           <ul class="space-y-4 text-slate-300 text-sm font-medium">
-            <li class="hover:text-white cursor-pointer transition-colors">Find an Expert</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Become a Partner</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Pricing</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Success Stories</li>
+            <li class="hover:text-white cursor-pointer transition-colors hover:translate-x-1 transition-transform">Find an Expert</li>
+            <li class="hover:text-white cursor-pointer transition-colors hover:translate-x-1 transition-transform">Become a Partner</li>
+            <li class="hover:text-white cursor-pointer transition-colors hover:translate-x-1 transition-transform">Pricing</li>
+            <li class="hover:text-white cursor-pointer transition-colors hover:translate-x-1 transition-transform">Success Stories</li>
           </ul>
         </div>
         <div>
           <h3 class="font-bold mb-6 text-sm uppercase tracking-widest text-slate-500">Support</h3>
           <ul class="space-y-4 text-slate-300 text-sm font-medium">
-            <li class="hover:text-white cursor-pointer transition-colors">Help Center</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Trust & Safety</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Terms of Service</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Privacy Policy</li>
+            <li class="hover:text-white cursor-pointer transition-colors hover:translate-x-1 transition-transform">Help Center</li>
+            <li class="hover:text-white cursor-pointer transition-colors hover:translate-x-1 transition-transform">Trust & Safety</li>
+            <li class="hover:text-white cursor-pointer transition-colors hover:translate-x-1 transition-transform">Terms of Service</li>
+            <li class="hover:text-white cursor-pointer transition-colors hover:translate-x-1 transition-transform">Privacy Policy</li>
           </ul>
         </div>
       </div>
       <div class="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">© 2024 TaskFlow Marketplace India Pvt Ltd.
-        </p>
-        <div class="flex space-x-6 text-slate-400">
-          <!-- Social links placeholder -->
-        </div>
+        <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">© 2026 TaskFlow Marketplace India Pvt Ltd.</p>
+        <p class="text-xs text-slate-600">Made with ❤️ in India</p>
       </div>
     </div>
   </footer>

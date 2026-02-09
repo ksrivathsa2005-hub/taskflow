@@ -11,6 +11,7 @@ import { UserManagementComponent } from './pages/admin-dashboard/user-management
 import { TaskReviewComponent } from './pages/admin-dashboard/task-review.component';
 import { AdminDisputesComponent } from './pages/admin-dashboard/disputes.component';
 import { WorkerEarningsComponent } from './pages/worker-earnings/worker-earnings.component';
+import { WorkerProfileComponent } from './pages/worker-profile/worker-profile.component';
 import { PostTaskComponent } from './pages/customer-dashboard/post-task/post-task.component';
 import { MyBookingsComponent } from './pages/customer-dashboard/my-bookings/my-bookings.component';
 import { PreviousBookingsComponent } from './pages/customer-dashboard/previous-bookings/previous-bookings.component';
@@ -27,6 +28,7 @@ export const routes: Routes = [
     { path: 'customer/previous-bookings', component: PreviousBookingsComponent, canActivate: [customerGuard] },
     { path: 'worker', component: WorkerDashboardComponent, canActivate: [workerGuard] },
     { path: 'worker/earnings', component: WorkerEarningsComponent, canActivate: [workerGuard] },
+    { path: 'worker/profile', component: WorkerProfileComponent, canActivate: [workerGuard] },
     { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
     { path: 'admin/users', component: UserManagementComponent, canActivate: [adminGuard] },
     { path: 'admin/reviews', component: TaskReviewComponent, canActivate: [adminGuard] },
