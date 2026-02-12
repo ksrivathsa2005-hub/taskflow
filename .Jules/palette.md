@@ -1,0 +1,3 @@
+## 2026-02-12 - Accessibility Foundations: Skip Links and ARIA
+**Learning:** Even modern-looking SPAs often miss basic accessibility foundations like skip links and keyboard-accessible navigation. Using `focus-visible` ensures that focus rings are only shown when they are most needed (keyboard navigation), maintaining visual polish for mouse users. Reverting feature flags like `USE_REAL_API` and restoring lockfiles after local development is crucial for maintaining PR hygiene.
+**Action:** Always check for a 'Skip to Content' link and ensure that logo/branding elements are accessible `button`s or `a` tags. Always restore `package-lock.json` if no dependencies were added.
