@@ -1,0 +1,3 @@
+## 2026-02-14 - Skip to Content for Accessibility
+**Learning:** In applications with sticky navigation bars, a "Skip to Content" link is essential for keyboard users to bypass the navigation and reach the main content quickly. It must have a high z-index (e.g., z-[100]) to ensure it appears above the sticky navbar (z-50) when focused. Using Tailwind's `sr-only` and `focus:not-sr-only` classes is an effective way to implement this while keeping it hidden for mouse users.
+**Action:** Always include a skip-to-content link in the root layout of apps with complex navigation. Ensure the target element has an ID and `tabindex="-1"` to receive focus correctly.
