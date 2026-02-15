@@ -1,0 +1,3 @@
+## 2026-02-15 - Enhancing Navbar Accessibility with Semantic Buttons
+**Learning:** Using a non-semantic `div` with a click handler for navigation (like a logo) is a common accessibility anti-pattern. Converting it to a `<button>` or `<a>` automatically provides keyboard interaction (Enter/Space) and focus management. Combining this with `focus-visible` ensures that focus rings only appear when necessary, preserving the visual design for mouse users.
+**Action:** Always audit the navbar for interactive elements that lack semantic tags or ARIA labels, and prioritize `focus-visible` for high-contrast focus indicators.
