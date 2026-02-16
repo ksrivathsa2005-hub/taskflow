@@ -42,7 +42,11 @@ export class TaskCardComponent {
     }
 
     formatDate(date: string) {
-        return new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        return new Date(date).toLocaleDateString(undefined, {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+        });
     }
 
     onSelectClick() {
