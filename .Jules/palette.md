@@ -1,0 +1,3 @@
+## 2026-02-25 - Navigation & Navbar Accessibility
+**Learning:** The application had several non-semantic interactive elements (divs with click handlers) that were inaccessible to keyboard users. Using `<button type="button">` with `focus-visible` styles and specific `aria-label` attributes ensures a predictable and inclusive experience. Additionally, a "Skip to Content" link is essential for keyboard navigation efficiency in a layout with a sticky navbar.
+**Action:** Always audit the Navbar for semantic HTML and ensure all icon-only buttons have descriptive ARIA labels. Verify that a high-z-index Skip Link is present and targets a correctly prepared `<main>` element.
