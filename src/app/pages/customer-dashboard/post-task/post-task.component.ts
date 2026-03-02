@@ -105,8 +105,8 @@ import {
 
                             <!-- Task Title -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Task Title *</label>
-                                <input [(ngModel)]="formData.title" 
+                                <label for="task-title" class="block text-sm font-bold text-slate-700 mb-2">Task Title *</label>
+                                <input id="task-title" [(ngModel)]="formData.title"
                                     name="title" 
                                     placeholder="e.g., Fix leaky bathroom tap"
                                     minlength="5"
@@ -123,8 +123,8 @@ import {
 
                             <!-- Description -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Description *</label>
-                                <textarea [(ngModel)]="formData.description" 
+                                <label for="task-description" class="block text-sm font-bold text-slate-700 mb-2">Description *</label>
+                                <textarea id="task-description" [(ngModel)]="formData.description"
                                     name="description" 
                                     placeholder="Provide detailed information about your task..."
                                     rows="4"
@@ -153,8 +153,8 @@ import {
                             <!-- Location -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-2">State *</label>
-                                    <select [(ngModel)]="selectedState" 
+                                    <label for="state-select" class="block text-sm font-bold text-slate-700 mb-2">State *</label>
+                                    <select id="state-select" [(ngModel)]="selectedState"
                                         name="state"
                                         (change)="onStateChange()"
                                         class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
@@ -164,8 +164,8 @@ import {
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-2">City *</label>
-                                    <select [(ngModel)]="selectedCity" 
+                                    <label for="city-select" class="block text-sm font-bold text-slate-700 mb-2">City *</label>
+                                    <select id="city-select" [(ngModel)]="selectedCity"
                                         name="city"
                                         (change)="onCityChange()"
                                         [disabled]="!selectedState"
@@ -179,8 +179,8 @@ import {
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-2">Area/Locality *</label>
-                                    <select [(ngModel)]="selectedArea" 
+                                    <label for="area-select" class="block text-sm font-bold text-slate-700 mb-2">Area/Locality *</label>
+                                    <select id="area-select" [(ngModel)]="selectedArea"
                                         name="area"
                                         [disabled]="!selectedCity"
                                         class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium disabled:bg-slate-100"
@@ -190,8 +190,8 @@ import {
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-2">Preferred Date *</label>
-                                    <input [(ngModel)]="formData.preferredDate" name="date" type="date"
+                                    <label for="preferred-date" class="block text-sm font-bold text-slate-700 mb-2">Preferred Date *</label>
+                                    <input id="preferred-date" [(ngModel)]="formData.preferredDate" name="date" type="date"
                                         [min]="getTodayDate()"
                                         class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
                                         required>
@@ -200,8 +200,8 @@ import {
 
                             <!-- Full Address -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Full Address</label>
-                                <textarea [(ngModel)]="fullAddress" name="fullAddress"
+                                <label for="full-address" class="block text-sm font-bold text-slate-700 mb-2">Full Address</label>
+                                <textarea id="full-address" [(ngModel)]="fullAddress" name="fullAddress"
                                     placeholder="Apartment/Building, Street, Landmark (optional)"
                                     rows="3"
                                     class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium resize-none"></textarea>
@@ -219,7 +219,8 @@ import {
                                 <label class="block text-sm font-bold text-slate-700 mb-4">Budget Range (₹) *</label>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <input [(ngModel)]="formData.budgetMin" 
+                                        <label for="budget-min" class="sr-only">Minimum Budget</label>
+                                        <input id="budget-min" [(ngModel)]="formData.budgetMin"
                                             name="budgetMin" 
                                             type="number" 
                                             placeholder="Minimum budget"
@@ -234,7 +235,8 @@ import {
                                         </p>
                                     </div>
                                     <div>
-                                        <input [(ngModel)]="formData.budgetMax" 
+                                        <label for="budget-max" class="sr-only">Maximum Budget</label>
+                                        <input id="budget-max" [(ngModel)]="formData.budgetMax"
                                             name="budgetMax" 
                                             type="number" 
                                             placeholder="Maximum budget"
