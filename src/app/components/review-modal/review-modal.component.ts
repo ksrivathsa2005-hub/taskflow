@@ -26,7 +26,9 @@ import { firstValueFrom } from 'rxjs';
                         <label class="block text-sm font-bold text-slate-700 mb-3">Rating <span class="text-red-500">*</span></label>
                         <div class="flex gap-2">
                             <button *ngFor="let star of [1,2,3,4,5]" type="button" (click)="setRating(star)"
-                                class="transition-all hover:scale-125 active:scale-95">
+                                [attr.aria-label]="'Rate ' + star + ' out of 5 stars'"
+                                [attr.aria-pressed]="star <= rating"
+                                class="transition-all hover:scale-125 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg">
                                 <lucide-icon [img]="Star" 
                                     [class.fill-amber-400]="star <= rating" 
                                     [class.text-amber-400]="star <= rating" 
