@@ -1,9 +1,13 @@
 <div class="min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+  <a href="#main-content"
+    class="sr-only focus:not-sr-only fixed top-4 left-4 z-[100] bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-lg">
+    Skip to Content
+  </a>
   <app-navbar></app-navbar>
   <app-toast></app-toast>
   <app-confirm-dialog></app-confirm-dialog>
 
-  <main class="flex-grow">
+  <main id="main-content" tabindex="-1" class="flex-grow outline-none">
     <router-outlet></router-outlet>
   </main>
 
@@ -20,19 +24,19 @@
         <div>
           <h3 class="font-bold mb-6 text-sm uppercase tracking-widest text-slate-500">Platform</h3>
           <ul class="space-y-4 text-slate-300 text-sm font-medium">
-            <li class="hover:text-white cursor-pointer transition-colors">Find an Expert</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Become a Partner</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Pricing</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Success Stories</li>
+            <li class="hover:text-white transition-colors">Find an Expert</li>
+            <li class="hover:text-white transition-colors">Become a Partner</li>
+            <li class="hover:text-white transition-colors">Pricing</li>
+            <li class="hover:text-white transition-colors">Success Stories</li>
           </ul>
         </div>
         <div>
           <h3 class="font-bold mb-6 text-sm uppercase tracking-widest text-slate-500">Support</h3>
           <ul class="space-y-4 text-slate-300 text-sm font-medium">
-            <li class="hover:text-white cursor-pointer transition-colors">Help Center</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Trust & Safety</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Terms of Service</li>
-            <li class="hover:text-white cursor-pointer transition-colors">Privacy Policy</li>
+            <li class="hover:text-white transition-colors">Help Center</li>
+            <li class="hover:text-white transition-colors">Trust & Safety</li>
+            <li class="hover:text-white transition-colors">Terms of Service</li>
+            <li class="hover:text-white transition-colors">Privacy Policy</li>
           </ul>
         </div>
       </div>
