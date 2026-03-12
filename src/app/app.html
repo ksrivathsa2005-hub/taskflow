@@ -1,9 +1,14 @@
 <div class="min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+  <a href="#main-content"
+    class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-6 focus:py-3 focus:bg-indigo-600 focus:text-white focus:font-bold focus:rounded-xl focus:shadow-2xl focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
+    Skip to Content
+  </a>
+
   <app-navbar></app-navbar>
   <app-toast></app-toast>
   <app-confirm-dialog></app-confirm-dialog>
 
-  <main class="flex-grow">
+  <main id="main-content" class="flex-grow outline-none" tabindex="-1">
     <router-outlet></router-outlet>
   </main>
 
