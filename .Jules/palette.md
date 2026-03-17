@@ -1,0 +1,3 @@
+## 2026-03-17 - [Accessible Navigation and Semantic Buttons]
+**Learning:** In Angular applications, interactive elements like logos and user profiles are often implemented using `div` tags with `(click)` handlers. This breaks keyboard navigation and screen reader support. Converting them to `<button>` elements is the correct fix, but one must ensure not to nest block-level elements (`div`, `p`) inside the `button` to maintain semantic validity.
+**Action:** Use `<button type="button">` for custom interactive components. Use `<span>` with `block` or `flex` classes instead of `div` or `p` when nesting content inside a button. Always add `focus-visible:ring-2` for a clear focus state.
