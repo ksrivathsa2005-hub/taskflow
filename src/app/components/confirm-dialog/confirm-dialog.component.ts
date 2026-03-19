@@ -8,14 +8,18 @@ import { ConfirmDialogService } from '../../services/confirm-dialog.service';
   imports: [CommonModule],
   template: `
     @if (confirmService.isVisible()) {
-      <div class="fixed inset-0 z-[80] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+      <div class="fixed inset-0 z-[80] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm"
+           role="alertdialog"
+           aria-modal="true"
+           aria-labelledby="confirm-title"
+           aria-describedby="confirm-message">
         <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
           <div class="px-6 py-5 border-b border-slate-100">
-            <h3 class="text-lg font-bold text-slate-900">{{ confirmService.config().title }}</h3>
+            <h3 id="confirm-title" class="text-lg font-bold text-slate-900">{{ confirmService.config().title }}</h3>
           </div>
           
           <div class="px-6 py-6">
-            <p class="text-slate-600">{{ confirmService.config().message }}</p>
+            <p id="confirm-message" class="text-slate-600">{{ confirmService.config().message }}</p>
           </div>
           
           <div class="px-6 py-4 bg-slate-50 flex justify-end gap-3">
