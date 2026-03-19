@@ -12,21 +12,27 @@ import { firstValueFrom } from 'rxjs';
     standalone: true,
     imports: [CommonModule, FormsModule, LucideAngularModule],
     template: `
-        <div *ngIf="showModal" class="fixed inset-0 z-[70] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div *ngIf="showModal" class="fixed inset-0 z-[70] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="review-modal-title">
             <div class="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl">
                 <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                    <h2 class="text-2xl font-black text-slate-900">Review Work</h2>
-                    <button (click)="closeModal()" type="button" class="bg-slate-50 p-2 rounded-xl text-slate-400 hover:text-slate-600">
+                    <h2 id="review-modal-title" class="text-2xl font-black text-slate-900">Review Work</h2>
+                    <button (click)="closeModal()" type="button" class="bg-slate-50 p-2 rounded-xl text-slate-400 hover:text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none"
+                            aria-label="Close modal">
                         <lucide-icon [img]="X" class="w-5 h-5"></lucide-icon>
                     </button>
                 </div>
                 <form (ngSubmit)="submitReview()" class="p-8 space-y-6">
                     <!-- Star Rating -->
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-3">Rating <span class="text-red-500">*</span></label>
-                        <div class="flex gap-2">
+                        <label id="rating-label" class="block text-sm font-bold text-slate-700 mb-3">Rating <span class="text-red-500">*</span></label>
+                        <div class="flex gap-2" role="group" aria-labelledby="rating-label">
                             <button *ngFor="let star of [1,2,3,4,5]" type="button" (click)="setRating(star)"
-                                class="transition-all hover:scale-125 active:scale-95">
+                                class="transition-all hover:scale-125 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg"
+                                [attr.aria-label]="'Rate ' + star + ' out of 5 stars'"
+                                [attr.aria-pressed]="star <= rating">
                                 <lucide-icon [img]="Star" 
                                     [class.fill-amber-400]="star <= rating" 
                                     [class.text-amber-400]="star <= rating" 
