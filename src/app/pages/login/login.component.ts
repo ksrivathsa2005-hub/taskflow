@@ -22,18 +22,18 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
           </div>
 
           <!-- Error Alert -->
-          <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+          <div *ngIf="errorMessage" role="alert" aria-live="assertive" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
             <lucide-icon [img]="AlertCircle" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"></lucide-icon>
             <div class="flex-1">
               <p class="text-sm font-medium text-red-800">{{ errorMessage }}</p>
             </div>
-            <button (click)="errorMessage = null" class="text-red-600 hover:text-red-800">
+            <button (click)="errorMessage = null" class="text-red-600 hover:text-red-800" aria-label="Close error message">
               <span class="text-xl">&times;</span>
             </button>
           </div>
 
           <!-- Success Alert -->
-          <div *ngIf="successMessage" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div *ngIf="successMessage" aria-live="polite" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <p class="text-sm font-medium text-green-800">{{ successMessage }}</p>
           </div>
 
@@ -41,9 +41,10 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
           <form (ngSubmit)="handleSubmit()" #authForm="ngForm">
             <!-- Name Field (Register Only) -->
             <div *ngIf="isRegisterMode" class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
               <input
                 type="text"
+                id="name"
                 name="name"
                 [(ngModel)]="formData.name"
                 required
@@ -64,9 +65,10 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
             <!-- Email Field -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
               <input
                 type="email"
+                id="email"
                 name="email"
                 [(ngModel)]="formData.email"
                 required
@@ -85,9 +87,10 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
             <!-- Password Field -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
               <input
                 type="password"
+                id="password"
                 name="password"
                 [(ngModel)]="formData.password"
                 required
@@ -112,6 +115,7 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 <button
                   type="button"
                   (click)="formData.role = UserRole.CUSTOMER"
+                  [attr.aria-pressed]="formData.role === UserRole.CUSTOMER"
                   [class.ring-2]="formData.role === UserRole.CUSTOMER"
                   [class.ring-indigo-600]="formData.role === UserRole.CUSTOMER"
                   [class.bg-indigo-50]="formData.role === UserRole.CUSTOMER"
@@ -123,6 +127,7 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 <button
                   type="button"
                   (click)="formData.role = UserRole.WORKER"
+                  [attr.aria-pressed]="formData.role === UserRole.WORKER"
                   [class.ring-2]="formData.role === UserRole.WORKER"
                   [class.ring-indigo-600]="formData.role === UserRole.WORKER"
                   [class.bg-indigo-50]="formData.role === UserRole.WORKER"
