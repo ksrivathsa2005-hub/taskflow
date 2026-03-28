@@ -48,7 +48,8 @@ import {
                     <div class="flex items-center justify-between mb-8">
                         <div *ngFor="let step of [1, 2, 3]; let i = index"
                             class="flex items-center flex-1"
-                            [class.mb-0]="i === 2">
+                            [class.mb-0]="i === 2"
+                            [attr.aria-current]="currentStep === step ? 'step' : null">
                             <!-- Step Circle -->
                             <div [class.bg-indigo-600]="currentStep >= step"
                                 [class.bg-slate-300]="currentStep < step"
@@ -87,19 +88,21 @@ import {
                         <form class="space-y-6">
                             <!-- Category Selection -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-3">Service Category *</label>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                                    <div *ngFor="let category of SERVICE_CATEGORIES"
+                                <label id="category-label" class="block text-sm font-bold text-slate-700 mb-3">Service Category *</label>
+                                <div role="radiogroup" aria-labelledby="category-label" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                                    <button type="button" role="radio"
+                                        *ngFor="let category of SERVICE_CATEGORIES"
                                         (click)="selectCategory(category.id)"
+                                        [attr.aria-checked]="formData.category === category.id"
                                         [class.ring-2]="formData.category === category.id"
                                         [class.ring-indigo-500]="formData.category === category.id"
                                         [class.bg-indigo-50]="formData.category === category.id"
-                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center">
+                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none">
                                         <div [class]="category.color" class="w-10 h-10 rounded-lg flex items-center justify-center mb-2 mx-auto">
                                             <lucide-icon [img]="getCategoryIcon(category.id)" class="w-5 h-5"></lucide-icon>
                                         </div>
-                                        <p class="font-bold text-slate-900 text-sm">{{ category.name }}</p>
-                                    </div>
+                                        <span class="block font-bold text-slate-900 text-sm">{{ category.name }}</span>
+                                    </button>
                                 </div>
                             </div>
 
