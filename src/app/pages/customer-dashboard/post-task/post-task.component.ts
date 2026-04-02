@@ -54,6 +54,7 @@ import {
                                 [class.bg-slate-300]="currentStep < step"
                                 [class.text-white]="currentStep >= step"
                                 [class.text-slate-600]="currentStep < step"
+                                [attr.aria-current]="currentStep === step ? 'step' : null"
                                 class="w-12 h-12 rounded-full flex items-center justify-center font-black text-lg transition-all shadow-lg">
                                 <span *ngIf="currentStep > step" class="flex items-center">
                                     <lucide-icon [img]="CheckCircle2" class="w-6 h-6"></lucide-icon>
@@ -88,18 +89,19 @@ import {
                             <!-- Category Selection -->
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-3">Service Category *</label>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                                    <div *ngFor="let category of SERVICE_CATEGORIES"
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" role="radiogroup" aria-label="Select service category">
+                                    <button type="button" role="radio" *ngFor="let category of SERVICE_CATEGORIES"
                                         (click)="selectCategory(category.id)"
+                                        [attr.aria-checked]="formData.category === category.id"
                                         [class.ring-2]="formData.category === category.id"
                                         [class.ring-indigo-500]="formData.category === category.id"
                                         [class.bg-indigo-50]="formData.category === category.id"
-                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center">
+                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                         <div [class]="category.color" class="w-10 h-10 rounded-lg flex items-center justify-center mb-2 mx-auto">
                                             <lucide-icon [img]="getCategoryIcon(category.id)" class="w-5 h-5"></lucide-icon>
                                         </div>
                                         <p class="font-bold text-slate-900 text-sm">{{ category.name }}</p>
-                                    </div>
+                                    </button>
                                 </div>
                             </div>
 
@@ -258,11 +260,11 @@ import {
                             <!-- Photos -->
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-3">Add Photos (Optional)</label>
-                                <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-indigo-400 transition-colors cursor-pointer">
+                                <div (click)="fileInput.click()" class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-indigo-400 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2">
                                     <lucide-icon [img]="Upload" class="w-10 h-10 text-slate-400 mx-auto mb-3"></lucide-icon>
                                     <p class="text-sm font-bold text-slate-700">Drag photos here or click to browse</p>
                                     <p class="text-xs text-slate-500 mt-1">PNG, JPG up to 5MB each</p>
-                                    <input type="file" multiple accept="image/*" class="hidden" #fileInput>
+                                    <input type="file" multiple accept="image/*" class="hidden" #fileInput (change)="onFileSelected($event)">
                                 </div>
                                 <div *ngIf="formData.photos.length > 0" class="mt-4 grid grid-cols-3 gap-3">
                                     <div *ngFor="let photo of formData.photos" class="relative group">
@@ -464,6 +466,19 @@ export class PostTaskComponent implements OnInit {
 
     getTodayDate(): string {
         return new Date().toISOString().split('T')[0];
+    }
+
+    onFileSelected(event: any) {
+        const files = event.target.files;
+        if (files) {
+            Array.from(files).forEach((file: any) => {
+                const reader = new FileReader();
+                reader.onload = (e: any) => {
+                    this.formData.photos.push(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
     }
 
     removePhoto(photo: string) {

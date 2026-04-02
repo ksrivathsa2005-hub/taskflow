@@ -1,0 +1,3 @@
+## 2026-04-02 - [Improved Accessibility & Functional Polish in PostTaskComponent]
+**Learning:** Refactoring interactive `div` elements into semantic `<button role="radio">` within a `role="radiogroup"` significantly improves keyboard navigation and screen reader support while maintaining visual parity. Additionally, functionalizing "false affordances" (like an upload area that looks clickable but isn't) is critical for a smooth user experience.
+**Action:** Always check for `div` elements with click handlers that should be semantic buttons. Ensure stepper indicators use `aria-current="step"`. Functionalize any UI elements that provide visual affordance for interaction.
