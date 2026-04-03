@@ -1,0 +1,3 @@
+## 2024-05-23 - [Keyboard Accessibility in Category Selection]
+**Learning:** Using `div` with `(click)` for selection patterns (like category picking) creates a keyboard accessibility gap. Users relying on keyboards or screen readers cannot interact with these elements because they are not focusable and lack semantic roles.
+**Action:** Always use `<button>` elements for selectable items or ensure `tabindex="0"` and appropriate ARIA roles (`role="radio"` or `role="button"`) and keyboard event listeners are present. Within a selection group, `role="radiogroup"` or `role="listbox"` provides better context for screen readers.
