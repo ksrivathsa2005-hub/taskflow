@@ -1,0 +1,3 @@
+## 2026-04-04 - [Accessible Selection Pattern in PostTaskComponent]
+**Learning:** Refactoring static `div` containers into semantic `<button role="radio">` within a `role="radiogroup"` significantly improves accessibility by enabling keyboard navigation and screen reader support. Applying `pointer-events-none` to child elements (icons and text) within these buttons ensures the parent button is the consistent and reliable click target.
+**Action:** Always prefer semantic interactive elements over styled containers for selection logic and use `pointer-events-none` on nested visual decorators to simplify event handling.
