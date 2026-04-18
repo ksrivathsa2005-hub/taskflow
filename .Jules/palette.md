@@ -1,0 +1,3 @@
+## 2026-04-18 - [Confirm Dialog Accessibility]
+**Learning:** Standard accessibility patterns for modals, such as ARIA roles and keyboard listeners, are often missing in custom implementations but significantly improve UX for power users and those with assistive technologies. Backdrop clicks are a semi-standard expectation that prevents user frustration when trying to dismiss a simple dialog.
+**Action:** Always include `role="dialog"`, `aria-modal="true"`, and an Escape key `@HostListener` when creating or touching modal components. Ensure backdrop clicks are handled unless the action is mandatory.
