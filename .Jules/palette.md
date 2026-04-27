@@ -1,0 +1,3 @@
+## 2026-04-27 - Accessible Category Selection Pattern
+**Learning:** In this Tailwind-based Angular app, interactive selection grids (like service categories) were implemented using `div` elements with `(click)` handlers, which are inaccessible to keyboard and screen reader users. Refactoring these into a `role="radiogroup"` containing semantic `<button type="button" role="radio">` elements immediately enables standard navigation and interaction patterns.
+**Action:** Always use semantic buttons with `role="radio"` for selection grids. Ensure `tabindex` is used to manage focus (0 for selected/first, -1 for others) and `aria-checked` reflects the selection state.

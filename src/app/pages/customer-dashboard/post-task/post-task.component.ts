@@ -87,19 +87,22 @@ import {
                         <form class="space-y-6">
                             <!-- Category Selection -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-3">Service Category *</label>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                                    <div *ngFor="let category of SERVICE_CATEGORIES"
+                                <label id="category-label" class="block text-sm font-bold text-slate-700 mb-3">Service Category *</label>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" role="radiogroup" aria-labelledby="category-label">
+                                    <button type="button" role="radio"
+                                        *ngFor="let category of SERVICE_CATEGORIES; let i = index"
                                         (click)="selectCategory(category.id)"
+                                        [attr.aria-checked]="formData.category === category.id"
+                                        [tabindex]="formData.category === category.id || (!formData.category && i === 0) ? 0 : -1"
                                         [class.ring-2]="formData.category === category.id"
                                         [class.ring-indigo-500]="formData.category === category.id"
                                         [class.bg-indigo-50]="formData.category === category.id"
-                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center">
-                                        <div [class]="category.color" class="w-10 h-10 rounded-lg flex items-center justify-center mb-2 mx-auto">
+                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-all text-center focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 outline-none">
+                                        <div [class]="category.color" class="w-10 h-10 rounded-lg flex items-center justify-center mb-2 mx-auto pointer-events-none">
                                             <lucide-icon [img]="getCategoryIcon(category.id)" class="w-5 h-5"></lucide-icon>
                                         </div>
-                                        <p class="font-bold text-slate-900 text-sm">{{ category.name }}</p>
-                                    </div>
+                                        <p class="font-bold text-slate-900 text-sm pointer-events-none">{{ category.name }}</p>
+                                    </button>
                                 </div>
                             </div>
 
