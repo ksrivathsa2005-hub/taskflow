@@ -1,10 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
+import { provideRouter, Router } from '@angular/router';
+import { routes } from './app.routes';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [
+        provideRouter(routes)
+      ]
     }).compileComponents();
   });
 
@@ -16,8 +21,14 @@ describe('App', () => {
 
   it('should render title', async () => {
     const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigate(['']);
+    fixture.detectChanges();
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, taskflow');
+    const h1 = compiled.querySelector('h1');
+    expect(h1).toBeTruthy();
+    // The landing page has "Hire the best Experts locally."
+    expect(h1?.textContent?.toLowerCase()).toContain('best');
   });
 });
