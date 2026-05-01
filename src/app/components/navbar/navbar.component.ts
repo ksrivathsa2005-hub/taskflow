@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -44,6 +44,11 @@ export class NavbarComponent {
         this.appService.disputes$.subscribe(disputes => {
             this.unreadDisputes = disputes.filter(d => d.status !== 'RESOLVED').length;
         });
+    }
+
+    @HostListener('window:keydown.escape')
+    onEscapePressed() {
+        this.showDropdown = false;
     }
 
     logout() {
