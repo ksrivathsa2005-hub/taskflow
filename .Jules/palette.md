@@ -1,0 +1,3 @@
+## 2025-05-01 - Global Navigation Accessibility and Affordances
+**Learning:** Keyboard accessibility and clear interactive affordances in the primary navigation are critical for user trust and inclusive UX. Using semantic elements like `<button>` for brand logos and providing ARIA labels for icon-only actions significantly improves the experience for screen reader and keyboard users.
+**Action:** Always verify that brand/logo elements are keyboard accessible, ensure icon-only buttons have descriptive `aria-label` attributes, and use `focus-visible` to provide clear focus states without cluttering the UI for mouse users.
