@@ -54,6 +54,7 @@ import {
                                 [class.bg-slate-300]="currentStep < step"
                                 [class.text-white]="currentStep >= step"
                                 [class.text-slate-600]="currentStep < step"
+                                [attr.aria-current]="currentStep === step ? 'step' : null"
                                 class="w-12 h-12 rounded-full flex items-center justify-center font-black text-lg transition-all shadow-lg">
                                 <span *ngIf="currentStep > step" class="flex items-center">
                                     <lucide-icon [img]="CheckCircle2" class="w-6 h-6"></lucide-icon>
@@ -87,19 +88,20 @@ import {
                         <form class="space-y-6">
                             <!-- Category Selection -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-3">Service Category *</label>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                                    <div *ngFor="let category of SERVICE_CATEGORIES"
+                                <label id="category-label" class="block text-sm font-bold text-slate-700 mb-3">Service Category *</label>
+                                <div role="radiogroup" aria-labelledby="category-label" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                                    <button type="button" role="radio" *ngFor="let category of SERVICE_CATEGORIES"
                                         (click)="selectCategory(category.id)"
+                                        [attr.aria-checked]="formData.category === category.id"
                                         [class.ring-2]="formData.category === category.id"
                                         [class.ring-indigo-500]="formData.category === category.id"
                                         [class.bg-indigo-50]="formData.category === category.id"
-                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center">
+                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none transition-all text-center">
                                         <div [class]="category.color" class="w-10 h-10 rounded-lg flex items-center justify-center mb-2 mx-auto">
                                             <lucide-icon [img]="getCategoryIcon(category.id)" class="w-5 h-5"></lucide-icon>
                                         </div>
                                         <p class="font-bold text-slate-900 text-sm">{{ category.name }}</p>
-                                    </div>
+                                    </button>
                                 </div>
                             </div>
 
