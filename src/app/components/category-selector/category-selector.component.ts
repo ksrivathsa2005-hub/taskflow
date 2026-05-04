@@ -25,26 +25,29 @@ import {
     template: `
         <div>
             <div class="mb-4">
-                <label class="block text-sm font-bold text-slate-700 mb-3">
+                <label id="cat-selector-label" class="block text-sm font-bold text-slate-700 mb-3">
                     {{ label }}
                     <span *ngIf="maxSelections" class="text-xs text-slate-500 font-normal">(Select up to {{ maxSelections }})</span>
                 </label>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                <div *ngFor="let category of SERVICE_CATEGORIES"
+            <div [attr.role]="maxSelections === 1 ? 'radiogroup' : 'group'" aria-labelledby="cat-selector-label" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                <button *ngFor="let category of SERVICE_CATEGORIES"
+                    type="button"
+                    [attr.role]="maxSelections === 1 ? 'radio' : 'checkbox'"
+                    [attr.aria-checked]="isSelected(category.id)"
                     (click)="toggleCategory(category.id)"
                     [class.ring-2]="isSelected(category.id)"
                     [class.ring-indigo-500]="isSelected(category.id)"
                     [class.bg-indigo-50]="isSelected(category.id)"
-                    class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center">
+                    class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 outline-none transition-all text-center">
                     
-                    <div [class]="category.color" class="w-12 h-12 rounded-xl flex items-center justify-center mb-2 mx-auto">
+                    <div [class]="category.color" class="w-12 h-12 rounded-xl flex items-center justify-center mb-2 mx-auto pointer-events-none">
                         <lucide-icon [img]="iconMap[category.icon]" class="w-6 h-6"></lucide-icon>
                     </div>
-                    <p class="font-bold text-slate-900 text-sm">{{ category.name }}</p>
-                    <p class="text-xs text-slate-500 mt-1">{{ category.description }}</p>
-                </div>
+                    <span class="block font-bold text-slate-900 text-sm pointer-events-none">{{ category.name }}</span>
+                    <span class="block text-xs text-slate-500 mt-1 pointer-events-none">{{ category.description }}</span>
+                </button>
             </div>
 
             <div *ngIf="selectedCategories.length > 0" class="mt-6 p-4 bg-indigo-50 rounded-xl border border-indigo-200">
