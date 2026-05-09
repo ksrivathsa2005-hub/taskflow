@@ -1,0 +1,3 @@
+## 2026-05-09 - Standardizing Accessible Dialogs
+**Learning:** Global UI services that trigger modals (like `ConfirmDialogService`) often overlook basic keyboard accessibility (Escape key) and semantic ARIA labeling (`role="alertdialog"`), which are critical for screen reader users and power users to understand the context and easily dismiss the interaction.
+**Action:** Always check if modal-like components handle the Escape key via `@HostListener` and use `aria-labelledby`/`aria-describedby` linked to internal IDs to provide immediate context to assistive technologies.
