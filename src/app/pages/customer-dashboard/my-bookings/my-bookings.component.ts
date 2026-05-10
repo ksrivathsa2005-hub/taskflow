@@ -6,6 +6,7 @@ import { ToastService } from '../../../services/toast.service';
 import { Task, TaskStatus } from '../../../types';
 import { STATUS_COLORS, CURRENCY } from '../../../constants';
 import { TaskStatusTimelineComponent } from '../../../components/task-status-timeline/task-status-timeline.component';
+import { ReviewModalComponent } from '../../../components/review-modal/review-modal.component';
 import {
     LucideAngularModule,
     MapPin,
@@ -24,7 +25,7 @@ import {
 @Component({
     selector: 'app-my-bookings',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule, TaskStatusTimelineComponent],
+    imports: [CommonModule, FormsModule, LucideAngularModule, TaskStatusTimelineComponent, ReviewModalComponent],
     template: `
         <div class="min-h-screen bg-gradient-to-b from-slate-50 to-white">
             <!-- Header -->
@@ -172,6 +173,15 @@ import {
                     </div>
                 </div>
             </div>
+
+            <!-- Review Modal -->
+            <app-review-modal [showModal]="showReviewModal"
+                [workerId]="reviewingWorkerId"
+                [taskId]="reviewingTaskId"
+                [customerId]="currentUserId"
+                (close)="showReviewModal = false"
+                (submitted)="handleReviewSubmit($event)">
+            </app-review-modal>
         </div>
     `,
     styles: []
@@ -181,6 +191,9 @@ export class MyBookingsComponent implements OnInit {
     tabs = ['All', 'Active', 'Pending', 'Completed', 'Cancelled'];
     expandedTaskId: string | null = null;
     myTasks: Task[] = [];
+    showReviewModal = false;
+    reviewingTaskId = '';
+    reviewingWorkerId = '';
 
     readonly TaskStatus = TaskStatus;
     readonly STATUS_COLORS = STATUS_COLORS;
@@ -199,6 +212,10 @@ export class MyBookingsComponent implements OnInit {
     readonly CheckCircle2 = CheckCircle2;
 
     constructor(public appService: AppService) {}
+
+    get currentUserId(): string {
+        return this.appService.currentUser?.id || '';
+    }
 
     ngOnInit() {
         this.appService.tasks$.subscribe((tasks: Task[]) => {
@@ -270,16 +287,18 @@ export class MyBookingsComponent implements OnInit {
     }
 
     leaveReview(task: Task) {
-        const rating = prompt('Rate the worker (1-5):', '5');
-        const reviewText = prompt('Share your feedback:');
-        
-        if (rating && reviewText) {
-            this.appService.submitReview(task.id, {
-                rating: parseInt(rating),
-                text: reviewText,
-                customerId: this.appService.currentUser?.id
-            });
+        if (task.workerId) {
+            this.reviewingTaskId = task.id;
+            this.reviewingWorkerId = task.workerId;
+            this.showReviewModal = true;
         }
+    }
+
+    handleReviewSubmit(event: any) {
+        console.log('Review submitted:', event);
+        this.showReviewModal = false;
+        // The modal handles the submission and toast.
+        // We just need to close it here.
     }
 
     hasReviewed(task: Task): boolean {
