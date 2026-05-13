@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -39,6 +39,13 @@ export class NavbarComponent {
 
     unreadDisputes = 0;
     showDropdown = false;
+
+    @HostListener('window:keydown.escape')
+    handleEscape() {
+        if (this.showDropdown) {
+            this.showDropdown = false;
+        }
+    }
 
     constructor(public appService: AppService, private router: Router) {
         this.appService.disputes$.subscribe(disputes => {
