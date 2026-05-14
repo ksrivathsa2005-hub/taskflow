@@ -1,0 +1,3 @@
+## 2025-05-14 - Accessible Modal and Star Rating Pattern
+**Learning:** Standard modals and star ratings often lack the necessary ARIA attributes and keyboard support for users relying on assistive technologies or keyboard-only navigation. Specifically, a star rating should be treated as a `radiogroup` with each star being a `radio` button to provide the most intuitive experience for screen readers.
+**Action:** Always implement `role="dialog"`, `aria-modal="true"`, and `Escape` key handling for modals. For star ratings, use `role="radiogroup"` with `role="radio"` buttons, and ensure the icon inside the button has `pointer-events-none` to keep the button as the target.

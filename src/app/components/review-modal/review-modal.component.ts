@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Star, X } from 'lucide-angular';
@@ -12,39 +12,50 @@ import { firstValueFrom } from 'rxjs';
     standalone: true,
     imports: [CommonModule, FormsModule, LucideAngularModule],
     template: `
-        <div *ngIf="showModal" class="fixed inset-0 z-[70] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div *ngIf="showModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="review-modal-title"
+            class="fixed inset-0 z-[70] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
             <div class="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl">
                 <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                    <h2 class="text-2xl font-black text-slate-900">Review Work</h2>
-                    <button (click)="closeModal()" type="button" class="bg-slate-50 p-2 rounded-xl text-slate-400 hover:text-slate-600">
+                    <h2 id="review-modal-title" class="text-2xl font-black text-slate-900">Review Work</h2>
+                    <button (click)="closeModal()" type="button"
+                        aria-label="Close modal"
+                        class="bg-slate-50 p-2 rounded-xl text-slate-400 hover:text-slate-600 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none">
                         <lucide-icon [img]="X" class="w-5 h-5"></lucide-icon>
                     </button>
                 </div>
                 <form (ngSubmit)="submitReview()" class="p-8 space-y-6">
                     <!-- Star Rating -->
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-3">Rating <span class="text-red-500">*</span></label>
-                        <div class="flex gap-2">
-                            <button *ngFor="let star of [1,2,3,4,5]" type="button" (click)="setRating(star)"
-                                class="transition-all hover:scale-125 active:scale-95">
+                        <label id="rating-label" class="block text-sm font-bold text-slate-700 mb-3">Rating <span class="text-red-500" aria-hidden="true">*</span></label>
+                        <div class="flex gap-2" role="radiogroup" aria-labelledby="rating-label">
+                            <button *ngFor="let star of [1,2,3,4,5]"
+                                type="button"
+                                role="radio"
+                                [attr.aria-checked]="rating === star"
+                                [attr.aria-label]="star + ' stars'"
+                                (click)="setRating(star)"
+                                class="transition-all hover:scale-125 active:scale-95 focus:outline-none group">
                                 <lucide-icon [img]="Star" 
                                     [class.fill-amber-400]="star <= rating" 
                                     [class.text-amber-400]="star <= rating" 
                                     [class.text-slate-300]="star > rating" 
-                                    class="w-8 h-8"></lucide-icon>
+                                    class="w-8 h-8 pointer-events-none group-focus-visible:ring-2 group-focus-visible:ring-indigo-500 rounded-full"></lucide-icon>
                             </button>
                         </div>
-                        <p *ngIf="rating > 0" class="text-xs text-indigo-600 mt-2 font-medium">Rating: {{rating}} out of 5</p>
-                        <p *ngIf="showRatingError" class="text-xs text-red-500 mt-2 font-medium">Please select a rating</p>
+                        <p *ngIf="rating > 0" class="text-xs text-indigo-600 mt-2 font-medium" aria-live="polite">Rating: {{rating}} out of 5</p>
+                        <p *ngIf="showRatingError" class="text-xs text-red-500 mt-2 font-medium" role="alert">Please select a rating</p>
                     </div>
 
                     <!-- Review Text -->
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Your Review <span class="text-red-500">*</span></label>
-                        <textarea [(ngModel)]="comment" name="comment" rows="4" placeholder="Share your experience..."
-                            class="w-full px-4 py-3 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                        <label for="review-comment" class="block text-sm font-bold text-slate-700 mb-2">Your Review <span class="text-red-500" aria-hidden="true">*</span></label>
+                        <textarea [(ngModel)]="comment" name="comment" id="review-comment" rows="4" placeholder="Share your experience..."
+                            class="w-full px-4 py-3 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 resize-none transition-shadow"
                             [class.border-red-300]="showCommentError"></textarea>
-                        <p *ngIf="showCommentError" class="text-xs text-red-500 mt-2 font-medium">Please write a review</p>
+                        <p *ngIf="showCommentError" class="text-xs text-red-500 mt-2 font-medium" role="alert">Please write a review</p>
                     </div>
 
                     <!-- Success Message -->
@@ -86,6 +97,13 @@ export class ReviewModalComponent {
     
     readonly Star = Star;
     readonly X = X;
+
+    @HostListener('window:keydown.escape', ['$event'])
+    onEscape(event: any) {
+        if (this.showModal) {
+            this.closeModal();
+        }
+    }
     
     private toastService = inject(ToastService);
     private appService = inject(AppService);
