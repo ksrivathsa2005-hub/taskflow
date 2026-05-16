@@ -44,11 +44,12 @@ import {
                 </div>
 
                 <!-- Stepper -->
-                <div class="mb-12">
+                <nav class="mb-12" aria-label="Task Posting Progress">
                     <div class="flex items-center justify-between mb-8">
                         <div *ngFor="let step of [1, 2, 3]; let i = index"
                             class="flex items-center flex-1"
-                            [class.mb-0]="i === 2">
+                            [class.mb-0]="i === 2"
+                            [attr.aria-current]="currentStep === step ? 'step' : null">
                             <!-- Step Circle -->
                             <div [class.bg-indigo-600]="currentStep >= step"
                                 [class.bg-slate-300]="currentStep < step"
@@ -76,7 +77,7 @@ import {
                                 [class.bg-indigo-600]="currentStep > step"></div>
                         </div>
                     </div>
-                </div>
+                </nav>
 
                 <!-- Form Container -->
                 <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
@@ -87,26 +88,30 @@ import {
                         <form class="space-y-6">
                             <!-- Category Selection -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-3">Service Category *</label>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                                    <div *ngFor="let category of SERVICE_CATEGORIES"
+                                <p class="block text-sm font-bold text-slate-700 mb-3">Service Category *</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" role="radiogroup">
+                                    <button *ngFor="let category of SERVICE_CATEGORIES"
+                                        type="button"
                                         (click)="selectCategory(category.id)"
+                                        [attr.aria-checked]="formData.category === category.id"
+                                        role="radio"
                                         [class.ring-2]="formData.category === category.id"
                                         [class.ring-indigo-500]="formData.category === category.id"
                                         [class.bg-indigo-50]="formData.category === category.id"
-                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center">
+                                        class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
                                         <div [class]="category.color" class="w-10 h-10 rounded-lg flex items-center justify-center mb-2 mx-auto">
                                             <lucide-icon [img]="getCategoryIcon(category.id)" class="w-5 h-5"></lucide-icon>
                                         </div>
                                         <p class="font-bold text-slate-900 text-sm">{{ category.name }}</p>
-                                    </div>
+                                    </button>
                                 </div>
                             </div>
 
                             <!-- Task Title -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Task Title *</label>
+                                <label for="task-title" class="block text-sm font-bold text-slate-700 mb-2">Task Title *</label>
                                 <input [(ngModel)]="formData.title" 
+                                    id="task-title"
                                     name="title" 
                                     placeholder="e.g., Fix leaky bathroom tap"
                                     minlength="5"
@@ -123,8 +128,9 @@ import {
 
                             <!-- Description -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Description *</label>
+                                <label for="task-desc" class="block text-sm font-bold text-slate-700 mb-2">Description *</label>
                                 <textarea [(ngModel)]="formData.description" 
+                                    id="task-desc"
                                     name="description" 
                                     placeholder="Provide detailed information about your task..."
                                     rows="4"
@@ -153,8 +159,9 @@ import {
                             <!-- Location -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-2">State *</label>
+                                    <label for="task-state" class="block text-sm font-bold text-slate-700 mb-2">State *</label>
                                     <select [(ngModel)]="selectedState" 
+                                        id="task-state"
                                         name="state"
                                         (change)="onStateChange()"
                                         class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
@@ -164,8 +171,9 @@ import {
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-2">City *</label>
+                                    <label for="task-city" class="block text-sm font-bold text-slate-700 mb-2">City *</label>
                                     <select [(ngModel)]="selectedCity" 
+                                        id="task-city"
                                         name="city"
                                         (change)="onCityChange()"
                                         [disabled]="!selectedState"
@@ -179,8 +187,9 @@ import {
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-2">Area/Locality *</label>
+                                    <label for="task-area" class="block text-sm font-bold text-slate-700 mb-2">Area/Locality *</label>
                                     <select [(ngModel)]="selectedArea" 
+                                        id="task-area"
                                         name="area"
                                         [disabled]="!selectedCity"
                                         class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium disabled:bg-slate-100"
@@ -190,8 +199,11 @@ import {
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-bold text-slate-700 mb-2">Preferred Date *</label>
-                                    <input [(ngModel)]="formData.preferredDate" name="date" type="date"
+                                    <label for="task-date" class="block text-sm font-bold text-slate-700 mb-2">Preferred Date *</label>
+                                    <input [(ngModel)]="formData.preferredDate"
+                                        id="task-date"
+                                        name="date"
+                                        type="date"
                                         [min]="getTodayDate()"
                                         class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
                                         required>
@@ -200,8 +212,10 @@ import {
 
                             <!-- Full Address -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Full Address</label>
-                                <textarea [(ngModel)]="fullAddress" name="fullAddress"
+                                <label for="task-address" class="block text-sm font-bold text-slate-700 mb-2">Full Address</label>
+                                <textarea [(ngModel)]="fullAddress"
+                                    id="task-address"
+                                    name="fullAddress"
                                     placeholder="Apartment/Building, Street, Landmark (optional)"
                                     rows="3"
                                     class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium resize-none"></textarea>
@@ -216,10 +230,12 @@ import {
                         <form class="space-y-6">
                             <!-- Budget -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-4">Budget Range (₹) *</label>
+                                <p class="block text-sm font-bold text-slate-700 mb-4">Budget Range (₹) *</p>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
+                                        <label for="budget-min" class="sr-only">Minimum Budget</label>
                                         <input [(ngModel)]="formData.budgetMin" 
+                                            id="budget-min"
                                             name="budgetMin" 
                                             type="number" 
                                             placeholder="Minimum budget"
@@ -234,7 +250,9 @@ import {
                                         </p>
                                     </div>
                                     <div>
+                                        <label for="budget-max" class="sr-only">Maximum Budget</label>
                                         <input [(ngModel)]="formData.budgetMax" 
+                                            id="budget-max"
                                             name="budgetMax" 
                                             type="number" 
                                             placeholder="Maximum budget"
@@ -257,17 +275,20 @@ import {
 
                             <!-- Photos -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-3">Add Photos (Optional)</label>
-                                <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-indigo-400 transition-colors cursor-pointer">
+                                <p class="block text-sm font-bold text-slate-700 mb-3">Add Photos (Optional)</p>
+                                <button type="button"
+                                     class="w-full border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-indigo-400 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                                     (click)="fileInput.click()">
                                     <lucide-icon [img]="Upload" class="w-10 h-10 text-slate-400 mx-auto mb-3"></lucide-icon>
-                                    <p class="text-sm font-bold text-slate-700">Drag photos here or click to browse</p>
+                                    <p class="text-sm font-bold text-slate-700">Click to browse photos</p>
                                     <p class="text-xs text-slate-500 mt-1">PNG, JPG up to 5MB each</p>
-                                    <input type="file" multiple accept="image/*" class="hidden" #fileInput>
-                                </div>
+                                    <input type="file" multiple accept="image/*" class="hidden" #fileInput (change)="onFileSelected($event)">
+                                </button>
                                 <div *ngIf="formData.photos.length > 0" class="mt-4 grid grid-cols-3 gap-3">
                                     <div *ngFor="let photo of formData.photos" class="relative group">
                                         <img [src]="photo" alt="Task photo" class="w-full h-24 object-cover rounded-lg border border-slate-200">
                                         <button (click)="removePhoto(photo)" type="button"
+                                            aria-label="Remove photo"
                                             class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                                             <lucide-icon [img]="X" class="w-4 h-4"></lucide-icon>
                                         </button>
@@ -464,6 +485,24 @@ export class PostTaskComponent implements OnInit {
 
     getTodayDate(): string {
         return new Date().toISOString().split('T')[0];
+    }
+
+    onFileSelected(event: any) {
+        const files = event.target.files;
+        if (files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.size > 5 * 1024 * 1024) {
+                    this.toastService.warning(`File ${file.name} is too large (> 5MB)`);
+                    continue;
+                }
+                const reader = new FileReader();
+                reader.onload = (e: any) => {
+                    this.formData.photos.push(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
     }
 
     removePhoto(photo: string) {
