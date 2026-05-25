@@ -89,24 +89,25 @@ import {
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-3">Service Category *</label>
                                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                                    <div *ngFor="let category of SERVICE_CATEGORIES"
+                                    <button type="button" *ngFor="let category of SERVICE_CATEGORIES"
                                         (click)="selectCategory(category.id)"
                                         [class.ring-2]="formData.category === category.id"
                                         [class.ring-indigo-500]="formData.category === category.id"
                                         [class.bg-indigo-50]="formData.category === category.id"
+                                        [attr.aria-pressed]="formData.category === category.id"
                                         class="p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 cursor-pointer transition-all text-center">
                                         <div [class]="category.color" class="w-10 h-10 rounded-lg flex items-center justify-center mb-2 mx-auto">
                                             <lucide-icon [img]="getCategoryIcon(category.id)" class="w-5 h-5"></lucide-icon>
                                         </div>
                                         <p class="font-bold text-slate-900 text-sm">{{ category.name }}</p>
-                                    </div>
+                                    </button>
                                 </div>
                             </div>
 
                             <!-- Task Title -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Task Title *</label>
-                                <input [(ngModel)]="formData.title" 
+                                <label for="task-title" class="block text-sm font-bold text-slate-700 mb-2">Task Title *</label>
+                                <input id="task-title" [(ngModel)]="formData.title"
                                     name="title" 
                                     placeholder="e.g., Fix leaky bathroom tap"
                                     minlength="5"
@@ -123,8 +124,8 @@ import {
 
                             <!-- Description -->
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Description *</label>
-                                <textarea [(ngModel)]="formData.description" 
+                                <label for="task-description" class="block text-sm font-bold text-slate-700 mb-2">Description *</label>
+                                <textarea id="task-description" [(ngModel)]="formData.description"
                                     name="description" 
                                     placeholder="Provide detailed information about your task..."
                                     rows="4"
