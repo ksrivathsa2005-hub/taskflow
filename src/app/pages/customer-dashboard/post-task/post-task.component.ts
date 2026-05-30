@@ -258,17 +258,28 @@ import {
                             <!-- Photos -->
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-3">Add Photos (Optional)</label>
-                                <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-indigo-400 transition-colors cursor-pointer">
-                                    <lucide-icon [img]="Upload" class="w-10 h-10 text-slate-400 mx-auto mb-3"></lucide-icon>
-                                    <p class="text-sm font-bold text-slate-700">Drag photos here or click to browse</p>
-                                    <p class="text-xs text-slate-500 mt-1">PNG, JPG up to 5MB each</p>
-                                    <input type="file" multiple accept="image/*" class="hidden" #fileInput>
+                                <div class="relative">
+                                    <button type="button"
+                                        (click)="fileInput.click()"
+                                        class="w-full border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer bg-transparent">
+                                        <lucide-icon [img]="Upload" class="w-10 h-10 text-slate-400 mx-auto mb-3"></lucide-icon>
+                                        <p class="text-sm font-bold text-slate-700">Click to browse or drag photos here</p>
+                                        <p class="text-xs text-slate-500 mt-1">PNG, JPG up to 5MB each</p>
+                                    </button>
+                                    <input type="file"
+                                        multiple
+                                        accept="image/*"
+                                        class="hidden"
+                                        #fileInput
+                                        (change)="onFileSelected($event)">
                                 </div>
                                 <div *ngIf="formData.photos.length > 0" class="mt-4 grid grid-cols-3 gap-3">
                                     <div *ngFor="let photo of formData.photos" class="relative group">
                                         <img [src]="photo" alt="Task photo" class="w-full h-24 object-cover rounded-lg border border-slate-200">
-                                        <button (click)="removePhoto(photo)" type="button"
-                                            class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button (click)="removePhoto(photo)"
+                                            type="button"
+                                            aria-label="Remove photo"
+                                            class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity shadow-sm">
                                             <lucide-icon [img]="X" class="w-4 h-4"></lucide-icon>
                                         </button>
                                     </div>
@@ -464,6 +475,25 @@ export class PostTaskComponent implements OnInit {
 
     getTodayDate(): string {
         return new Date().toISOString().split('T')[0];
+    }
+
+    onFileSelected(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const files = input.files;
+        if (files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.size > 5 * 1024 * 1024) {
+                    this.toastService.error(`File ${file.name} is too large (max 5MB)`);
+                    continue;
+                }
+                const reader = new FileReader();
+                reader.onload = (e: any) => {
+                    this.formData.photos.push(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
     }
 
     removePhoto(photo: string) {
