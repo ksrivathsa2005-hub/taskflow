@@ -4,7 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AppService } from '../../app.service';
 import { UserRole } from '../../types';
-import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  LogIn,
+  UserPlus,
+  AlertCircle,
+  Loader2,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-login',
@@ -38,11 +47,12 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
           </div>
 
           <!-- Login/Register Form -->
-          <form (ngSubmit)="handleSubmit()" #authForm="ngForm">
+          <form (ngSubmit)="handleSubmit()" #authForm="ngForm" novalidate>
             <!-- Name Field (Register Only) -->
             <div *ngIf="isRegisterMode" class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label for="fullName" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
               <input
+                id="fullName"
                 type="text"
                 name="name"
                 [(ngModel)]="formData.name"
@@ -53,9 +63,11 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 #nameField="ngModel"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 [class.border-red-500]="nameField.invalid && nameField.touched"
+                [attr.aria-invalid]="nameField.invalid && nameField.touched"
+                [attr.aria-describedby]="nameField.invalid && nameField.touched ? 'name-error' : null"
                 placeholder="Enter your full name"
               />
-              <p *ngIf="nameField.invalid && nameField.touched" class="mt-1 text-xs text-red-600">
+              <p *ngIf="nameField.invalid && nameField.touched" id="name-error" class="mt-1 text-xs text-red-600">
                 <span *ngIf="nameField.errors?.['required']">Name is required</span>
                 <span *ngIf="nameField.errors?.['minlength']">Name must be at least 3 characters</span>
                 <span *ngIf="nameField.errors?.['pattern']">Name can only contain letters and spaces</span>
@@ -64,8 +76,9 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
             <!-- Email Field -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
               <input
+                id="email"
                 type="email"
                 name="email"
                 [(ngModel)]="formData.email"
@@ -75,9 +88,11 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 #emailField="ngModel"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 [class.border-red-500]="emailField.invalid && emailField.touched"
+                [attr.aria-invalid]="emailField.invalid && emailField.touched"
+                [attr.aria-describedby]="emailField.invalid && emailField.touched ? 'email-error' : null"
                 placeholder="Enter your email"
               />
-              <p *ngIf="emailField.invalid && emailField.touched" class="mt-1 text-xs text-red-600">
+              <p *ngIf="emailField.invalid && emailField.touched" id="email-error" class="mt-1 text-xs text-red-600">
                 <span *ngIf="emailField.errors?.['required']">Email is required</span>
                 <span *ngIf="emailField.errors?.['email'] || emailField.errors?.['pattern']">Please enter a valid email address</span>
               </p>
@@ -85,21 +100,34 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
             <!-- Password Field -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <input
-                type="password"
-                name="password"
-                [(ngModel)]="formData.password"
-                required
-                minlength="6"
-                maxlength="50"
-                #passwordField="ngModel"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                [class.border-red-500]="passwordField.invalid && passwordField.touched"
-                placeholder="Enter your password"
-              />
-              <p *ngIf="isRegisterMode && !passwordField.touched" class="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
-              <p *ngIf="passwordField.invalid && passwordField.touched" class="mt-1 text-xs text-red-600">
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <div class="relative">
+                <input
+                  id="password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  name="password"
+                  [(ngModel)]="formData.password"
+                  required
+                  minlength="6"
+                  maxlength="50"
+                  #passwordField="ngModel"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent pr-12"
+                  [class.border-red-500]="passwordField.invalid && passwordField.touched"
+                  [attr.aria-invalid]="passwordField.invalid && passwordField.touched"
+                  [attr.aria-describedby]="(passwordField.invalid && passwordField.touched) ? 'password-error' : (isRegisterMode && !passwordField.touched ? 'password-hint' : null)"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  (click)="showPassword = !showPassword"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md transition-colors"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                >
+                  <lucide-icon [img]="showPassword ? EyeOff : Eye" class="w-5 h-5"></lucide-icon>
+                </button>
+              </div>
+              <p *ngIf="isRegisterMode && !passwordField.touched" id="password-hint" class="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
+              <p *ngIf="passwordField.invalid && passwordField.touched" id="password-error" class="mt-1 text-xs text-red-600">
                 <span *ngIf="passwordField.errors?.['required']">Password is required</span>
                 <span *ngIf="passwordField.errors?.['minlength']">Password must be at least 6 characters</span>
               </p>
@@ -162,9 +190,10 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
         <div class="mt-6 text-center">
           <button
             (click)="goToLanding()"
-            class="text-sm text-gray-600 hover:text-gray-900"
+            class="text-sm text-gray-600 hover:text-gray-900 inline-flex items-center gap-2 group"
           >
-            ← Back to home
+            <lucide-icon [img]="ArrowLeft" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></lucide-icon>
+            Back to home
           </button>
         </div>
       </div>
@@ -182,8 +211,12 @@ export class LoginComponent implements OnInit {
   readonly UserPlus = UserPlus;
   readonly AlertCircle = AlertCircle;
   readonly Loader2 = Loader2;
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
+  readonly ArrowLeft = ArrowLeft;
 
   isRegisterMode = false;
+  showPassword = false;
   isLoading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
@@ -258,6 +291,7 @@ export class LoginComponent implements OnInit {
     this.isRegisterMode = !this.isRegisterMode;
     this.errorMessage = null;
     this.successMessage = null;
+    this.showPassword = false;
     
     // Reset form
     this.formData = {
