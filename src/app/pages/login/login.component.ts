@@ -1,15 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AppService } from '../../app.service';
 import { UserRole } from '../../types';
-import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  LogIn,
+  UserPlus,
+  AlertCircle,
+  Loader2,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, RouterLink],
   template: `
     <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 flex items-center justify-center p-4">
       <div class="max-w-md w-full">
@@ -41,9 +50,10 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
           <form (ngSubmit)="handleSubmit()" #authForm="ngForm">
             <!-- Name Field (Register Only) -->
             <div *ngIf="isRegisterMode" class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
               <input
                 type="text"
+                id="name"
                 name="name"
                 [(ngModel)]="formData.name"
                 required
@@ -51,7 +61,7 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
                 maxlength="50"
                 pattern="^[a-zA-Z\s]+$"
                 #nameField="ngModel"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                 [class.border-red-500]="nameField.invalid && nameField.touched"
                 placeholder="Enter your full name"
               />
@@ -64,16 +74,17 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
             <!-- Email Field -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
               <input
                 type="email"
+                id="email"
                 name="email"
                 [(ngModel)]="formData.email"
                 required
                 email
                 pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                 #emailField="ngModel"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                 [class.border-red-500]="emailField.invalid && emailField.touched"
                 placeholder="Enter your email"
               />
@@ -85,19 +96,30 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
             <!-- Password Field -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <input
-                type="password"
-                name="password"
-                [(ngModel)]="formData.password"
-                required
-                minlength="6"
-                maxlength="50"
-                #passwordField="ngModel"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                [class.border-red-500]="passwordField.invalid && passwordField.touched"
-                placeholder="Enter your password"
-              />
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <div class="relative">
+                <input
+                  [type]="showPassword ? 'text' : 'password'"
+                  id="password"
+                  name="password"
+                  [(ngModel)]="formData.password"
+                  required
+                  minlength="6"
+                  maxlength="50"
+                  #passwordField="ngModel"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none pr-12"
+                  [class.border-red-500]="passwordField.invalid && passwordField.touched"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  (click)="showPassword = !showPassword"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1 transition-colors"
+                  [aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                >
+                  <lucide-icon [img]="showPassword ? EyeOff : Eye" class="w-5 h-5"></lucide-icon>
+                </button>
+              </div>
               <p *ngIf="isRegisterMode && !passwordField.touched" class="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
               <p *ngIf="passwordField.invalid && passwordField.touched" class="mt-1 text-xs text-red-600">
                 <span *ngIf="passwordField.errors?.['required']">Password is required</span>
@@ -160,12 +182,13 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
         <!-- Back to Home -->
         <div class="mt-6 text-center">
-          <button
-            (click)="goToLanding()"
-            class="text-sm text-gray-600 hover:text-gray-900"
+          <a
+            routerLink="/"
+            class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 font-medium transition-colors group"
           >
-            ← Back to home
-          </button>
+            <lucide-icon [img]="ArrowLeft" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></lucide-icon>
+            Back to home
+          </a>
         </div>
       </div>
     </div>
@@ -182,8 +205,12 @@ export class LoginComponent implements OnInit {
   readonly UserPlus = UserPlus;
   readonly AlertCircle = AlertCircle;
   readonly Loader2 = Loader2;
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
+  readonly ArrowLeft = ArrowLeft;
 
   isRegisterMode = false;
+  showPassword = false;
   isLoading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
