@@ -1,14 +1,16 @@
 <nav class="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between h-20 items-center">
-      <div class="flex items-center space-x-2 cursor-pointer" (click)="navigateToDashboard()">
-        <div class="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-200">
+      <button type="button" class="flex items-center space-x-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl p-1"
+        (click)="navigateToDashboard()"
+        aria-label="TaskFlow Dashboard">
+        <div class="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform">
           <lucide-icon [img]="LayoutGrid" class="text-white w-6 h-6"></lucide-icon>
         </div>
         <span class="text-2xl font-black text-slate-900 tracking-tight">
           TaskFlow
         </span>
-      </div>
+      </button>
 
       <div class="flex items-center space-x-6">
         <ng-container *ngIf="appService.currentUser$ | async as currentUser; else guest">
@@ -16,29 +18,31 @@
           <!-- Quick Navigation Menu -->
           <div class="relative">
             <button (click)="toggleDropdown()"
-              class="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-              title="Quick Links">
+              class="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              [attr.aria-expanded]="showDropdown"
+              aria-haspopup="true"
+              aria-label="Quick Links">
               <lucide-icon [img]="FileText" class="w-5 h-5"></lucide-icon>
             </button>
 
             <!-- Dropdown Menu -->
-            <div *ngIf="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-50">
+            <div *ngIf="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-50" role="menu">
               <div class="py-2">
                 <!-- Reviews -->
-                <button (click)="navigateToReviews()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-2 transition-colors">
+                <button (click)="navigateToReviews()" role="menuitem" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-2 transition-colors">
                   <lucide-icon [img]="FileText" class="w-4 h-4 text-indigo-600"></lucide-icon>
                   Reviews
                 </button>
 
                 <!-- Disputes -->
-                <button (click)="navigateToDisputes()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-2 transition-colors">
+                <button (click)="navigateToDisputes()" role="menuitem" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 flex items-center gap-2 transition-colors">
                   <lucide-icon [img]="AlertCircle" class="w-4 h-4 text-red-600"></lucide-icon>
                   Disputes
                 </button>
 
                 <!-- Worker Earnings -->
                 <div *ngIf="currentUser.role === UserRole.WORKER" class="border-t border-slate-100 mt-2 pt-2">
-                  <button (click)="navigateToEarnings()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-green-50 flex items-center gap-2 transition-colors">
+                  <button (click)="navigateToEarnings()" role="menuitem" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-green-50 flex items-center gap-2 transition-colors">
                     <lucide-icon [img]="TrendingUp" class="w-4 h-4 text-green-600"></lucide-icon>
                     My Earnings
                   </button>
@@ -47,15 +51,15 @@
                 <!-- Admin Section -->
                 <div *ngIf="currentUser.role === UserRole.ADMIN" class="border-t border-slate-100 mt-2 pt-2">
                   <p class="px-4 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider">Admin Panel</p>
-                  <button (click)="navigateToAdminUsers()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
+                  <button (click)="navigateToAdminUsers()" role="menuitem" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
                     <lucide-icon [img]="Users" class="w-4 h-4 text-purple-600"></lucide-icon>
                     User Management
                   </button>
-                  <button (click)="navigateToAdminReviews()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
+                  <button (click)="navigateToAdminReviews()" role="menuitem" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
                     <lucide-icon [img]="FileText" class="w-4 h-4 text-purple-600"></lucide-icon>
                     Task Reviews
                   </button>
-                  <button (click)="navigateToAdminDisputes()" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
+                  <button (click)="navigateToAdminDisputes()" role="menuitem" class="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-purple-50 flex items-center gap-2 transition-colors">
                     <lucide-icon [img]="AlertCircle" class="w-4 h-4 text-purple-600"></lucide-icon>
                     Manage Disputes
                   </button>
@@ -66,15 +70,15 @@
 
           <div class="flex items-center space-x-4 pl-4 border-l border-slate-100">
             <button (click)="navigateToDisputes()"
-              class="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative"
-              title="Disputes">
+              class="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              aria-label="Disputes">
               <lucide-icon [img]="Bell" class="w-5 h-5"></lucide-icon>
               <span *ngIf="unreadDisputes > 0" class="absolute top-2 right-2 w-5 h-5 bg-rose-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                 {{unreadDisputes}}
               </span>
             </button>
 
-            <div class="flex items-center space-x-3 group cursor-pointer">
+            <div class="flex items-center space-x-3 group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1" tabindex="0">
               <div class="text-right hidden sm:block">
                 <p class="text-sm font-bold text-slate-800 leading-none">{{currentUser.name}}</p>
                 <p class="text-[10px] font-black text-indigo-600 uppercase mt-1 tracking-wider">{{currentUser.role}}</p>
@@ -85,8 +89,8 @@
             </div>
 
             <button (click)="logout()"
-              class="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
-              title="Sign Out">
+              class="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+              aria-label="Sign Out">
               <lucide-icon [img]="LogOut" class="w-5 h-5"></lucide-icon>
             </button>
           </div>
@@ -94,8 +98,8 @@
 
         <ng-template #guest>
           <div class="flex items-center space-x-4">
-            <button routerLink="/"
-              class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">
+            <button routerLink="/login"
+              class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
               Login
             </button>
           </div>
