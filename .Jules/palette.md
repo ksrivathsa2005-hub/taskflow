@@ -1,0 +1,3 @@
+## 2026-06-12 - [Enhanced Review Modal Accessibility and Interactions]
+**Learning:** Modal components in this application (like `ReviewModalComponent`) initially lacked standard ARIA roles, modal context, and keyboard dismissal support. Interactive selection components (star ratings) lacked visual hover feedback, making the selection process less intuitive.
+**Action:** Always implement `role="dialog"`, `aria-modal="true"`, and reference titles with `aria-labelledby` in modals. For rating systems, use `role="radiogroup"` and `role="radio"`, and add a `hoveredRating` state to provide immediate visual feedback during interaction. Ensure the `Escape` key is handled via `@HostListener`.
