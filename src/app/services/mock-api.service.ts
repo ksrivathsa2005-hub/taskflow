@@ -81,7 +81,34 @@ export class MockApiService {
             fullAddress: '456 Oak Avenue, Bandra, Mumbai, Maharashtra 400050'
         };
 
+        const completedAddress: Address = {
+            state: 'Maharashtra',
+            city: 'Pune',
+            area: 'Kothrud',
+            fullAddress: '789 Pune Road, Kothrud, Pune, Maharashtra 411038'
+        };
+
         this.mockTasks = [
+            {
+                id: 'task_3',
+                title: 'Furniture Assembly',
+                description: 'Need help assembling a large wardrobe and two bedside tables from IKEA.',
+                category: 'Furniture Assembly',
+                location: completedAddress,
+                customerId: 'u1',
+                status: TaskStatus.VERIFIED,
+                budgetMin: 1000,
+                budgetMax: 3000,
+                preferredDate: '2026-01-20',
+                photos: [],
+                bids: [],
+                progressUpdates: [],
+                reviews: [],
+                createdDate: '2026-01-15',
+                workerId: 'u2',
+                workerName: 'Mike Plumber',
+                finalPrice: 2500
+            },
             {
                 id: 'task_1',
                 title: 'Fix Leaky Pipe',
