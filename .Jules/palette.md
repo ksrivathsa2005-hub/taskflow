@@ -1,0 +1,3 @@
+## 2026-06-14 - Accessible Modal and Star Rating Pattern
+**Learning:** Implementing `role="dialog"`, `aria-modal="true"`, and keyboard listeners for the `Escape` key significantly improves modal accessibility. For interactive rating systems, using `role="radiogroup"` with individual stars as `role="radio"` and adding a `hoveredRating` preview effect creates a more polished and intuitive user experience.
+**Action:** Always include ARIA roles and keyboard listeners when creating or modifying modals. Use hover states to provide immediate visual feedback for interactive elements like star ratings.
