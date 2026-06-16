@@ -1,0 +1,3 @@
+## 2026-06-16 - Accessible and Interactive Star Rating Pattern
+**Learning:** Star rating systems in this application often use non-interactive icons or basic buttons that lack screen reader context and visual hover feedback. Using `role="radiogroup"` on the container and `role="radio"` with `aria-checked` on individual stars, combined with a `hoveredRating` preview state, significantly improves both accessibility and user delight.
+**Action:** Always implement star ratings with a `radiogroup` wrapper, `radio` roles for buttons, and a hover preview effect to provide immediate interactive feedback.
