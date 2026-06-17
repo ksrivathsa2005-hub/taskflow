@@ -1,0 +1,3 @@
+## 2026-06-17 - [Accessible Rating System & Modal Polish]
+**Learning:** Implementing `role="radiogroup"` on star rating containers and `role="radio"` on individual stars, combined with `aria-checked`, provides a significantly better experience for screen reader users compared to generic button lists. Adding a `hoveredRating` state provides immediate visual feedback that makes the interaction feel more responsive and "premium".
+**Action:** Always use semantic ARIA roles for custom interactive components like ratings and ensure modals have proper `aria-modal` and `aria-labelledby` attributes. Implement keyboard shortcuts (like Escape to close) by default for all modal-like UI elements.
