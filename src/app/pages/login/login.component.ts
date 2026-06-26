@@ -41,8 +41,9 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
           <form (ngSubmit)="handleSubmit()" #authForm="ngForm">
             <!-- Name Field (Register Only) -->
             <div *ngIf="isRegisterMode" class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label for="full-name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
               <input
+                id="full-name"
                 type="text"
                 name="name"
                 [(ngModel)]="formData.name"
@@ -64,8 +65,9 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
             <!-- Email Field -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <label for="email-address" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
               <input
+                id="email-address"
                 type="email"
                 name="email"
                 [(ngModel)]="formData.email"
@@ -85,8 +87,9 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
             <!-- Password Field -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
               <input
+                id="password"
                 type="password"
                 name="password"
                 [(ngModel)]="formData.password"
