@@ -1,0 +1,3 @@
+## 2026-06-27 - [Login Accessibility and Password Toggle]
+**Learning:** Adding ARIA roles like `radiogroup` and `radio` requires a complete implementation including keyboard navigation (roving tabindex, arrow keys) to avoid misleading screen reader users. Partial implementation is worse than no implementation. A password visibility toggle significantly improves UX by allowing users to verify their input, reducing login errors.
+**Action:** Ensure all form inputs have explicit `id` attributes that match the `for` attribute of their corresponding `<label>` elements to maintain standard accessibility. Always include `aria-label` for icon-only buttons like the password toggle.
