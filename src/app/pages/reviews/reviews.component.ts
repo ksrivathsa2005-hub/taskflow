@@ -31,7 +31,7 @@ import { firstValueFrom } from 'rxjs';
                     </div>
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <div class="text-sm text-gray-600 mb-1">Average Rating</div>
-                        <div class="text-3xl font-bold text-yellow-500">★ {{ averageRating }}</div>
+                        <div class="text-3xl font-bold text-yellow-500"><span aria-hidden="true">★</span> {{ averageRating }}</div>
                     </div>
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <div class="text-sm text-gray-600 mb-1">5 Star</div>
@@ -47,8 +47,8 @@ import { firstValueFrom } from 'rxjs';
                 <div class="bg-white rounded-lg shadow-md p-4 mb-6">
                     <div class="flex gap-4 flex-wrap">
                         <div class="flex-1 min-w-48">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Rating</label>
-                            <select [(ngModel)]="selectedRating" (change)="applyFilter()" class="w-full border rounded-lg px-3 py-2">
+                            <label for="rating-filter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Rating</label>
+                            <select id="rating-filter" [(ngModel)]="selectedRating" (change)="applyFilter()" class="w-full border rounded-lg px-3 py-2">
                                 <option value="">All Ratings</option>
                                 <option value="5">5 Stars</option>
                                 <option value="4">4 Stars</option>
@@ -58,16 +58,16 @@ import { firstValueFrom } from 'rxjs';
                             </select>
                         </div>
                         <div class="flex-1 min-w-48">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-                            <select [(ngModel)]="sortBy" (change)="applyFilter()" class="w-full border rounded-lg px-3 py-2">
+                            <label for="sort-filter" class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                            <select id="sort-filter" [(ngModel)]="sortBy" (change)="applyFilter()" class="w-full border rounded-lg px-3 py-2">
                                 <option value="newest">Newest First</option>
                                 <option value="highest">Highest Rating</option>
                                 <option value="lowest">Lowest Rating</option>
                             </select>
                         </div>
                         <div class="flex-1 min-w-48">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Search Reviews</label>
-                            <input [(ngModel)]="searchQuery" (keyup)="applyFilter()" placeholder="Search by task or reviewer..." class="w-full border rounded-lg px-3 py-2">
+                            <label for="search-reviews" class="block text-sm font-medium text-gray-700 mb-2">Search Reviews</label>
+                            <input id="search-reviews" [(ngModel)]="searchQuery" (keyup)="applyFilter()" placeholder="Search by task or reviewer..." class="w-full border rounded-lg px-3 py-2">
                         </div>
                     </div>
                 </div>
@@ -79,12 +79,12 @@ import { firstValueFrom } from 'rxjs';
                 </div>
 
                 <div *ngIf="!isLoading && filteredReviews.length === 0" class="bg-white rounded-lg shadow-md p-12 text-center">
-                    <div class="text-gray-300 text-6xl mb-4">★</div>
+                    <div class="text-gray-300 text-6xl mb-4" aria-hidden="true">★</div>
                     <p class="text-gray-600 text-lg font-semibold mb-2">No reviews found</p>
                     <p class="text-gray-500 text-sm">Reviews will appear here when customers complete and rate tasks.</p>
                 </div>
 
-                <div *ngIf="!isLoading" class="space-y-6">"
+                <div *ngIf="!isLoading" class="space-y-6">
                     <div *ngFor="let review of filteredReviews" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                         <!-- Task Info Header -->
                         <div class="mb-4 pb-4 border-b border-gray-200">
@@ -93,10 +93,11 @@ import { firstValueFrom } from 'rxjs';
                                     <h3 class="font-bold text-lg text-gray-900">{{ getTaskTitle(review.taskId) }}</h3>
                                     <p class="text-sm text-gray-500">Task #{{ review.taskId.substring(0, 8) }}...</p>
                                 </div>
-                                <div class="flex items-center gap-1">
+                                <div class="flex items-center gap-1" role="img" [attr.aria-label]="'Rating: ' + review.rating + ' out of 5 stars'">
                                     <span *ngFor="let i of [1,2,3,4,5]" class="text-2xl" 
                                         [class.text-yellow-400]="i <= review.rating"
-                                        [class.text-gray-300]="i > review.rating">★</span>
+                                        [class.text-gray-300]="i > review.rating"
+                                        aria-hidden="true">★</span>
                                 </div>
                             </div>
                         </div>
@@ -134,18 +135,18 @@ import { firstValueFrom } from 'rxjs';
                         <!-- Action Buttons -->
                         <div class="flex items-center justify-between text-sm pt-4 border-t border-gray-100">
                             <div class="flex gap-4">
-                                <button class="text-gray-600 hover:text-blue-600 flex items-center gap-1 transition-colors">
-                                    <span>👍</span>
+                                <button class="text-gray-600 hover:text-blue-600 flex items-center gap-1 transition-colors" aria-label="Mark as helpful">
+                                    <span aria-hidden="true">👍</span>
                                     <span class="font-medium">Helpful</span>
                                 </button>
-                                <button class="text-gray-600 hover:text-red-600 flex items-center gap-1 transition-colors">
-                                    <span>🚩</span>
+                                <button class="text-gray-600 hover:text-red-600 flex items-center gap-1 transition-colors" aria-label="Report review">
+                                    <span aria-hidden="true">🚩</span>
                                     <span class="font-medium">Report</span>
                                 </button>
                             </div>
                             <button *ngIf="canDelete(review)" (click)="deleteReview(review)" 
-                                class="text-red-600 hover:text-red-800 flex items-center gap-1 font-medium transition-colors">
-                                <span>🗑️</span>
+                                class="text-red-600 hover:text-red-800 flex items-center gap-1 font-medium transition-colors" aria-label="Delete review">
+                                <span aria-hidden="true">🗑️</span>
                                 <span>Delete</span>
                             </button>
                         </div>
