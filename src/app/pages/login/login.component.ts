@@ -4,7 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AppService } from '../../app.service';
 import { UserRole } from '../../types';
-import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  LogIn,
+  UserPlus,
+  AlertCircle,
+  Loader2,
+  Eye,
+  EyeOff,
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-login',
@@ -41,8 +49,9 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
           <form (ngSubmit)="handleSubmit()" #authForm="ngForm">
             <!-- Name Field (Register Only) -->
             <div *ngIf="isRegisterMode" class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
               <input
+                id="name"
                 type="text"
                 name="name"
                 [(ngModel)]="formData.name"
@@ -64,8 +73,9 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
             <!-- Email Field -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
               <input
+                id="email"
                 type="email"
                 name="email"
                 [(ngModel)]="formData.email"
@@ -85,19 +95,30 @@ import { LucideAngularModule, LogIn, UserPlus, AlertCircle, Loader2 } from 'luci
 
             <!-- Password Field -->
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <input
-                type="password"
-                name="password"
-                [(ngModel)]="formData.password"
-                required
-                minlength="6"
-                maxlength="50"
-                #passwordField="ngModel"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                [class.border-red-500]="passwordField.invalid && passwordField.touched"
-                placeholder="Enter your password"
-              />
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <div class="relative">
+                <input
+                  id="password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  name="password"
+                  [(ngModel)]="formData.password"
+                  required
+                  minlength="6"
+                  maxlength="50"
+                  #passwordField="ngModel"
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  [class.border-red-500]="passwordField.invalid && passwordField.touched"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  (click)="showPassword = !showPassword"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg outline-none transition-colors"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                >
+                  <lucide-icon [img]="showPassword ? EyeOff : Eye" class="w-5 h-5"></lucide-icon>
+                </button>
+              </div>
               <p *ngIf="isRegisterMode && !passwordField.touched" class="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
               <p *ngIf="passwordField.invalid && passwordField.touched" class="mt-1 text-xs text-red-600">
                 <span *ngIf="passwordField.errors?.['required']">Password is required</span>
@@ -182,8 +203,11 @@ export class LoginComponent implements OnInit {
   readonly UserPlus = UserPlus;
   readonly AlertCircle = AlertCircle;
   readonly Loader2 = Loader2;
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
 
   isRegisterMode = false;
+  showPassword = false;
   isLoading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
