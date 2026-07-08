@@ -1,0 +1,3 @@
+## 2026-07-08 - [Enhancing Star Ratings and Modal Accessibility]
+**Learning:** Star rating systems often lack both interactive feedback (hover states) and accessibility (ARIA roles). Using `role="radiogroup"` and `role="radio"` provides semantic meaning, while a `hoveredRating` state offers a "micro-UX" touch of delight. Modals should also always include keyboard listeners for the Escape key and appropriate ARIA dialog attributes.
+**Action:** Implement star ratings with a container role of `radiogroup` and individual star roles of `radio`, complemented by hover preview logic. Always add `role="dialog"` and Escape key listeners to modal components.
